@@ -19,5 +19,9 @@ if (typeof Object.beget !== 'function') {
     var F = function () {};
     F.prototype = o;
     return new F();
-  }
+  };
 }
+
+String.prototype.nl2br = function() {
+    return this.replace(/\n/g, "<br />");
+};

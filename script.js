@@ -51,7 +51,7 @@ $(document).on('windowResize', '.ilex-verticalSplit', function (e) {
 ilex.widgetsCollection.horizontalSplit = function (parentWidget, position) {
   var that = {},
     position = position || [0.5, 0.5],
-    width = parentWidget.width() - ilex.widgetsCollection.handlerSize,
+    width = parentWidget.width(),
     height = parentWidget.height(),
     innerWidth = width - ilex.widgetsCollection.handlerSize,
     table = $('<div class="ilex-resize ilex-horizontalSplit">').appendTo(parentWidget)
@@ -94,8 +94,29 @@ $(document).on('windowResize', '.ilex-horizontalSplit', function (e) {
 
 });
 
+ilex.widgetsCollection.text = function (parentWidget) {
+  var that = {},
+    width = parentWidget.width(),
+    height = parentWidget.height(),
+    container = $('<div class="ilex-resize ilex-text">').appendTo(parentWidget)
+                    .css("overflow", "auto")
+                    .width(width)
+                    .height(height);
+    that.loadText = function (text) {
+      container.html(text.nl2br());
+    };
+    return that;
+};
+
+$(document).on('windowResize', '.ilex-text', function (e) {
+    var container = $(this),
+      width = container.parent().data('ilex-width'),
+      height = container.parent().data('ilex-height');
+    container.data('ilex-width', width).data('ilex-height', height);
+});
+
 $(document).ready(function(){
-  $("body").css("overflow", "hidden");
+  //$("body").css("overflow", "hidden");
   ilex.window = $('<div>').appendTo('body')
                       .width($(window).width())
                       .height($(window).height());
@@ -114,4 +135,18 @@ $(document).ready(function(){
   });
   ilex.fileSelector = ilex.widgetsCollection.verticalSplit(ilex.window, [0.1, 0.9]);
   ilex.pannels = ilex.widgetsCollection.horizontalSplit(ilex.fileSelector.bottom);
+  ilex.leftText = ilex.widgetsCollection.text(ilex.pannels.left);
+  ilex.rightText = ilex.widgetsCollection.text(ilex.pannels.right);
+
+  ilexServer.init(function () {
+    ilexServer.send({target: 'left', text: 'xanadu'});
+    ilexServer.send({target: 'right', text: 'powiesc_wajdeloty'});
+  }, function (data) {
+    var json = JSON.parse(data);
+    if (json.target === 'left')
+      ilex.leftText.loadText(json.text);
+    else if (json.target === 'right')
+      ilex.rightText.loadText(json.text);
+  });
+
 });
