@@ -1,12 +1,6 @@
 "use strict";
 
 Function.prototype.method = function (name, func) {
-  if (this.prototype[name]) {
-    throw {
-      name: 'MethodExists',
-      message: 'method: ' + name + ' already exists'
-    };
-  }
   this.prototype[name] = func;
   return this;
 };
