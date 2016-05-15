@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 )
 
+// the backticks are hints for JSON marshaller - names of json fields
 type IlexMessage struct {
 	Target string `json:"target"`
 	Text   string `json:"text"`
