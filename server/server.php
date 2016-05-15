@@ -9,7 +9,7 @@ class echoServer extends WebSocketServer {
 
   protected function process ($user, $message) {
     $json = json_decode($message);
-    $text = 'texts/'.$json->{'text'}.'.txt';
+    $text = dirname(__FILE__).'/texts/'.$json->{'text'}.'.txt';
     if (file_exists($text)) {
       $contet = file_get_contents($text);
       $value = json_encode(array('target' => $json->{'target'},
