@@ -1,11 +1,11 @@
 http://ilex.imz.re/
 
-1. Install php7.0-cli:
+1. Server side
+	1. PHP  
+	Install php7.0-cli:
 
 	sudo apt-get install php7.0-cli
 
-2.
-	1. PHP  
 	Run WebSockets server:
 
 	php server/server.php
@@ -18,8 +18,8 @@ http://ilex.imz.re/
 	Install websockets library:  
 	go get golang.org/x/net/websocket
 
-	Copy server.go to your Golang source workplace and build it.  
-	Copy the binary to go-server folder (yes, this is ugly!).  
+	In go-server directory:  
+	go build server.go 
 	Run it.
 
 3. Open index.html in your web browser.
