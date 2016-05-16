@@ -21,7 +21,8 @@ func FileServer(ws *websocket.Conn) {
 		err := websocket.JSON.Receive(ws, &ilex_request)
 
 		if err != nil {
-			log.Fatal(err)
+			break
+			log.Print(err)
 		} else {
 			var ilex_response IlexMessage
 			ilex_response.Target = ilex_request.Target
@@ -31,13 +32,15 @@ func FileServer(ws *websocket.Conn) {
 			path := directory + "/texts/" + ilex_request.Text + ".txt"
 			buffer, err := ioutil.ReadFile(path)
 			if err != nil {
-				log.Fatal(err)
+				break
+				log.Print(err)
 			}
 			ilex_response.Text = string(buffer)
 
 			err = websocket.JSON.Send(ws, ilex_response)
 			if err != nil {
-				log.Fatal(err)
+				break
+				log.Print(err)
 			}
 		}
 	}
