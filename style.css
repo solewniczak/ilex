@@ -1,7 +1,7 @@
 @import url("css/reset.css");
 
 div:focus {
-  border: none;
+  outline: 0;
 }
 
 b {
