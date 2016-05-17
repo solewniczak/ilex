@@ -96,54 +96,65 @@ $(document).on('windowResize', '.ilex-horizontalSplit', function (e) {
 
 ilex.textFill = function(text, $container) {
   var createParagraph = function($container) {
-    return $('<div class="ilex-paragraph">').appendTo($container)
-            .css('margin-bottom', '10px');
+    var $paragraph = $('<p class="ilex-paragraph">').appendTo($container)
+                          .css('margin-bottom', '10px');
+    return $paragraph;
   },
   paragraphs = text.split('\n\n');
   for (let p of paragraphs) {
     let $p = createParagraph($container);
     $p.html(p.nl2br());
   }
-
-  /*var createParagraph = function($container) {
-    return $('<div class="ilex-paragraph">').appendTo($container)
-            .css('margin-bottom', '10px');
-  },
-  createLine = function($paragraph) {
-    return $('<div class="ilex-line">').appendTo($paragraph);
-  },
-  createWord = function($line, word) {
-    return $('<span class="ilex-word">').text(word).appendTo($line);
-  },
-  rows = function($selector) {
-    //http://stackoverflow.com/questions/783899/how-can-i-count-text-lines-inside-an-dom-element-can-i
-    var height = $selector.height(),
-      line_height = $selector.css('line-height'),
-      line_height = parseFloat(line_height),
-      rows = height / line_height;
-    return Math.round(rows);
-  },
-  paragraphs = text.split('\n\n');
-
-  for (let p of paragraphs) {
-    let $paragraph = createParagraph($container),
-      lines = p.split('\n');
-    for (let l of lines) {
-      let $line = createLine($paragraph),
-        words = l.split(' ');
-      for (let w of words) {
-        let $w = createWord($line, w);
-        $line.append($w, ' ');
-        if (rows($line) > 1) {
-          $w.remove();
-          $line = createLine($paragraph);
-          $line.append($w);
-        }
-      }
-    }
-  }*/
-
 }
+
+$(document).on('dragstart', '.ilex-paragraph', function(e) {
+  var $this = $(this);
+  e.preventDefault();
+});
+
+$(document).on('selectstart', '.ilex-content', function(e) {
+  var $this = $(this);
+});
+
+$(document).on('selectionchange', '.ilex-content', function(e) {
+  var $this = $(this);
+
+});
+
+$(document).on('mousedown', '.ilex-content', function(e) {
+  var $this = $(this);
+  console.log("start_selection");
+});
+
+$(document).on('mouseup', '.ilex-content', function(e) {
+  var $this = $(this);
+  console.log("end selection");
+});
+
+ilex.widgetsCollection.textToolbar = function ($parentWidget) {
+  var that = {},
+    addButton = function($toolbar, text, command) {
+      var $button = $('<span class="ilex-button">').appendTo($toolbar)
+                      .text(text)
+                      .data('command', command)
+                      .css('border', '1px solid #000')
+                      .css('cursor', 'pointer');
+      return $button;
+    },
+    $toolbar = $('<div class="ilex-text-toolbar">').appendTo($parentWidget);
+
+    addButton($toolbar, 'Bold', 'bold');
+    addButton($toolbar, 'Italic', 'italic');
+    addButton($toolbar, 'Underline', 'underline');
+};
+
+$(document).on('mousedown', '.ilex-button', function (e) {
+  var command = $(this).data('command');
+  document.execCommand(command, false, null);
+  console.log(e);
+  //prevent focus stealing
+  e.preventDefault();
+});
 
 ilex.widgetsCollection.text = function ($parentWidget) {
   var that = {},
@@ -151,8 +162,10 @@ ilex.widgetsCollection.text = function ($parentWidget) {
     height = $parentWidget.height(),
     $container = $('<div class="ilex-resize ilex-text">').appendTo($parentWidget)
                     .css("position", "relative")
+                    .css('overflow', 'auto')
                     .width(width)
                     .height(height),
+    $toolbar = $('<div class="ilex-content-tools">').appendTo($container),
     $content = $('<div class="ilex-content">').appendTo($container)
                   .attr('contenteditable', 'true'),
     $cursor = $('<div class="ilex-cursor">').appendTo($container)
@@ -161,6 +174,7 @@ ilex.widgetsCollection.text = function ($parentWidget) {
               .width(3)
               .height(12)
               .hide();
+    ilex.widgetsCollection.textToolbar($toolbar);
     that.loadText = function (text) {
       //Filling algorithm
       ilex.textFill(text, $content);
@@ -175,29 +189,13 @@ $(document).on('mousedown', '.ilex-word', function(e) {
 
 $(document).on('windowResize', '.ilex-text', function (e) {
     var $container = $(this),
-      width = container.parent().data('ilex-width'),
-      height = container.parent().data('ilex-height');
-    container.data('ilex-width', width).data('ilex-height', height);
+      width = $container.parent().data('ilex-width'),
+      height = $container.parent().data('ilex-height');
+    $container.data('ilex-width', width).data('ilex-height', height);
 });
-
-/*$(document).on('mousedown', '.ilex-text', function (e) {
-    var $container = $(this),
-      xPos = e.pageX - $container.offset().left,
-      yPos = e.pageY - $container.offset().top,
-      selection = window.getSelection(),
-      focusOffset = selection.focusOffset,
-      content = $container.find(".ilex-content"),
-      contentValue = $content.html();
-    $container.find(".ilex-cursor").css({'top': xPos, 'left': yPos}).show();
-    e.preventDefault();
-});
-
-$(document).on('selectstart', '.ilex-text', function (e) {
-    console.log("Mongo");
-});*/
 
 $(document).ready(function(){
-  //$("body").css("overflow", "hidden");
+  $("body").css("overflow", "hidden");
   ilex.window = $('<div>').appendTo('body')
                       .width($(window).width())
                       .height($(window).height());
