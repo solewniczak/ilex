@@ -1,1 +1,13 @@
 @import url("css/reset.css");
+
+div:focus {
+  border: none;
+}
+
+b {
+  font-weight: bold;
+}
+
+i {
+  font-style: italic;
+}
