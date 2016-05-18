@@ -123,12 +123,23 @@ $(document).on('selectionchange', '.ilex-content', function(e) {
 
 $(document).on('mousedown', '.ilex-content', function(e) {
   var $this = $(this);
+  $this.find('.ilex-highlight').replaceWith(function () {
+    return $(this).html();
+  });
   console.log("start_selection");
 });
 
 $(document).on('mouseup', '.ilex-content', function(e) {
-  var $this = $(this);
-  console.log("end selection");
+  var $this = $(this),
+    highlight;
+
+  //we select nothing, just click on the text
+  if (window.getSelection().isCollapsed)
+    return;
+  //highlight selection
+  document.execCommand('hiliteColor', false, '#a8d1ff');
+  highlight = window.getSelection().focusNode.parentNode;
+  $(highlight).addClass("ilex-highlight");
 });
 
 ilex.widgetsCollection.textToolbar = function ($parentWidget) {
@@ -181,11 +192,6 @@ ilex.widgetsCollection.text = function ($parentWidget) {
     };
     return that;
 };
-
-$(document).on('mousedown', '.ilex-word', function(e) {
-  var $this = $(this);
-  console.log($this.text());
-});
 
 $(document).on('windowResize', '.ilex-text', function (e) {
     var $container = $(this),
