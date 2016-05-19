@@ -114,32 +114,29 @@ $(document).on('dragstart', '.ilex-paragraph', function(e) {
 
 $(document).on('selectstart', '.ilex-content', function(e) {
   var $this = $(this);
-});
-
-$(document).on('selectionchange', '.ilex-content', function(e) {
-  var $this = $(this);
-
-});
-
-$(document).on('mousedown', '.ilex-content', function(e) {
-  var $this = $(this);
-  $this.find('.ilex-highlight').replaceWith(function () {
+  $this.find('.ilex-selection').replaceWith(function () {
     return $(this).html();
   });
-  console.log("start_selection");
 });
 
 $(document).on('mouseup', '.ilex-content', function(e) {
   var $this = $(this),
-    highlight;
+    selection = window.getSelection(),
+    rects, range;
 
   //we select nothing, just click on the text
-  if (window.getSelection().isCollapsed)
+  if (selection.isCollapsed || selection.rangeCount < 1)
     return;
+
   //highlight selection
-  document.execCommand('hiliteColor', false, '#a8d1ff');
-  highlight = window.getSelection().focusNode.parentNode;
-  $(highlight).addClass("ilex-highlight");
+
+  range = selection.getRangeAt(0);
+  rects = range.getClientRects();
+  for (let i = 0; i < rects.length; i++) {
+    let rect = rects[i];
+    ilex.canvas.drawRect(rect.left, rect.top,
+                        rect.width, rect.height, '#a8d1ff');
+  }
 });
 
 ilex.widgetsCollection.textToolbar = function ($parentWidget) {
@@ -162,7 +159,7 @@ ilex.widgetsCollection.textToolbar = function ($parentWidget) {
 $(document).on('mousedown', '.ilex-button', function (e) {
   var command = $(this).data('command');
   document.execCommand(command, false, null);
-  console.log(e);
+
   //prevent focus stealing
   e.preventDefault();
 });
@@ -190,6 +187,8 @@ ilex.widgetsCollection.text = function ($parentWidget) {
       //Filling algorithm
       ilex.textFill(text, $content);
     };
+    //selections of the text object
+    that.selections = [];
     return that;
 };
 
@@ -200,11 +199,37 @@ $(document).on('windowResize', '.ilex-text', function (e) {
     $container.data('ilex-width', width).data('ilex-height', height);
 });
 
+$(document).on('windowResize', 'canvas', function (e) {
+    var $canvas = $(this),
+      width = $canvas.parent().data('ilex-width'),
+      height = $canvas.parent().data('ilex-height');
+    $canvas.attr('width', width).attr('height', height);
+});
+
+ilex.canvas = {};
+ilex.canvas.clear = function () {
+  var ctx = ilex.canvas.element.getContext('2d');
+};
+
+ilex.canvas.drawRect = function (x, y, w, h, color) {
+  var ctx = ilex.canvas.element.getContext('2d');
+  ctx.fillStyle = color;
+  ctx.fillRect(x,y,w,h);
+};
+
 $(document).ready(function(){
   $("body").css("overflow", "hidden");
+
   ilex.window = $('<div>').appendTo('body')
                       .width($(window).width())
                       .height($(window).height());
+
+  //create ilex canvas element
+  ilex.canvas.element = $('<canvas class="ilex-resize">').appendTo(ilex.window)
+                  .css('position', 'absolute')
+                  .attr('width', $(window).width())
+                  .attr('height', $(window).height())[0];
+
   $(window).on('resize', function () {
     var width = $(window).width(),
       height = $(window).height();
