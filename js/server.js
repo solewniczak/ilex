@@ -12,7 +12,6 @@ ilexServer.init = function (send, recieve) {
                  send();
 						   };
 		ilexServer.socket.onmessage = function(msg) {
-							   console.log("Received: ", msg.data);
                  recieve(msg.data);
 						   };
 		ilexServer.socket.onclose = function(msg) {
