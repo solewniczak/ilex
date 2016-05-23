@@ -8,38 +8,6 @@ if (ilex.widgetsCollection === undefined)
 if (ilex.widgetsCollection.text !== undefined)
   throw 'ilex.widgetsCollection.horizontalSplit already defined';
 
-/*$(document).on('dragstart', '.ilex-paragraph', function(e) {
-  var $this = $(this);
-  e.preventDefault();
-});
-
-$(document).on('selectstart', '.ilex-content', function(e) {
-  var $this = $(this);
-  $this.find('.ilex-selection').replaceWith(function () {
-    return $(this).html();
-  });
-});
-
-$(document).on('mouseup', '.ilex-content', function(e) {
-  var $this = $(this),
-    selection = window.getSelection(),
-    rects, range;
-
-  //we select nothing, just click on the text
-  if (selection.isCollapsed || selection.rangeCount < 1)
-    return;
-
-  //highlight selection
-
-  range = selection.getRangeAt(0);
-  rects = range.getClientRects();
-  for (let i = 0; i < rects.length; i++) {
-    let rect = rects[i];
-    ilex.canvas.drawRect(rect.left, rect.top,
-                        rect.width, rect.height, '#a8d1ff');
-  }
-});*/
-
 ilex.widgetsCollection.text = function ($parentWidget, canvas) {
   if (canvas === undefined)
     throw 'canvas undefined';
@@ -115,7 +83,18 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
       event.preventDefault();
     });
 
-    //Ctrl + A doesn't work
+    var drawSelection = function () {
+      var rects = that.selectionRects || [],
+        selectionScroll = that.selectionScroll || 0,
+        scrollDelta = that.scrollWindow.scrollTop() - selectionScroll;
+      for (let i = 0; i < rects.length; i++) {
+        let rect = rects[i];
+        canvas.drawRect(rect.left, rect.top - scrollDelta,
+                            rect.width, rect.height, '#a8d1ff');
+      }
+    };
+
+    //Ctrl + A doesn't work yet
     that.container.on('mouseup', function (event) {
       var selection = window.getSelection(),
         rects, range;
@@ -126,21 +105,28 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
 
       //highlight selection
       range = selection.getRangeAt(0);
-      rects = range.getClientRects();
+      that.selectionRects = range.getClientRects();
+      that.selectionScroll = that.scrollWindow.scrollTop();
 
-      for (let i = 0; i < rects.length; i++) {
-        let rect = rects[i];
-        canvas.drawRect(rect.left, rect.top,
-                            rect.width, rect.height, '#a8d1ff');
-      }
-      //clearPreviousSelection(event);
+      drawSelection();
+
     });
     that.container.on('mousedown', function (event) {
       var range = document.createRange(),
         textRange = range.selectNode(that.container[0]),
         rect = range.getBoundingClientRect();
-      console.log(rect);
       canvas.clearRect(rect.left, rect.top, rect.width, rect.height)
     });
+
+    //redraw selections
+    $(document).on('canvasRedraw', function(event) {
+      drawSelection();
+    });
+
+    //when user scrolls redraw the canvas
+    that.scrollWindow.on('scroll', function (event) {
+      $(document).trigger('canvasRedraw');
+    });
+
     return that;
 };
