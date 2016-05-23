@@ -4,8 +4,13 @@ $(document).ready(function(){
   $("body").css("overflow", "hidden");
 
   ilex.window = $('<div>').appendTo('body')
+                      .css('position', 'relative')
+                      .css('z-index', 3)
                       .data('ilex-width', $(window).width())
                       .data('ilex-height', $(window).height());
+
+  //create ilex canvas element
+  ilex.canvas = ilex.widgetsCollection.canvas($("body"), 2);
 
   $(window).on('resize', function () {
     var width = $(window).width(),
@@ -15,7 +20,7 @@ $(document).ready(function(){
     ilex.applySize();
   });
 
-  ilex.view = ilex.views.twoColumn();
+  ilex.view = ilex.views.twoColumn(ilex.canvas);
 
   ilexServer.init(function () {
     ilexServer.send({target: 'left', text: 'xanadu'});

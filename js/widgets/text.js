@@ -1,12 +1,10 @@
 'use strict';
 
-//requires: ilex.widgetsCollection.canvas
+//requires: ilex.canvas
 if (ilex === undefined)
   throw 'ilex undefined';
 if (ilex.widgetsCollection === undefined)
   throw 'ilex.widgetsCollection undefined';
-if (ilex.widgetsCollection.canvas === undefined)
-  throw 'ilex.canvas undefined';
 if (ilex.widgetsCollection.text !== undefined)
   throw 'ilex.widgetsCollection.horizontalSplit already defined';
 
@@ -42,15 +40,9 @@ $(document).on('mouseup', '.ilex-content', function(e) {
   }
 });*/
 
-$(document).on('mouseup', '.ilex-content', function(e) {
-  var selection = window.getSelection();
-  var test = selection.getRangeAt(0);
-  console.log(selection.anchorNode, selection.anchorOffset, selection.focusNode, selection.focusOffset, selection.rangeCount);
-  console.log(selection.anchorNode.parentElement.innerHTML);
-  console.log(test.startContainer, test.startOffset, test.endContainer, test.endOffset);
-});
-
-ilex.widgetsCollection.text = function ($parentWidget) {
+ilex.widgetsCollection.text = function ($parentWidget, canvas) {
+  if (canvas === undefined)
+    throw 'canvas undefined';
   var that = {},
     textFill = function(text, $container) {
       var createParagraph = function($container) {
@@ -115,6 +107,40 @@ ilex.widgetsCollection.text = function ($parentWidget) {
       that.content.data('ilex-height', height - ilex.widgetsCollection.textDockHeight);
       that.scrollWindow.data('ilex-height', height - ilex.widgetsCollection.textDockHeight);
 
+    });
+
+    //we don't want standard browsers draging procedure
+    //it confuses the users
+    that.container.on('dragstart', function (event) {
+      event.preventDefault();
+    });
+
+    //Ctrl + A doesn't work
+    that.container.on('mouseup', function (event) {
+      var selection = window.getSelection(),
+        rects, range;
+
+      //we select nothing, just click on the text
+      if (selection.isCollapsed || selection.rangeCount < 1)
+        return;
+
+      //highlight selection
+      range = selection.getRangeAt(0);
+      rects = range.getClientRects();
+
+      for (let i = 0; i < rects.length; i++) {
+        let rect = rects[i];
+        canvas.drawRect(rect.left, rect.top,
+                            rect.width, rect.height, '#a8d1ff');
+      }
+      //clearPreviousSelection(event);
+    });
+    that.container.on('mousedown', function (event) {
+      var range = document.createRange(),
+        textRange = range.selectNode(that.container[0]),
+        rect = range.getBoundingClientRect();
+      console.log(rect);
+      canvas.clearRect(rect.left, rect.top, rect.width, rect.height)
     });
     return that;
 };
