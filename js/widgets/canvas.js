@@ -12,6 +12,9 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
   var that = {},
     zIndex = zIndex || 2;
 
+  that.clearCanvas = function () {
+    that.ctx.clearRect(0, 0, $(window).width(), $(window).height());
+  }
   that.clearRect = function (x, y, w, h) {
     that.ctx.clearRect(x,y,w,h);
   };
@@ -19,6 +22,11 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
     that.ctx.fillStyle = color;
     that.ctx.fillRect(x,y,w,h);
   };
+
+  //basic canvasRedraw behaviour
+  $(document).on('canvasRedraw', function(event) {
+    that.clearCanvas();
+  });
   //canvas always appends and never replace parentContent
   //it's additional layer
   that.canvas = $('<canvas class="ilex-resize">').appendTo($parentWidget)
