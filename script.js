@@ -1,15 +1,5 @@
 'use strict';
 
-ilex.applySize = function() {
-  ilex.window.find('.ilex-resize').trigger('windowResize');
-  ilex.window.find('*').each(function () {
-    if ($(this).data('ilex-width'))
-      $(this).width($(this).data('ilex-width'))
-    if ($(this).data('ilex-height'))
-      $(this).height($(this).data('ilex-height'));
-  });
-};
-
 $(document).ready(function(){
   $("body").css("overflow", "hidden");
 

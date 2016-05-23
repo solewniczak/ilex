@@ -1,11 +1,11 @@
 'use strict';
 
-//requires: ilex.canvas
+//requires: ilex.widgetsCollection.canvas
 if (ilex === undefined)
   throw 'ilex undefined';
 if (ilex.widgetsCollection === undefined)
   throw 'ilex.widgetsCollection undefined';
-if (ilex.canvas === undefined)
+if (ilex.widgetsCollection.canvas === undefined)
   throw 'ilex.canvas undefined';
 if (ilex.widgetsCollection.text !== undefined)
   throw 'ilex.widgetsCollection.horizontalSplit already defined';
@@ -42,28 +42,16 @@ $(document).on('mouseup', '.ilex-content', function(e) {
   }
 });*/
 
+$(document).on('mouseup', '.ilex-content', function(e) {
+  var selection = window.getSelection();
+  var test = selection.getRangeAt(0);
+  console.log(selection.anchorNode, selection.anchorOffset, selection.focusNode, selection.focusOffset, selection.rangeCount);
+  console.log(selection.anchorNode.parentElement.innerHTML);
+  console.log(test.startContainer, test.startOffset, test.endContainer, test.endOffset);
+});
+
 ilex.widgetsCollection.text = function ($parentWidget) {
   var that = {},
-    makeResizeCallback = function(that) {
-      return function(event) {
-        var width = that.container.parent().data('ilex-width'),
-          height = that.container.parent().data('ilex-height');
-
-        that.container.data('ilex-width', width);
-        that.scrollWindow.data('ilex-width', width);
-        that.dock.container.data('ilex-width', width);
-        //that.content doesn't have fix width to react on scrollbar
-        //show and hide
-
-
-        that.container.data('ilex-height', height);
-        //dock conatiner height does not choange
-        //content height shrinks
-        that.content.data('ilex-height', height - ilex.widgetsCollection.textDockHeight);
-        that.scrollWindow.data('ilex-height', height - ilex.widgetsCollection.textDockHeight);
-
-      };
-    },
     textFill = function(text, $container) {
       var createParagraph = function($container) {
         var $paragraph = $('<p class="ilex-paragraph">').appendTo($container)
@@ -82,9 +70,10 @@ ilex.widgetsCollection.text = function ($parentWidget) {
     width = $parentWidget.data('ilex-width'),
     height = $parentWidget.data('ilex-height');
 
-    that.container = $('<div class="ilex-resize ilex-text">').appendTo($parentWidget)
+    that.container = $('<div class="ilex-resize ilex-text">')
                     .data('ilex-width', width)
                     .data('ilex-height', height);
+    $parentWidget.html(that.container);
 
     that.dock = {};
     that.dock.container = $('<div class="ilex-dock">').appendTo(that.container)
@@ -109,6 +98,23 @@ ilex.widgetsCollection.text = function ($parentWidget) {
     };
     //selections of the text
     that.selections = [];
-    that.container.on('windowResize', makeResizeCallback(that));
+    that.container.on('windowResize', function(event) {
+      var width = that.container.parent().data('ilex-width'),
+        height = that.container.parent().data('ilex-height');
+
+      that.container.data('ilex-width', width);
+      that.scrollWindow.data('ilex-width', width);
+      that.dock.container.data('ilex-width', width);
+      //that.content doesn't have fix width to react on scrollbar
+      //show and hide
+
+
+      that.container.data('ilex-height', height);
+      //dock conatiner height does not choange
+      //content height shrinks
+      that.content.data('ilex-height', height - ilex.widgetsCollection.textDockHeight);
+      that.scrollWindow.data('ilex-height', height - ilex.widgetsCollection.textDockHeight);
+
+    });
     return that;
 };

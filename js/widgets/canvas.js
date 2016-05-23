@@ -5,23 +5,31 @@ if (ilex === undefined)
   throw 'ilex undefined';
 if (ilex.widgetsCollection === undefined)
   throw 'ilex.widgetsCollection undefined';
-if (ilex.widgetsCollection.text !== undefined)
-  throw 'ilex.widgetsCollection.horizontalSplit already defined';
+if (ilex.widgetsCollection.canvas !== undefined)
+  throw 'ilex.widgetsCollection.cavas already defined';
 
-$(document).on('windowResize', 'canvas', function (e) {
-    var $canvas = $(this),
-      width = $canvas.parent().data('ilex-width'),
-      height = $canvas.parent().data('ilex-height');
-    $canvas.attr('width', width).attr('height', height);
-});
+ilex.widgetsCollection.canvas = function ($parentWidget) {
+  var that = {};
+  
+  that.clear = function () {
+    var ctx = that.canvas.getContext('2d');
+  };
+  that.drawRect = function (x, y, w, h, color) {
+    var ctx = that.canvas.getContext('2d');
+    ctx.fillStyle = color;
+    ctx.fillRect(x,y,w,h);
+  };
+  that.canvas = $('<canvas class="ilex-resize">').appendTo($parentWidget)
+                .css('position', 'absolute')
+                .attr('width', $(window).width())
+                .attr('height', $(window).height());
 
-ilex.canvas = {};
-ilex.canvas.clear = function () {
-  var ctx = ilex.canvas.element.getContext('2d');
-};
-
-ilex.canvas.drawRect = function (x, y, w, h, color) {
-  var ctx = ilex.canvas.element.getContext('2d');
-  ctx.fillStyle = color;
-  ctx.fillRect(x,y,w,h);
+  that.canvas.on('windowResize',function(that) {
+    return function(event) {
+      var width = that.canvas.parent().data('ilex-width'),
+        height = that.canvas.parent().data('ilex-height');
+      that.canvas.attr('width', width).attr('height', height);
+    };
+  });
+  return that;
 };

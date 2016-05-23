@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>ilex</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <!-- page content -->
+    <script src="js/jquery-2.2.3.js"></script>
+    <script src="js/server.js"></script>
+
+    <script src="js/ilex.js"></script>
+    <script src="js/widgets/canvas.js"></script>
+    <script src="js/widgets/horizontalSplit.js"></script>
+    <script src="js/widgets/verticalSplit.js"></script>
+    <script src="js/widgets/textToolbar.js"></script>
+    <script src="js/widgets/text.js"></script>
+
+    <script src="js/views/pannelsTest.js"></script>
+
+    <script>
+      $(document).ready(function(){
+        $("body").css("overflow", "hidden");
+
+        ilex.window = $('<div>').appendTo('body')
+                            .data('ilex-width', $(window).width())
+                            .data('ilex-height', $(window).height());
+
+        $(window).on('resize', function () {
+          var width = $(window).width(),
+            height = $(window).height();
+          ilex.window.data('ilex-width', width).data('ilex-height', height);
+          ilex.window.width(width).height(height);
+          ilex.applySize();
+        });
+
+        ilex.view = ilex.views.pannelsTest();
+
+        ilexServer.init(function () {
+          ilexServer.send({target: 'left', text: 'xanadu'});
+          ilexServer.send({target: 'right', text: 'powiesc_wajdeloty'});
+        }, function (data) {
+          var json = JSON.parse(data);
+          if (json.target === 'left') {
+              ilex.view.leftText.loadText(json.text);
+              ilex.view.topText.loadText(json.text);
+          } else if (json.target === 'right') {
+              ilex.view.rightText.loadText(json.text);
+              ilex.view.bottomText.loadText(json.text);
+            }
+        });
+
+      });
+    </script>
+  </body>
+</html>
