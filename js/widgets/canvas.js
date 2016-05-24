@@ -90,9 +90,9 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
   };
   //threeRectsSelection is special data structure that transforms normal browser
   //text selection (build from many rects) into selection build from three rects:
-  //the top, the middle and the bottom one. Top and bottom rects cover only
-  //one line, the middle one may covers many lines.
-  //The middle rect has the width of the the widest rect in the list.
+  //the top, the middle and the bottom one. The top and the bottom cover only
+  //one line of text. The middle may covers many lines.
+  //The middle rect the width of the the widest rect in the list.
   //Top and the bottom ones may be shorter if the selection starts or ends in
   //the middle of a line.
 
