@@ -16,6 +16,7 @@ ilex.views.twoColumn = function(canvas) {
 
   view.finishLinkButton = ilex.widgetsCollection
                                       .finishLinkButton(ilex.window,
+                                                        canvas,
                                                         view.leftText,
                                                         view.rightText,
                                                         view.pannels.handler);

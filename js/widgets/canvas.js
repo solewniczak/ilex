@@ -88,6 +88,26 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
       }
       return newClientRectsList;
   };
+  //threeRectsSelection is special data structure that transforms normal browser
+  //text selection (build from many rects) into selection build from three rects:
+  //the top, the middle and the bottom one. Top and bottom rects cover only
+  //one line, the middle one may covers many lines.
+  //The middle rect has the width of the the widest rect in the list.
+  //Top and the bottom ones may be shorter if the selection starts or ends in
+  //the middle of a line.
+
+  //returns {rects: [array of three rects], leftBound: {x, y, width},
+  //                                        rightBound: {x, y, width}}
+  //leftBound and rightBound are used by ray drawing algorithm.
+  that.threeRectsSelection = function (rects) {
+
+  };
+  //draw two rects and line that connects them
+  that.drawConnection = function (a, b) {
+    var color = "#c1f0c1";
+    that.drawRect(a, color);
+    that.drawRect(b, color);
+  };
 
   //basic canvasRedraw behaviour
   $(document).on('canvasRedraw', function(event) {

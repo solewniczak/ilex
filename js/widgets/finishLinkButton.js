@@ -10,7 +10,7 @@ if (ilex.widgetsCollection === undefined)
 //selected part of the document and .container which triggers 'selectend' event
 //handler is element on which show finish link button.
 //the position of link button will be intersesion of handler and link ray
-ilex.widgetsCollection.finishLinkButton = function ($parentWidget, doc1, doc2, handler) {
+ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1, doc2, handler) {
   var that = {},
     show = function (event) {
       var handlerOffset = handler.offset(),
@@ -35,5 +35,16 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, doc1, doc2, h
 
   doc1.container.on('selectstart selectend windowResize', show);
   doc2.container.on('selectstart selectend windowResize', show);
+
+  that.button.on('mouseenter mouseleave', function(event) {
+    $(document).trigger('canvasRedraw');
+  });
+
+  $(document).on('canvasRedraw', function (event) {
+    if (that.button.is(':hover')) {
+      canvas.drawConnection(doc1.selectionRange.getBoundingClientRect(),
+                            doc2.selectionRange.getBoundingClientRect());
+    }
+  });
   return that;
 }
