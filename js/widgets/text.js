@@ -39,18 +39,19 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
     that.dock.container = $('<div class="ilex-dock">').appendTo(that.container)
                             .data('ilex-width', width);
                             //height depends on button's sizes
+    that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container);
 
     that.scrollWindow = $('<div class="ilex-scrollWindow">')
                     .appendTo(that.container)
                     .css('overflow', 'auto')
                     .data('ilex-width', width)
-                    .data('ilex-height', height - ilex.widgetsCollection.textDockHeight);
+                    .data('ilex-height', height - that.dock.container.height());
 
     that.content = $('<div class="ilex-content">').appendTo(that.scrollWindow)
-                  .data('ilex-height', height - ilex.widgetsCollection.textDockHeight)
+                  .data('ilex-height', height - that.dock.container.height())
                   .attr('contenteditable', 'true');
 
-    that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container);
+
 
     that.loadText = function (text) {
       //Filling algorithm
@@ -72,8 +73,8 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
       that.container.data('ilex-height', height);
       //dock conatiner height does not choange
       //content height shrinks
-      that.content.data('ilex-height', height - ilex.widgetsCollection.textDockHeight);
-      that.scrollWindow.data('ilex-height', height - ilex.widgetsCollection.textDockHeight);
+      that.content.data('ilex-height', height - that.dock.container.height());
+      that.scrollWindow.data('ilex-height', height - that.dock.container.height());
     });
     //nothing is selected at the begining
     that.selectionRange = {};
@@ -112,10 +113,6 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
       }
     };
 
-    var clearWidgetCanvas = function () {
-
-    };
-
     //Ctrl + A doesn't work yet
     that.container.on('mouseup', function (event) {
       var selection = window.getSelection();
@@ -126,6 +123,9 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
       that.selectionRange = selection.getRangeAt(0);
       //highlight selection
       drawSelection();
+
+      //selection finished, used by finishLinkButton
+      that.container.trigger('selectend');
 
     });
     that.container.on('mousedown', function (event) {
