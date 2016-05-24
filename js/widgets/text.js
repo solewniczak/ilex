@@ -79,9 +79,9 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
     that.selectionRange = {};
     that.container.on('mouseenter', function(event) {
       var selection = window.getSelection();
+      selection.removeAllRanges();
       //if something is selected get focus
       if (that.selectionRange.constructor.name === 'Range') {
-        selection.removeAllRanges();
         selection.addRange(that.selectionRange);
       }
     });

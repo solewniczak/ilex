@@ -16,6 +16,7 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, doc1, doc2) {
   that.button = $('<div class="ilex-button cycle">🔗</div>').appendTo($parentWidget)
                     .css('position', 'absolute')
                     .css('top', 100)
-                    .css('left', 100).hide();
+                    .css('left', 100)
+                    .hide();
   return that;
 }
