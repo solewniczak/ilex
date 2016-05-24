@@ -74,7 +74,6 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
       //content height shrinks
       that.content.data('ilex-height', height - ilex.widgetsCollection.textDockHeight);
       that.scrollWindow.data('ilex-height', height - ilex.widgetsCollection.textDockHeight);
-
     });
 
     //we don't want standard browsers draging procedure
@@ -84,38 +83,46 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
     });
 
     var drawSelection = function () {
-      var rects = that.selectionRects || [],
-        selectionScroll = that.selectionScroll || 0,
-        scrollDelta = that.scrollWindow.scrollTop() - selectionScroll;
+      var rects,
+        scrollWindowOffset = that.scrollWindow.offset(),
+        clipRect = canvas.createClientRect(scrollWindowOffset.left, scrollWindowOffset.top,
+                                              that.scrollWindow.data('ilex-width'),
+                                              that.scrollWindow.data('ilex-height'));
+
+      if (that.selectionRange && typeof that.selectionRange.getClientRects === 'function') {
+        rects = canvas.clipClientRectList(clipRect, that.selectionRange.getClientRects());
+      } else {
+        rects = [];
+      }
+
       for (let i = 0; i < rects.length; i++) {
         let rect = rects[i];
-        canvas.drawRect(rect.left, rect.top - scrollDelta,
-                            rect.width, rect.height, '#a8d1ff');
+        canvas.drawRect(rect, '#a8d1ff');
       }
     };
 
     //Ctrl + A doesn't work yet
     that.container.on('mouseup', function (event) {
-      var selection = window.getSelection(),
-        rects, range;
-
+      var selection = window.getSelection();
+      console.log('mouseup');
       //we select nothing, just click on the text
       if (selection.isCollapsed || selection.rangeCount < 1)
         return;
 
+      that.selectionRange = selection.getRangeAt(0);
       //highlight selection
-      range = selection.getRangeAt(0);
-      that.selectionRects = range.getClientRects();
-      that.selectionScroll = that.scrollWindow.scrollTop();
-
       drawSelection();
 
     });
     that.container.on('mousedown', function (event) {
-      var range = document.createRange(),
-        textRange = range.selectNode(that.container[0]),
-        rect = range.getBoundingClientRect();
-      canvas.clearRect(rect.left, rect.top, rect.width, rect.height)
+      //we have to clear entire container to avoid 1 px artifact between
+      //toolbar and content
+      var containerOffset = that.container.offset(),
+        widgetRect = canvas.createClientRect(containerOffset.left, containerOffset.top,
+                                              that.container.data('ilex-width'),
+                                              that.container.data('ilex-height'));
+      that.selectionRange = [];
+      canvas.clearRect(widgetRect);
     });
 
     //redraw selections
