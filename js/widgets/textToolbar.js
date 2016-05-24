@@ -11,10 +11,8 @@ if (ilex.widgetsCollection.textToolbar !== undefined)
 ilex.widgetsCollection.textToolbar = function ($parentWidget) {
   var that = {},
     addButton = function(that, text, command) {
-      var $button = $('<span class="ilex-button">').appendTo(that.toolbar)
-                      .text(text)
-                      .css('border', '1px solid #000')
-                      .css('cursor', 'pointer');
+      var $button = $('<div class="ilex-button">').appendTo(that.toolbar)
+                      .text(text);
       $button.on('mousedown', function (event) {
         document.execCommand(command, false, null);
         //prevent focus stealing

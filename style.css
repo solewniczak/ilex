@@ -1,4 +1,10 @@
 @import url("css/reset.css");
+@import url("css/font.css");
+
+body {
+  font-family: IlexSans;
+  font-size: 12pt;
+}
 
 div:focus {
   outline: 0;
@@ -12,6 +18,46 @@ i {
   font-style: italic;
 }
 
+/*CSS is based on Metro UI design*/
+/*becouse it's flat and looks well :)*/
+/*https://metroui.org.ua/*/
 ::selection {
   background: #a8d1ff; /* WebKit/Blink Browsers */
+}
+
+/*ilex buttons styling */
+.ilex-button {
+  padding: 0 10px;
+  line-height: 30px;
+  text-align: center;
+  vertical-align: middle;
+  background-color: #ffffff;
+  border: 1px #d9d9d9 solid;
+  color: #262626;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 90%;
+}
+
+.ilex-button:hover {
+  border-color: #787878;
+}
+
+.ilex-button:active {
+  background-color: #eaeaea;
+}
+
+.ilex-button:disabled, .ilex-button.disabled {
+		background-color: #eaeaea;
+		color: #bebebe;
+		cursor: default;
+		border-color: transparent;
+	}
+
+.ilex-button.cycle {
+  padding: 0;
+  vertical-align: middle;
+  line-height: 40px;
+  width: 40px;
+  border-radius: 50%;
 }
