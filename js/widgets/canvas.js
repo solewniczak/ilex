@@ -14,13 +14,79 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
 
   that.clearCanvas = function () {
     that.ctx.clearRect(0, 0, $(window).width(), $(window).height());
-  }
-  that.clearRect = function (x, y, w, h) {
-    that.ctx.clearRect(x,y,w,h);
   };
-  that.drawRect = function (x, y, w, h, color) {
+  //rect is ClientRects
+  that.clearRect = function (rect) {
+    that.ctx.clearRect(rect.left, rect.top, rect.width, rect.height);
+  };
+  that.drawRect = function (rect, color) {
     that.ctx.fillStyle = color;
-    that.ctx.fillRect(x,y,w,h);
+    that.ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
+  };
+  //https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIDOMClientRect
+  that.createClientRect = function (x, y, w, h) {
+    return {
+      left: x,
+      top: y,
+      right: x + w,
+      bottom: y + h,
+      width: w,
+      height: h
+    };
+  };
+  //http://stackoverflow.com/questions/2752349/fast-rectangle-to-rectangle-intersection
+  //a, b are ClientRects
+  that.hasIntersectRect = function (a, b) {
+    return (a.left <= b.right &&
+             b.left <= a.right &&
+             a.top <= b.bottom &&
+             b.top <= a.bottom);
+  };
+
+  //a, b are ClientRects
+  that.intersectionRect = function (a, b) {
+    var rect = {};
+    if (a.left < b.left) {
+      rect.left = b.left;
+    } else {
+      rect.left = a.left;
+    }
+    if (a.top < b.top) {
+      rect.top = b.top;
+    } else {
+      rect.top = a.top;
+    }
+    if (a.right > b.right) {
+      rect.right = b.right;
+    } else {
+      rect.right = a.right;
+    }
+    if (a.bottom > b.bottom) {
+      rect.bottom = b.bottom;
+    } else {
+      rect.bottom = a.bottom;
+    }
+    rect.width = rect.right - rect.left;
+    rect.height = rect.bottom - rect.top;
+    return rect;
+  };
+  //takes clipping region and ClientRectList
+  //returns new ClientRectList clipped to the region
+  that.clipClientRectList = function (clipRect, rects) {
+    var rects = rects || [],
+      hasIntersection = function (rect) {
+        return that.hasIntersectRect(clipRect, rect);
+      },
+      intersection = function (rect) {
+        return that.intersectionRect(clipRect, rect);
+      },
+      newClientRectsList = [];
+      for (let i = 0; i < rects.length; i++) {
+        let rect = rects[i];
+        if (hasIntersection(rect))
+          newClientRectsList.push(intersection(rect));
+      }
+      return newClientRectsList;
   };
 
   //basic canvasRedraw behaviour

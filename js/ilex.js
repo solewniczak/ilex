@@ -19,4 +19,6 @@ ilex.applySize = function() {
     if ($(this).data('ilex-height'))
       $(this).height($(this).data('ilex-height'));
   });
+  //redraw all canvas elements
+  $(document).trigger('canvasRedraw');
 };
