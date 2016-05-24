@@ -14,9 +14,11 @@ ilex.views.twoColumn = function(canvas) {
   view.leftText = ilex.widgetsCollection.text(view.pannels.left, canvas);
   view.rightText = ilex.widgetsCollection.text(view.pannels.right, canvas);
 
-  view.finishLinkButton = ilex.widgetsCollection.finishLinkButton(ilex.window,
-                                                                  view.leftText,
-                                                                  view.rightText);
+  view.finishLinkButton = ilex.widgetsCollection
+                                      .finishLinkButton(ilex.window,
+                                                        view.leftText,
+                                                        view.rightText,
+                                                        view.pannels.handler);
 
   //move scrollbar to left
   view.leftText.scrollWindow.css('direction', 'rtl');
