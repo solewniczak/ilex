@@ -75,6 +75,16 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
       that.content.data('ilex-height', height - ilex.widgetsCollection.textDockHeight);
       that.scrollWindow.data('ilex-height', height - ilex.widgetsCollection.textDockHeight);
     });
+    //nothing is selected at the begining
+    that.selectionRange = {};
+    that.container.on('mouseenter', function(event) {
+      var selection = window.getSelection();
+      //if something is selected get focus
+      if (that.selectionRange.constructor.name === 'Range') {
+        selection.removeAllRanges();
+        selection.addRange(that.selectionRange);
+      }
+    });
 
     //we don't want standard browsers draging procedure
     //it confuses the users
@@ -89,7 +99,8 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
                                               that.scrollWindow.data('ilex-width'),
                                               that.scrollWindow.data('ilex-height'));
 
-      if (that.selectionRange && typeof that.selectionRange.getClientRects === 'function') {
+      //duck typing
+      if (typeof that.selectionRange.getClientRects === 'function') {
         rects = canvas.clipClientRectList(clipRect, that.selectionRange.getClientRects());
       } else {
         rects = [];
@@ -101,10 +112,13 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
       }
     };
 
+    var clearWidgetCanvas = function () {
+
+    };
+
     //Ctrl + A doesn't work yet
     that.container.on('mouseup', function (event) {
       var selection = window.getSelection();
-      console.log('mouseup');
       //we select nothing, just click on the text
       if (selection.isCollapsed || selection.rangeCount < 1)
         return;
@@ -121,7 +135,7 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
         widgetRect = canvas.createClientRect(containerOffset.left, containerOffset.top,
                                               that.container.data('ilex-width'),
                                               that.container.data('ilex-height'));
-      that.selectionRange = [];
+      that.selectionRange = {};
       canvas.clearRect(widgetRect);
     });
 
