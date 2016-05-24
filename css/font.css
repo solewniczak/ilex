@@ -1,0 +1,9 @@
+@font-face {
+  font-family: IlexSans;
+  src: url(ttf/DejaVuSans.ttf)
+}
+
+@font-face {
+  font-family: IlexSansBold;
+  src: url(ttf/DejaVuSans-Bold.ttf)
+}

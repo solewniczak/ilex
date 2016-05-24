@@ -37,8 +37,8 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
 
     that.dock = {};
     that.dock.container = $('<div class="ilex-dock">').appendTo(that.container)
-                            .data('ilex-width', width)
-                            .data('ilex-height', ilex.widgetsCollection.textDockHeight);
+                            .data('ilex-width', width);
+                            //height depends on button's sizes
 
     that.scrollWindow = $('<div class="ilex-scrollWindow">')
                     .appendTo(that.container)
