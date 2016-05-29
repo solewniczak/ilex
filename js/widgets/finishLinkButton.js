@@ -40,6 +40,14 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
     $(document).trigger('canvasRedraw');
   });
 
+  that.button.on('mouseup', function(event) {
+	ilexServer.send({action : "createLink",
+	 				  parameters : {
+					  	source : doc1.selectionRange,
+						destination: doc2.selectionRange
+					  }})
+  });
+
   $(document).on('canvasRedraw', function (event) {
     if (that.button.is(':hover')) {
       canvas.drawConnection(doc1.selectionRange.getBoundingClientRect(),

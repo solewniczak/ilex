@@ -51,14 +51,41 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
                   .data('ilex-height', height - that.dock.container.height())
                   .attr('contenteditable', 'true');
 
-
+	that.content.on('input', function(event) {
+		// stan: "głębokie kopiowanie" jest od czapy - kopia starego stanu też
+		// się zmienia. A obiekty się różnią, bo są innego typu
+		console.log(that.oldData)
+		console.log(that.content[0].children)
+		if (that.oldData != that.content[0].children) {
+			console.log("data changed")
+			for (let i = 0; i < that.oldData.length; i++) {
+				//console.log(that.oldData[i].innerText)
+				//console.log(that.content[0].children[i].innerText)
+				if (that.oldData[i].innerText != that.content[0].children[i].innerText) {
+					console.log( i )
+				}
+				
+			}
+	  		that.oldData = jQuery.extend(true, {}, that.content[0].children);
+		}
+		ilexServer.send({action: "modifyDocument",
+						parameters : {
+							text : that.text,
+							data : event
+						}});
+	});
 
     that.loadText = function (text) {
       //Filling algorithm
       textFill(text, that.content);
+	  that.oldData = jQuery.extend(true, {}, that.content[0].children);
     };
     //selections of the text
     that.selections = [];
+	that.text = null;
+	that.setText = function(text) {
+		that.text = text;
+	};
     that.container.on('windowResize', function(event) {
       var width = that.container.parent().data('ilex-width'),
         height = that.container.parent().data('ilex-height');
