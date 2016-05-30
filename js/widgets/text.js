@@ -52,6 +52,7 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
                   .attr('contenteditable', 'true');
 
 	that.content.on('input', function(event) {
+		console.log(event)
 		// stan: "głębokie kopiowanie" jest od czapy - kopia starego stanu też
 		// się zmienia. A obiekty się różnią, bo są innego typu
 		console.log(that.oldData)
