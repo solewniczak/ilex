@@ -23,6 +23,26 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
     that.ctx.fillStyle = color;
     that.ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
   };
+  //used for debbuging purposes
+  that.drawRectsStep = function (rects, color) {
+    var colors = ['#ff0000', '#0066ff', '#99ffcc', '#660066', '#003366',
+                  '#ffff00', '#ccccff', '#990099', '#ffcc00'];
+    var i = 0;
+    setInterval(function() {
+      let rect = rects[i];
+      that.ctx.fillStyle = colors[i];
+      that.ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
+      i++;
+    }, 1000);
+  }
+  //rects is Array of ClientRect or ClientRectsList
+  that.drawRects = function (rects, color) {
+    that.ctx.fillStyle = color;
+    for (let i = 0; i < rects.length; i++) {
+      let rect = rects[i];
+      that.ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
+    }
+  };
   //https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIDOMClientRect
   that.createClientRect = function (x, y, w, h) {
     return {
@@ -92,21 +112,59 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
   //text selection (build from many rects) into selection build from three rects:
   //the top, the middle and the bottom one. The top and the bottom cover only
   //one line of text. The middle may covers many lines.
-  //The middle rect the width of the the widest rect in the list.
+  //The middle rect has a width of the the widest rect in the list.
   //Top and the bottom ones may be shorter if the selection starts or ends in
   //the middle of a line.
 
-  //returns {rects: [array of three rects], leftBound: {x, y, width},
-  //                                        rightBound: {x, y, width}}
+  //returns {rects: [array of three rects], leftBound: {x, y, height},
+  //                                        rightBound: {x, y, height}}
   //leftBound and rightBound are used by ray drawing algorithm.
   that.threeRectsSelection = function (rects) {
+    var topRect = rects[0],
+      bottomRect = rects[rects.length - 1],
+      minX = 999999, maxX = 0,
+      middleHeight = bottomRect.top - topRect.bottom,
+      middleY = topRect.bottom,
+      topSpace, topWidth, maxWidth;
+    for (let i = 0; i < rects.length; i++) {
+      let rect = rects[i];
+      if (rect.left < minX) {
+        minX = rect.left;
+      }
+      if (rect.right > maxX) {
+        maxX = rect.right;
+      }
+    }
+    maxWidth = maxX - minX;
 
+    topSpace = topRect.left - minX;
+    topWidth = maxWidth - topSpace;
+
+    return {'rects': [
+            that.createClientRect(topRect.left, topRect.top, topWidth, topRect.height),
+            that.createClientRect(minX, middleY, maxWidth, middleHeight),
+            that.createClientRect(minX, bottomRect.top, bottomRect.right - minX, bottomRect.height),
+          ],
+          'leftBound': {'x': minX,
+                        'y': middleY,
+                        'height': middleHeight + bottomRect.height
+                      },
+          'rightBound': {'x': maxX,
+                         'y': topRect.top,
+                         'height': middleHeight + topRect.height
+                       }
+        };
   };
-  //draw two rects and line that connects them
-  that.drawConnection = function (a, b) {
-    var color = "#c1f0c1";
-    that.drawRect(a, color);
-    that.drawRect(b, color);
+  //draw two rects and a line that connects them
+  //a, b are ClientRectLists
+  //returns y where the line crosses 'boundX'
+  that.drawConnection = function (a, b, boundX) {
+    var color = "#c1f0c1",
+      leftThreeRectSel = that.threeRectsSelection(a),
+      rightTreeRectSel = that.threeRectsSelection(b);
+    console.log(leftThreeRectSel, rightTreeRectSel);
+    that.drawRects(leftThreeRectSel.rects, color);
+    that.drawRects(rightTreeRectSel.rects, color);
   };
 
   //basic canvasRedraw behaviour

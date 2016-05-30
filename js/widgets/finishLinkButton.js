@@ -42,8 +42,8 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
 
   $(document).on('canvasRedraw', function (event) {
     if (that.button.is(':hover')) {
-      canvas.drawConnection(doc1.selectionRange.getBoundingClientRect(),
-                            doc2.selectionRange.getBoundingClientRect());
+      canvas.drawConnection(doc1.selectionRange.getClientRects(),
+                            doc2.selectionRange.getClientRects());
     }
   });
   return that;
