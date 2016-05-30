@@ -37,6 +37,7 @@ i {
   cursor: pointer;
   display: inline-block;
   font-size: 90%;
+  font-family: IlexSans;
 }
 
 .ilex-button:hover {

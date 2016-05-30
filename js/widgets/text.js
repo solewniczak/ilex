@@ -13,19 +13,10 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
     throw 'canvas undefined';
   var that = {},
     textFill = function(text, $container) {
-      var createParagraph = function($container) {
-        var $paragraph = $('<p class="ilex-paragraph">').appendTo($container)
-                              .css('margin-bottom', '10px');
-        return $paragraph;
-      },
-      nl2br = function(string) {
+      var nl2br = function(string) {
           return string.replace(/\n/g, "<br />");
-      },
-      paragraphs = text.split('\n\n');
-      for (let p of paragraphs) {
-        let $p = createParagraph($container);
-        $p.html(nl2br(p));
-      }
+      };
+      $container.append(nl2br(text));
     },
     width = $parentWidget.data('ilex-width'),
     height = $parentWidget.data('ilex-height');
