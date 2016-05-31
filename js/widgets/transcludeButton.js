@@ -89,6 +89,11 @@ ilex.widgetsCollection.transcludeButton = function ($parentWidget, canvas, doc1,
         transclusinElement = $('<span>').append(selections.full.cloneContents()),
         range = document.createRange();
       selections.collapsed.insertNode(transclusinElement[0]);
+      that.button.on('mouseleave', function (event) {
+        transclusinElement.remove();
+        $(document).trigger('canvasRedraw');
+        that.button.off('mouseleave');
+      });
       range.selectNode(transclusinElement[0]);
 
       canvas.drawConnection(selections.full.getClientRects(),
@@ -106,6 +111,9 @@ ilex.widgetsCollection.transcludeButton = function ($parentWidget, canvas, doc1,
       ilex.view.connections = [];
     }
     ilex.view.connections.push({'left': doc1.selectionRange, 'right': doc2.selectionRange});
+    that.button.hide();
+    //prevent transclusion removal
+    that.button.off('mouseleave');
   });
 
   //draw all connection

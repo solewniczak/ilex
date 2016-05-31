@@ -77,6 +77,7 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
       ilex.view.connections = [];
     }
     ilex.view.connections.push({'left': doc1.selectionRange, 'right': doc2.selectionRange});
+    that.button.hide();
   });
 
   //draw all connection
