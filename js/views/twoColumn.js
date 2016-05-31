@@ -20,6 +20,12 @@ ilex.views.twoColumn = function(canvas) {
                                                         view.leftText,
                                                         view.rightText,
                                                         view.pannels.handler);
+  view.transcludeButton = ilex.widgetsCollection
+                                      .transcludeButton(ilex.window,
+                                                        canvas,
+                                                        view.leftText,
+                                                        view.rightText,
+                                                        view.pannels.handler);
 
   //move scrollbar to left
   view.leftText.scrollWindow.css('direction', 'rtl');
