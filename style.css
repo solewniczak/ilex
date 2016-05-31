@@ -40,6 +40,10 @@ i {
   font-family: IlexSans;
 }
 
+.ilex-awesome {
+  font-family: Awesome;
+}
+
 .ilex-button:hover {
   border-color: #787878;
 }

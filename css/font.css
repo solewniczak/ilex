@@ -1,14 +1,19 @@
 @font-face {
   font-family: IlexSans;
-  src: url(ttf/DejaVuSans.ttf)
+  src: url(DejaVu/DejaVuSans.ttf)
 }
 
 @font-face {
   font-family: IlexSansBold;
-  src: url(ttf/DejaVuSans-Bold.ttf)
+  src: url(DejaVu/DejaVuSans-Bold.ttf)
 }
 
 @font-face {
   font-family: IlexSansOblique;
-  src: url(ttf/DejaVuSans-Oblique.ttf)
+  src: url(DejaVu/DejaVuSans-Oblique.ttf)
+}
+
+@font-face {
+  font-family: Awesome;
+  src: url(fontawesome-webfont.ttf)
 }
