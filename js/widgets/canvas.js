@@ -165,8 +165,7 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
   };
   //draw two rects and a line that connects them
   //a, b are ClientRectLists
-  //returns y where the line crosses 'boundX'
-  that.drawConnection = function (a, b, boundX) {
+  that.drawConnection = function (a, b) {
     var color = "#c1f0c1",
       margin = 0,
       leftThreeRectSel = that.threeRectsSelection(a),

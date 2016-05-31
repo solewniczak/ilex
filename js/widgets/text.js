@@ -127,7 +127,7 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
                                               that.container.data('ilex-width'),
                                               that.container.data('ilex-height'));
       that.selectionRange = {};
-      canvas.clearRect(widgetRect);
+      $(document).trigger('canvasRedraw');
     });
 
     //redraw selections

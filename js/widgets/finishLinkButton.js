@@ -18,7 +18,20 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
       //if both ranges exisits
       if (doc1.selectionRange.constructor.name === 'Range' &&
           doc2.selectionRange.constructor.name === 'Range') {
+        let r1 = doc1.selectionRange.getBoundingClientRect(),
+          r2 = doc2.selectionRange.getBoundingClientRect(),
+          top, bottom, distance;
+        if (r1.top > r2.top) {
+          top = r1;
+          bottom = r2;
+        } else {
+          top = r2;
+          bottom = r1;
+        }
+        distance = bottom.top - top.top;
+
         that.button.css('left', handlerOffset.left - width/2);
+        that.button.css('top', top.top + distance/2);
         that.button.show();
       } else {
         that.button.hide();
@@ -26,8 +39,7 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
     };
   //We append not replace parent widget
   //Besouse we are absolute positioning
-  //Unicode Character 'LINK SYMBOL' (U+1F517)
-  that.button = $('<div class="ilex-button cycle">🔗</div>').appendTo($parentWidget)
+  that.button = $('<div class="ilex-button ilex-cycle ilex-awesome">&#xf0c1;</div>').appendTo($parentWidget)
                     .css('position', 'absolute')
                     .css('top', 100)
                     .hide();
