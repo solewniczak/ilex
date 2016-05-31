@@ -18,8 +18,8 @@ ilex.widgetsCollection.textToolbar = function ($parentWidget) {
         }
         return false;
       },
-      $button = $('<div class="ilex-button">').appendTo(that.toolbar)
-                      .text(text);
+      $button = $('<div class="ilex-button ilex-awesome">').appendTo(that.toolbar)
+                      .html(text);
       $button.on('mousedown', function (event) {
         var selection = window.getSelection(),
           surroundRange = document.createRange(),
@@ -61,9 +61,9 @@ ilex.widgetsCollection.textToolbar = function ($parentWidget) {
     };
     that.toolbar = $('<div class="ilex-text-toolbar">').appendTo($parentWidget);
 
-    addButton(that, 'Bold', '<b>');
-    addButton(that, 'Italic', '<i>');
-    addButton(that, 'Underline', '<u>');
+    addButton(that, '&#xf032;', '<b>');
+    addButton(that, '&#xf033;', '<i>');
+    addButton(that, '&#xf0cd;', '<u>');
 
     return that;
 };
