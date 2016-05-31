@@ -30,7 +30,6 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
   that.button = $('<div class="ilex-button cycle">🔗</div>').appendTo($parentWidget)
                     .css('position', 'absolute')
                     .css('top', 100)
-                    .css('left', 100)
                     .hide();
 
   doc1.container.on('selectstart selectend windowResize', show);
@@ -41,10 +40,33 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
   });
 
   $(document).on('canvasRedraw', function (event) {
+    var buttonOffset = that.button.offset(),
+      selection = window.getSelection();
     if (that.button.is(':hover')) {
       canvas.drawConnection(doc1.selectionRange.getClientRects(),
-                            doc2.selectionRange.getClientRects());
+                            doc2.selectionRange.getClientRects(),
+                            buttonOffset.left);
+      selection.removeAllRanges();
     }
   });
+
+  that.button.on('mouseup', function(event) {
+    //create Array of links
+    if (ilex.view.connections === undefined) {
+      ilex.view.connections = [];
+    }
+    ilex.view.connections.push({'left': doc1.selectionRange, 'right': doc2.selectionRange});
+  });
+
+  //draw all connection
+  $(document).on('canvasRedraw', function (event) {
+    if (ilex.view === undefined || ilex.view.connections === undefined) {
+      return;
+    }
+    for (let con of ilex.view.connections) {
+      canvas.drawConnection(con.left.getClientRects(), con.right.getClientRects());
+    }
+  });
+
   return that;
 }

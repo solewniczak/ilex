@@ -7,3 +7,8 @@
   font-family: IlexSansBold;
   src: url(ttf/DejaVuSans-Bold.ttf)
 }
+
+@font-face {
+  font-family: IlexSansOblique;
+  src: url(ttf/DejaVuSans-Oblique.ttf)
+}

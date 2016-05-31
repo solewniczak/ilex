@@ -126,6 +126,14 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
       middleHeight = bottomRect.top - topRect.bottom,
       middleY = topRect.bottom,
       topSpace, topWidth, maxWidth;
+    //browser is not very accurate about it so we need to check it
+    if (middleHeight < 0) {
+      middleHeight = 0;
+    }
+    //one line selection
+    if (rects.length == 1) {
+      middleY = topRect.top;
+    }
     for (let i = 0; i < rects.length; i++) {
       let rect = rects[i];
       if (rect.left < minX) {
@@ -160,11 +168,29 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
   //returns y where the line crosses 'boundX'
   that.drawConnection = function (a, b, boundX) {
     var color = "#c1f0c1",
+      margin = 0,
       leftThreeRectSel = that.threeRectsSelection(a),
       rightTreeRectSel = that.threeRectsSelection(b);
-    console.log(leftThreeRectSel, rightTreeRectSel);
+
     that.drawRects(leftThreeRectSel.rects, color);
     that.drawRects(rightTreeRectSel.rects, color);
+
+    //draw connection between threeRectsSelections
+    that.ctx.beginPath();
+    that.ctx.moveTo(leftThreeRectSel.rightBound.x, leftThreeRectSel.rightBound.y);
+    that.ctx.lineTo(leftThreeRectSel.rightBound.x + margin, leftThreeRectSel.rightBound.y);
+    that.ctx.lineTo(rightTreeRectSel.leftBound.x - margin, rightTreeRectSel.leftBound.y);
+    that.ctx.lineTo(rightTreeRectSel.leftBound.x, rightTreeRectSel.leftBound.y);
+    that.ctx.lineTo(rightTreeRectSel.leftBound.x, rightTreeRectSel.leftBound.y +
+                                                  rightTreeRectSel.leftBound.height);
+    that.ctx.lineTo(rightTreeRectSel.leftBound.x - margin, rightTreeRectSel.leftBound.y +
+                                                  rightTreeRectSel.leftBound.height);
+    that.ctx.lineTo(leftThreeRectSel.rightBound.x + margin, leftThreeRectSel.rightBound.y +
+                                                  leftThreeRectSel.rightBound.height);
+    that.ctx.lineTo(leftThreeRectSel.rightBound.x, leftThreeRectSel.rightBound.y +
+                                                  leftThreeRectSel.rightBound.height);
+    that.ctx.fill();
+
   };
 
   //basic canvasRedraw behaviour
