@@ -84,6 +84,9 @@ ilex.widgetsCollection.verticalSplit = function ($parentWidget, position) {
       that.position = [newTopHeight/innerHeight, newBottomHeight/innerHeight];
 
       ilex.applySize();
+
+      //prevent text selection while resizing
+      event.preventDefault();
     });
   });
   return that;

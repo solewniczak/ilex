@@ -38,7 +38,7 @@ ilex.views = {};
 
 //apply sizes to elements
 ilex.applySize = function() {
-  ilex.window.find('.ilex-resize').trigger('windowResize');
+  $('.ilex-resize').trigger('windowResize');
   ilex.window.find('*').each(function () {
     if ($(this).data('ilex-width'))
       $(this).width($(this).data('ilex-width'))
