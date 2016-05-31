@@ -10,38 +10,61 @@ if (ilex.widgetsCollection === undefined)
 //selected part of the document and .container which triggers 'selectend' event
 //handler is element on which show finish link button.
 //the position of link button will be intersesion of handler and link ray
-ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1, doc2, handler) {
+ilex.widgetsCollection.transcludeButton = function ($parentWidget, canvas, doc1, doc2, handler) {
   var that = {},
+    //detects if we have selection for transclusion - one side selected and one
+    //collapsed
+    collapsedFull = function() {
+      var full, collapsed;
+      if (doc1.selectionRange.constructor.name === 'Range' &&
+          doc2.selectionRange.constructor.name === 'Range') {
+        if (doc1.selectionRange.collapsed && !doc2.selectionRange.collapsed) {
+          collapsed = doc1.selectionRange;
+          full = doc2.selectionRange;
+        } else if (!doc1.selectionRange.collapsed && doc2.selectionRange.collapsed) {
+          collapsed = doc2.selectionRange;
+          full = doc1.selectionRange;
+        }
+      }
+      if (full !== undefined && collapsed !== undefined) {
+        return {
+                'full': full,
+                'collapsed': collapsed
+              };
+      } else {
+        return undefined;
+      }
+    },
     show = function (event) {
       var handlerOffset = handler.offset(),
-        width = that.button.width();
+        width = that.button.width(),
+        selections;
       //if both ranges exisits
-      if (doc1.selectionRange.constructor.name === 'Range' &&
-          doc2.selectionRange.constructor.name === 'Range' &&
-          !doc1.selectionRange.collapsed &&
-          !doc2.selectionRange.collapsed) {
-        let r1 = doc1.selectionRange.getBoundingClientRect(),
-          r2 = doc2.selectionRange.getBoundingClientRect(),
-          top, bottom, distance;
-        if (r1.top > r2.top) {
-          top = r1;
-          bottom = r2;
-        } else {
-          top = r2;
-          bottom = r1;
-        }
-        distance = bottom.top - top.top;
+      console.log(doc1.selectionRange, doc2.selectionRange);
+      selections = collapsedFull()
+      if (selections) {
+          let r1 = selections.collapsed.getBoundingClientRect(),
+            r2 = selections.full.getBoundingClientRect(),
+            top, bottom, distance;
+          if (r1.top > r2.top) {
+            top = r1;
+            bottom = r2;
+          } else {
+            top = r2;
+            bottom = r1;
+          }
+          distance = bottom.top - top.top;
 
-        that.button.css('left', handlerOffset.left - width/2);
-        that.button.css('top', top.top + distance/2);
-        that.button.show();
+          that.button.css('left', handlerOffset.left - width/2);
+          that.button.css('top', top.top + distance/2);
+          that.button.show();
       } else {
         that.button.hide();
       }
     };
   //We append not replace parent widget
   //Besouse we are absolute positioning
-  that.button = $('<div class="ilex-button ilex-cycle ilex-awesome">&#xf0c1;</div>').appendTo($parentWidget)
+  that.button = $('<div class="ilex-button ilex-cycle ilex-awesome">&#xf10d;</div>').appendTo($parentWidget)
                     .css('position', 'absolute')
                     .hide();
 
@@ -62,8 +85,14 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
     }
 
     if (that.button.is(':hover')) {
-      canvas.drawConnection(doc1.selectionRange.getClientRects(),
-                            doc2.selectionRange.getClientRects(),
+      let selections = collapsedFull(),
+        transclusinElement = $('<span>').append(selections.full.cloneContents()),
+        range = document.createRange();
+      selections.collapsed.insertNode(transclusinElement[0]);
+      range.selectNode(transclusinElement[0]);
+
+      canvas.drawConnection(selections.full.getClientRects(),
+                            range.getClientRects(),
                             //select next avalible color for next connection
                             ilex.contrastColors[connectionsLengt %
                                                   ilex.contrastColors.length]);

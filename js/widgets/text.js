@@ -107,12 +107,12 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
     //Ctrl + A doesn't work yet
     that.container.on('mouseup', function (event) {
       var selection = window.getSelection();
-      //we select nothing, just click on the text
-      if (selection.isCollapsed || selection.rangeCount < 1)
+
+      if (selection.rangeCount < 1)
         return;
 
       that.selectionRange = selection.getRangeAt(0);
-      //highlight selection
+
       drawSelection();
 
       //selection finished, used by finishLinkButton
