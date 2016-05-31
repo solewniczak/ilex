@@ -25,6 +25,10 @@ ilex.views.twoColumn = function(canvas) {
   view.leftText.scrollWindow.css('direction', 'rtl');
   view.leftText.content.css('direction', 'ltr');
 
+  //create margin for better link presentation
+  //view.leftText.content.css('margin-right', '10px');
+  //view.rightText.content.css('margin-left', '10px');
+
   //apply size
   ilex.applySize();
 
