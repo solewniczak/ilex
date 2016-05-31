@@ -207,11 +207,8 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
   that.ctx = that.canvas[0].getContext('2d');
 
   that.canvas.on('windowResize',function(that) {
-    return function(event) {
-      var width = that.canvas.parent().data('ilex-width'),
-        height = that.canvas.parent().data('ilex-height');
-      that.canvas.attr('width', width).attr('height', height);
-    };
+    $(this).attr('width', $(window).width()).attr('height', $(window).height());
+    $(document).trigger('canvasRedraw');
   });
   return that;
 };

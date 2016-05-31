@@ -83,6 +83,9 @@ ilex.widgetsCollection.horizontalSplit = function ($parentWidget, position) {
       that.position = [newLeftWidth/innerWidth, newRightWidth/innerWidth];
 
       ilex.applySize();
+
+      //prevent text selection while resizing
+      event.preventDefault();
     });
   });
   that.handler.on('dblclick', function (event) {
