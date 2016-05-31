@@ -53,11 +53,19 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
 
   $(document).on('canvasRedraw', function (event) {
     var buttonOffset = that.button.offset(),
-      selection = window.getSelection();
+      selection = window.getSelection(),
+      connectionsLengt = 0;
+
+    if (ilex.view !== undefined && ilex.view.connections !== undefined) {
+      connectionsLengt = ilex.view.connections.length
+    }
+
     if (that.button.is(':hover')) {
       canvas.drawConnection(doc1.selectionRange.getClientRects(),
                             doc2.selectionRange.getClientRects(),
-                            buttonOffset.left);
+                            //select next avalible color for next connection
+                            ilex.contrastColors[connectionsLengt %
+                                                  ilex.contrastColors.length]);
       selection.removeAllRanges();
     }
   });
@@ -75,8 +83,12 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
     if (ilex.view === undefined || ilex.view.connections === undefined) {
       return;
     }
+    let i = 0;
     for (let con of ilex.view.connections) {
-      canvas.drawConnection(con.left.getClientRects(), con.right.getClientRects());
+      canvas.drawConnection(con.left.getClientRects(),
+                            con.right.getClientRects(),
+                            ilex.contrastColors[i % ilex.contrastColors.length]);
+      i++;
     }
   });
 
