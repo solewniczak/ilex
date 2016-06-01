@@ -80,21 +80,42 @@ ilex.widgetsCollection.textToolbar = function ($parentWidget, textWidget) {
     addButton(that, '&#xf0cd;', '<u>');
     addSeparator();
     var transcludeButton = addButton(that, '&#xf10d;', function() {
-      alert('JGOSS');
+      alert('transclude');
     });
     that.toolbar.find('.ilex-button').addClass('ilex-disabled');
 
-    textWidget.container.on('mouseenter', function(event) {
-      that.toolbar.find('.ilex-button').removeClass('ilex-disabled');
-      //check if enable transclude button
-      //we don't have collapsed selectionRange
-      if (textWidget.selectionRange.collapsed === undefined ||
+    //we enable transclusion button when:
+    //1. something is selected in alternate text
+    //2. we have collapsed selection in text widget
+    let enableTransclusion = function() {
+      if (alternateTextWidget.selectionRange.collapsed !== undefined &&
           alternateTextWidget.selectionRange.collapsed === false) {
-        if (alternateTextWidget.selectionRange.collapsed === undefined ||
-            alternateTextWidget.selectionRange.collapsed === true) {
-              transcludeButton.addClass('ilex-disabled');
+        if (textWidget.selectionRange.collapsed !== undefined &&
+            textWidget.selectionRange.collapsed === true) {
+          return true;
         }
       }
+      return false;
+    };
+
+    //enable transclusion when user gives focus
+    textWidget.container.on('selectstart', function(event) {
+      console.log(transcludeButton);
+      if (enableTransclusion()) {
+        transcludeButton.removeClass('ilex-disabled');
+      } else {
+        transcludeButton.addClass('ilex-disabled');
+      }
+    });
+
+    textWidget.container.on('mouseenter', function(event) {
+      that.toolbar.find('.ilex-button').removeClass('ilex-disabled');
+        //check if enable transclude button
+        if (enableTransclusion()) {
+          transcludeButton.removeClass('ilex-disabled');
+        } else {
+          transcludeButton.addClass('ilex-disabled');
+        }
     });
     textWidget.container.on('mouseleave', function(event) {
       that.toolbar.find('.ilex-button').addClass('ilex-disabled');

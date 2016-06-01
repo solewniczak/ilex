@@ -30,7 +30,7 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
     that.dock.container = $('<div class="ilex-dock">').appendTo(that.container)
                             .data('ilex-width', width);
                             //height depends on button's sizes
-    that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container, that);
+
 
     that.scrollWindow = $('<div class="ilex-scrollWindow">')
                     .appendTo(that.container)
@@ -41,6 +41,9 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
     that.content = $('<div class="ilex-content">').appendTo(that.scrollWindow)
                   .data('ilex-height', height - that.dock.container.height())
                   .attr('contenteditable', 'true');
+
+    //add toolbar at the end to give it access to entre text object
+    that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container, that);
 
     //draw selections
     $(document).on('selectionchange', function(event) {
