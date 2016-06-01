@@ -19,11 +19,11 @@ ilex.widgetsCollection.transcludeButton = function ($parentWidget, canvas, doc1,
       if (doc1.selectionRange.constructor.name === 'Range' &&
           doc2.selectionRange.constructor.name === 'Range') {
         if (doc1.selectionRange.collapsed && !doc2.selectionRange.collapsed) {
-          collapsed = doc1.selectionRange;
-          full = doc2.selectionRange;
+          collapsed = doc1;
+          full = doc2;
         } else if (!doc1.selectionRange.collapsed && doc2.selectionRange.collapsed) {
-          collapsed = doc2.selectionRange;
-          full = doc1.selectionRange;
+          collapsed = doc2;
+          full = doc1;
         }
       }
       if (full !== undefined && collapsed !== undefined) {
@@ -38,25 +38,15 @@ ilex.widgetsCollection.transcludeButton = function ($parentWidget, canvas, doc1,
     show = function (event) {
       var handlerOffset = handler.offset(),
         width = that.button.width(),
-        selections;
+        selections = collapsedFull();
       //if both ranges exisits
-      console.log(doc1.selectionRange, doc2.selectionRange);
-      selections = collapsedFull()
+      //console.log(doc1, doc2);
+      //show transclude button only when mouse is over collapsed document
       if (selections) {
-          let r1 = selections.collapsed.getBoundingClientRect(),
-            r2 = selections.full.getBoundingClientRect(),
-            top, bottom, distance;
-          if (r1.top > r2.top) {
-            top = r1;
-            bottom = r2;
-          } else {
-            top = r2;
-            bottom = r1;
-          }
-          distance = bottom.top - top.top;
-
-          that.button.css('left', handlerOffset.left - width/2);
-          that.button.css('top', top.top + distance/2);
+          let colRect = selections.collapsed.selectionRange.getBoundingClientRect();
+          console.log(selections.collapsed.selectionRange.getClientRects());
+          that.button.css('left', colRect.left + that.button.width()/2);
+          that.button.css('top', colRect.top);
           that.button.show();
       } else {
         that.button.hide();
@@ -64,12 +54,15 @@ ilex.widgetsCollection.transcludeButton = function ($parentWidget, canvas, doc1,
     };
   //We append not replace parent widget
   //Besouse we are absolute positioning
-  that.button = $('<div class="ilex-button ilex-cycle ilex-awesome">&#xf10d;</div>').appendTo($parentWidget)
+  that.button = $('<div class="ilex-button ilex-awesome">&#xf10d;</div>').appendTo($parentWidget)
                     .css('position', 'absolute')
                     .hide();
 
   doc1.container.on('selectstart selectend windowResize', show);
   doc2.container.on('selectstart selectend windowResize', show);
+
+  doc1.content.on('keydown', show);
+  doc2.content.on('keydown', show);
 
   that.button.on('mouseenter mouseleave', function(event) {
     $(document).trigger('canvasRedraw');
@@ -86,9 +79,9 @@ ilex.widgetsCollection.transcludeButton = function ($parentWidget, canvas, doc1,
 
     if (that.button.is(':hover')) {
       let selections = collapsedFull(),
-        transclusinElement = $('<span>').append(selections.full.cloneContents()),
+        transclusinElement = $('<span>').append(selections.full.selectionRange.cloneContents()),
         range = document.createRange();
-      selections.collapsed.insertNode(transclusinElement[0]);
+      selections.collapsed.selectionRange.insertNode(transclusinElement[0]);
       that.button.on('mouseleave', function (event) {
         transclusinElement.remove();
         $(document).trigger('canvasRedraw');
@@ -96,7 +89,7 @@ ilex.widgetsCollection.transcludeButton = function ($parentWidget, canvas, doc1,
       });
       range.selectNode(transclusinElement[0]);
 
-      canvas.drawConnection(selections.full.getClientRects(),
+      canvas.drawConnection(selections.selectionRange.full.getClientRects(),
                             range.getClientRects(),
                             //select next avalible color for next connection
                             ilex.contrastColors[connectionsLengt %

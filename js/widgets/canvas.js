@@ -148,11 +148,17 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
     topSpace = topRect.left - minX;
     topWidth = maxWidth - topSpace;
 
-    return {'rects': [
-            that.createClientRect(topRect.left, topRect.top, topWidth, topRect.height),
-            that.createClientRect(minX, middleY, maxWidth, middleHeight),
-            that.createClientRect(minX, bottomRect.top, bottomRect.right - minX, bottomRect.height),
-          ],
+    //one line selection
+    if (rects.length == 1) {
+      rects = [that.createClientRect(topRect.left, topRect.top, topWidth, topRect.height)];
+    } else {
+      rects = [
+              that.createClientRect(topRect.left, topRect.top, topWidth, topRect.height),
+              that.createClientRect(minX, middleY, maxWidth, middleHeight),
+              that.createClientRect(minX, bottomRect.top, bottomRect.right - minX, bottomRect.height),
+            ];
+    }
+    return {'rects': rects,
           'leftBound': {'x': minX,
                         'y': middleY,
                         'height': middleHeight + bottomRect.height
@@ -170,6 +176,9 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
       margin = 0,
       leftThreeRectSel = that.threeRectsSelection(a),
       rightTreeRectSel = that.threeRectsSelection(b);
+
+    that.ctx.save();
+    that.ctx.globalAlpha = 0.2;
 
     that.drawRects(leftThreeRectSel.rects, color);
     that.drawRects(rightTreeRectSel.rects, color);
@@ -189,6 +198,8 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
     that.ctx.lineTo(leftThreeRectSel.rightBound.x, leftThreeRectSel.rightBound.y +
                                                   leftThreeRectSel.rightBound.height);
     that.ctx.fill();
+
+    that.ctx.restore();
 
   };
 

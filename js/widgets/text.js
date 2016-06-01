@@ -42,6 +42,33 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
                   .data('ilex-height', height - that.dock.container.height())
                   .attr('contenteditable', 'true');
 
+    //draw selections
+    $(document).on('selectionchange', function(event) {
+      var selection = window.getSelection(),
+        active = $('.ilex-text:hover');
+
+      if (active.length > 0 && selection.rangeCount >= 1) {
+        $('.ilex-text').each(function () {
+          if ($(this).is(that.container) && $(this).is(active)) {
+            that.selectionRange = selection.getRangeAt(0);
+          }
+        });
+      }
+      $(document).trigger('canvasRedraw');
+    });
+
+    //prevent inserting block elements when pressing return key
+    that.content.on('keydown', function(event) {
+      // trap the return key being pressed
+      if (event.keyCode === 13) {
+        let selection = window.getSelection();
+        // insert 2 br tags (if only one br tag is inserted the cursor won't go to the next line)
+        document.execCommand('insertHTML', false, '<br><br>');
+        // prevent the default behaviour of return key pressed
+        event.preventDefault();
+      }
+  });
+
 
 
     that.loadText = function (text) {
@@ -72,10 +99,12 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
     that.container.on('mouseenter', function(event) {
       var selection = window.getSelection();
       selection.removeAllRanges();
+      console.log(that.selectionRange);
       //if something is selected get focus
       if (that.selectionRange.constructor.name === 'Range') {
         selection.addRange(that.selectionRange);
       }
+      $(document).trigger('canvasRedraw');
     });
 
     //we don't want standard browsers draging procedure
@@ -90,6 +119,7 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
         clipRect = canvas.createClientRect(scrollWindowOffset.left, scrollWindowOffset.top,
                                               that.scrollWindow.data('ilex-width'),
                                               that.scrollWindow.data('ilex-height'));
+
 
       //duck typing
       if (typeof that.selectionRange.getClientRects === 'function') {
@@ -106,15 +136,6 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
 
     //Ctrl + A doesn't work yet
     that.container.on('mouseup', function (event) {
-      var selection = window.getSelection();
-
-      if (selection.rangeCount < 1)
-        return;
-
-      that.selectionRange = selection.getRangeAt(0);
-
-      drawSelection();
-
       //selection finished, used by finishLinkButton
       that.container.trigger('selectend');
 

@@ -22,7 +22,7 @@ i {
 /*becouse it's flat and looks well :)*/
 /*https://metroui.org.ua/*/
 ::selection {
-  background: #a8d1ff; /* WebKit/Blink Browsers */
+  background: transparent; /* don't draw default selection color */
 }
 
 /*ilex buttons styling */
