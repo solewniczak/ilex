@@ -66,3 +66,15 @@ i {
   width: 40px;
   border-radius: 50%;
 }
+
+.ilex-button.ilex-disabled {
+  background-color: #eaeaea;
+  color: #bebebe;
+  cursor: default;
+  border-color: transparent;
+}
+
+.ilex-separator {
+  margin: 0 10px;
+  display: inline-block;
+}

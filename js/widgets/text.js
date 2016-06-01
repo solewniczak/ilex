@@ -30,7 +30,7 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
     that.dock.container = $('<div class="ilex-dock">').appendTo(that.container)
                             .data('ilex-width', width);
                             //height depends on button's sizes
-    that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container);
+    that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container, that);
 
     that.scrollWindow = $('<div class="ilex-scrollWindow">')
                     .appendTo(that.container)
@@ -99,7 +99,6 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
     that.container.on('mouseenter', function(event) {
       var selection = window.getSelection();
       selection.removeAllRanges();
-      console.log(that.selectionRange);
       //if something is selected get focus
       if (that.selectionRange.constructor.name === 'Range') {
         selection.addRange(that.selectionRange);
