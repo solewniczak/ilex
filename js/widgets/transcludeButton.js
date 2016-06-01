@@ -40,11 +40,9 @@ ilex.widgetsCollection.transcludeButton = function ($parentWidget, canvas, doc1,
         width = that.button.width(),
         selections = collapsedFull();
       //if both ranges exisits
-      //console.log(doc1, doc2);
       //show transclude button only when mouse is over collapsed document
       if (selections) {
           let colRect = selections.collapsed.selectionRange.getBoundingClientRect();
-          console.log(selections.collapsed.selectionRange.getClientRects());
           that.button.css('left', colRect.left + that.button.width()/2);
           that.button.css('top', colRect.top);
           that.button.show();
