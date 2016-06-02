@@ -104,6 +104,8 @@ ilex.widgetsCollection.textToolbar = function ($parentWidget, textWidget, canvas
        transclusionsLength = ilex.view.transclusions.length
       }
       textWidget.selectionRange.insertNode(transclusionElement[0]);
+      //redraw connection with new node
+      $(document).trigger('canvasRedraw');
       transcludeButton.on('mouseleave', function (event) {
         //we didn't save transclusion
         if (!transclusionElement.hasClass('ilex-transclusion')) {

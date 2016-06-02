@@ -205,12 +205,18 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
   };
   //draw two rects and a line that connects them
   //a, b are ClientRectLists
-  that.drawConnection = function (a, b, color, stroke) {
+  that.drawConnection = function (left, right, color, stroke) {
     var color = color || '#c1f0c1',
       stroke = stroke || false,
-      leftThreeRectSel = that.threeRectsSelection(a),
-      rightTreeRectSel = that.threeRectsSelection(b),
-    getLeftJoinPoints = function () {
+      leftThreeRectSel = that.threeRectsSelection(left),
+      rightTreeRectSel = that.threeRectsSelection(right);
+    //check selections order
+    if (leftThreeRectSel[0].left > rightTreeRectSel[0].left) {
+      let t = leftThreeRectSel;
+      leftThreeRectSel = rightTreeRectSel;
+      rightTreeRectSel = t;
+    }
+    var getLeftJoinPoints = function () {
       if (leftThreeRectSel.length === 1) {
         let rect = leftThreeRectSel[0];
         return {
@@ -326,7 +332,7 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
 
     that.ctx.save();
     if (!stroke) {
-      that.ctx.globalAlpha = 0.2;
+      that.ctx.globalAlpha = 0.4;
       that.ctx.fillStyle = color;
     } else {
       //stroke connection should not contain interior lines
@@ -344,12 +350,6 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
     drawRightContainer();
     that.ctx.lineTo(leftBound.bottom.x, leftBound.bottom.y);
 
-    /*that.ctx.moveTo(leftThreeRectSel.rightBound.x, leftThreeRectSel.rightBound.y);
-    that.ctx.lineTo(rightTreeRectSel.leftBound.x, rightTreeRectSel.leftBound.y);
-    that.ctx.lineTo(rightTreeRectSel.leftBound.x, rightTreeRectSel.leftBound.y +
-                                                  rightTreeRectSel.leftBound.height);
-    that.ctx.lineTo(leftThreeRectSel.rightBound.x, leftThreeRectSel.rightBound.y +
-                                                  leftThreeRectSel.rightBound.height);*/
     if (stroke) {
       that.ctx.stroke();
     } else {
