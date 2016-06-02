@@ -8,7 +8,7 @@ if (ilex.widgetsCollection === undefined)
 if (ilex.widgetsCollection.textToolbar !== undefined)
   throw 'ilex.widgetsCollection.horizontalSplit already defined';
 
-ilex.widgetsCollection.textToolbar = function ($parentWidget, textWidget) {
+ilex.widgetsCollection.textToolbar = function ($parentWidget, textWidget, canvas) {
   var that = {},
     alternateTextWidget,
     addButton = function(that, text, node) {
@@ -79,9 +79,64 @@ ilex.widgetsCollection.textToolbar = function ($parentWidget, textWidget) {
     addButton(that, '&#xf033;', '<i>');
     addButton(that, '&#xf0cd;', '<u>');
     addSeparator();
-    var transcludeButton = addButton(that, '&#xf10d;', function() {
-      alert('transclude');
+    var transcludeButton = addButton(that, '&#xf10d;', function(event) {
+      var newTransclusionElement = $('.ilex-new-transclusion');
+      //button is active
+      if (!$(this).hasClass('ilex-disabled') && newTransclusionElement.length > 0) {
+        //save transclusion
+        newTransclusionElement.removeClass('ilex-new-transclusion');
+        newTransclusionElement.addClass('ilex-transclusion');
+        //create Array of transclusions
+        if (ilex.view.transclusions === undefined) {
+          ilex.view.transclusions = [];
+        }
+        ilex.view.transclusions.push({'left': alternateTextWidget.selectionRange,
+                                      'right': textWidget.selectionRange});
+      }
     });
+    transcludeButton.on('mouseenter', function (event) {
+      var range = document.createRange(),
+        transclusionsLength = 0,
+        transclusionElement = $('<span class="ilex-new-transclusion">')
+                   .append(alternateTextWidget.selectionRange.cloneContents());
+
+      if (ilex.view !== undefined && ilex.view.transclusions !== undefined) {
+       transclusionsLength = ilex.view.transclusions.length
+      }
+      textWidget.selectionRange.insertNode(transclusionElement[0]);
+      transcludeButton.on('mouseleave', function (event) {
+        //we didn't save transclusion
+        if (!transclusionElement.hasClass('ilex-transclusion')) {
+          transclusionElement.remove();
+        }
+        $(document).trigger('canvasRedraw');
+        transcludeButton.off('mouseleave');
+      });
+
+      range.selectNode(transclusionElement[0]);
+
+      canvas.drawConnection(alternateTextWidget.selectionRange.getClientRects(),
+                            range.getClientRects(),
+                            //select next avalible color for next connection
+                            ilex.transclusionsColors[transclusionsLength %
+                                                  ilex.transclusionsColors.length], true);
+    });
+
+    //draw all transclusions
+    $(document).on('canvasRedraw', function (event) {
+      if (ilex.view === undefined || ilex.view.transclusions === undefined) {
+        return;
+      }
+      let i = 0;
+      for (let con of ilex.view.transclusions) {
+        canvas.drawConnection(con.left.getClientRects(),
+                              con.right.getClientRects(),
+                              ilex.transclusionsColors[i %
+                                              ilex.transclusionsColors.length], true);
+        i++;
+      }
+    });
+
     that.toolbar.find('.ilex-button').addClass('ilex-disabled');
 
     //we enable transclusion button when:
@@ -99,8 +154,8 @@ ilex.widgetsCollection.textToolbar = function ($parentWidget, textWidget) {
     };
 
     //enable transclusion when user gives focus
-    textWidget.container.on('selectstart', function(event) {
-      console.log(transcludeButton);
+    textWidget.container.on('selectend', function(event) {
+
       if (enableTransclusion()) {
         transcludeButton.removeClass('ilex-disabled');
       } else {
