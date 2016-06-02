@@ -43,7 +43,7 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
                   .attr('contenteditable', 'true');
 
     //add toolbar at the end to give it access to entre text object
-    that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container, that);
+    that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container, that, canvas);
 
     //draw selections
     $(document).on('selectionchange', function(event) {

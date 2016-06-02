@@ -55,41 +55,41 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
   $(document).on('canvasRedraw', function (event) {
     var buttonOffset = that.button.offset(),
       selection = window.getSelection(),
-      connectionsLengt = 0;
+      linksLength = 0;
 
-    if (ilex.view !== undefined && ilex.view.connections !== undefined) {
-      connectionsLengt = ilex.view.connections.length
+    if (ilex.view !== undefined && ilex.view.links !== undefined) {
+      linksLength = ilex.view.links.length
     }
 
     if (that.button.is(':hover')) {
       canvas.drawConnection(doc1.selectionRange.getClientRects(),
                             doc2.selectionRange.getClientRects(),
                             //select next avalible color for next connection
-                            ilex.contrastColors[connectionsLengt %
-                                                  ilex.contrastColors.length]);
+                            ilex.linksColors[linksLength %
+                                                  ilex.linksColors.length]);
       selection.removeAllRanges();
     }
   });
 
   that.button.on('mouseup', function(event) {
     //create Array of links
-    if (ilex.view.connections === undefined) {
-      ilex.view.connections = [];
+    if (ilex.view.links === undefined) {
+      ilex.view.links = [];
     }
-    ilex.view.connections.push({'left': doc1.selectionRange, 'right': doc2.selectionRange});
+    ilex.view.links.push({'left': doc1.selectionRange, 'right': doc2.selectionRange});
     that.button.hide();
   });
 
-  //draw all connection
+  //draw all links
   $(document).on('canvasRedraw', function (event) {
-    if (ilex.view === undefined || ilex.view.connections === undefined) {
+    if (ilex.view === undefined || ilex.view.links === undefined) {
       return;
     }
     let i = 0;
-    for (let con of ilex.view.connections) {
+    for (let con of ilex.view.links) {
       canvas.drawConnection(con.left.getClientRects(),
                             con.right.getClientRects(),
-                            ilex.contrastColors[i % ilex.contrastColors.length]);
+                            ilex.linksColors[i % ilex.linksColors.length]);
       i++;
     }
   });

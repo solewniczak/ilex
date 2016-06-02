@@ -19,9 +19,15 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
   that.clearRect = function (rect) {
     that.ctx.clearRect(rect.left, rect.top, rect.width, rect.height);
   };
-  that.drawRect = function (rect, color) {
-    that.ctx.fillStyle = color;
-    that.ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
+  that.drawRect = function (rect, color, stroke) {
+    var stroke = stroke || false;
+    if (stroke) {
+      that.ctx.strokeStyle = color;
+      that.ctx.strokeRect(rect.left, rect.top, rect.width, rect.height);
+    } else {
+      that.ctx.fillStyle = color;
+      that.ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
+    }
   };
   //used for debbuging purposes
   that.drawRectsStep = function (rects, color) {
@@ -36,11 +42,11 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
     }, 1000);
   }
   //rects is Array of ClientRect or ClientRectsList
-  that.drawRects = function (rects, color) {
+  that.drawRects = function (rects, color, stroke) {
     that.ctx.fillStyle = color;
     for (let i = 0; i < rects.length; i++) {
       let rect = rects[i];
-      that.ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
+      that.drawRect(rect, color, stroke);
     }
   };
   //https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIDOMClientRect
@@ -108,6 +114,41 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
       }
       return newClientRectsList;
   };
+  //joint all rects into strips
+  that.getRectsStrips = function (rects) {
+    //stripe: {top, bottom, left, right}
+    var stripes = [], stripeRects = [];
+    for (let i = 0; i < rects.length; i++) {
+      let rect = rects[i],
+        createNewStripe = true;
+      //find if rect is part of existing stripe
+      for (let stripe of stripes) {
+        if (rect.top >= stripe.top && rect.bottom <= stripe.bottom) {
+          createNewStripe = false;
+          if (stripe.left > rect.left) {
+            stripe.left = rect.left;
+          }
+          if (stripe.right < rect.right) {
+            stripe.right = rect.right;
+          }
+        }
+      }
+      if (createNewStripe) {
+        stripes.push({
+                'top': rect.top,
+                'bottom': rect.bottom,
+                'left': rect.left,
+                'right': rect.right
+              });
+      }
+    }
+    for (let stripe of stripes) {
+      stripeRects.push(that.createClientRect(stripe.left, stripe.top,
+                                            stripe.right - stripe.left,
+                                            stripe.bottom - stripe.top));
+    }
+    return stripeRects;
+  };
   //threeRectsSelection is special data structure that transforms normal browser
   //text selection (build from many rects) into selection build from three rects:
   //the top, the middle and the bottom one. The top and the bottom cover only
@@ -120,7 +161,8 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
   //                                        rightBound: {x, y, height}}
   //leftBound and rightBound are used by ray drawing algorithm.
   that.threeRectsSelection = function (rects) {
-    var topRect = rects[0],
+    var rects = that.getRectsStrips(rects),
+      topRect = rects[0],
       bottomRect = rects[rects.length - 1],
       minX = 999999, maxX = 0,
       middleHeight = bottomRect.top - topRect.bottom,
@@ -130,10 +172,7 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
     if (middleHeight < 0) {
       middleHeight = 0;
     }
-    //one line selection
-    if (rects.length == 1) {
-      middleY = topRect.top;
-    }
+
     for (let i = 0; i < rects.length; i++) {
       let rect = rects[i];
       if (rect.left < minX) {
@@ -149,55 +188,173 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
     topWidth = maxWidth - topSpace;
 
     //one line selection
-    if (rects.length == 1) {
-      rects = [that.createClientRect(topRect.left, topRect.top, topWidth, topRect.height)];
+    if (rects.length === 1) {
+      return [that.createClientRect(topRect.left, topRect.top, topWidth, topRect.height)];
+    } else if (middleHeight === 0) {
+      return [
+              that.createClientRect(topRect.left, topRect.top, topWidth, topRect.height),
+              that.createClientRect(minX, bottomRect.top, bottomRect.right - minX, bottomRect.height),
+            ];
     } else {
-      rects = [
+      return [
               that.createClientRect(topRect.left, topRect.top, topWidth, topRect.height),
               that.createClientRect(minX, middleY, maxWidth, middleHeight),
               that.createClientRect(minX, bottomRect.top, bottomRect.right - minX, bottomRect.height),
             ];
     }
-    return {'rects': rects,
-          'leftBound': {'x': minX,
-                        'y': middleY,
-                        'height': middleHeight + bottomRect.height
-                      },
-          'rightBound': {'x': maxX,
-                         'y': topRect.top,
-                         'height': middleHeight + topRect.height
-                       }
-        };
   };
   //draw two rects and a line that connects them
   //a, b are ClientRectLists
-  that.drawConnection = function (a, b, color) {
+  that.drawConnection = function (a, b, color, stroke) {
     var color = color || '#c1f0c1',
-      margin = 0,
+      stroke = stroke || false,
       leftThreeRectSel = that.threeRectsSelection(a),
-      rightTreeRectSel = that.threeRectsSelection(b);
+      rightTreeRectSel = that.threeRectsSelection(b),
+    getLeftJoinPoints = function () {
+      if (leftThreeRectSel.length === 1) {
+        let rect = leftThreeRectSel[0];
+        return {
+          'top': {'x': rect.right, 'y': rect.top},
+          'bottom': {'x': rect.right, 'y': rect.bottom}
+        };
+      } else if (leftThreeRectSel.length === 2) {
+        let topRect = leftThreeRectSel[0];
+        return {
+          'top': {'x': topRect.right, 'y': topRect.top},
+          'bottom': {'x': topRect.right, 'y': topRect.bottom}
+        };
+      } else if (leftThreeRectSel.length === 3) {
+        let topRect = leftThreeRectSel[0],
+          middleRect = leftThreeRectSel[1];
+        return {
+          'top': {'x': topRect.right, 'y': topRect.top},
+          'bottom': {'x': middleRect.right, 'y': middleRect.bottom}
+        };
+      }
+    }, getRightJoinPoints = function () {
+      if (rightTreeRectSel.length === 1) {
+        let rect = rightTreeRectSel[0];
+        return {
+          'top': {'x': rect.left, 'y': rect.top},
+          'bottom': {'x': rect.left, 'y': rect.bottom}
+        };
+      } else if (rightTreeRectSel.length === 2) {
+        let bottomRect = rightTreeRectSel[1];
+        return {
+          'top': {'x': bottomRect.left, 'y': bottomRect.top},
+          'bottom': {'x': bottomRect.left, 'y': bottomRect.bottom}
+        };
+      } else if (rightTreeRectSel.length === 3) {
+        let bottomRect = rightTreeRectSel[2],
+          middleRect = rightTreeRectSel[1];
+        return {
+          'top': {'x': middleRect.left, 'y': middleRect.top},
+          'bottom': {'x': bottomRect.left, 'y': bottomRect.bottom}
+        };
+      }
+    },
+    //start in bottom right corner
+    drawLeftContainer = function() {
+      if (leftThreeRectSel.length === 1) {
+        let rect = leftThreeRectSel[0];
+        that.ctx.moveTo(rect.right, rect.bottom);
+        that.ctx.lineTo(rect.left, rect.bottom);
+        that.ctx.lineTo(rect.left, rect.top);
+        that.ctx.lineTo(rect.right, rect.top);
+      } else if (leftThreeRectSel.length === 2) {
+        let topRect = leftThreeRectSel[0],
+          bottomRect = leftThreeRectSel[1];
+
+        that.ctx.moveTo(topRect.right, topRect.bottom);
+        that.ctx.lineTo(bottomRect.right, topRect.bottom);
+        that.ctx.lineTo(bottomRect.right, bottomRect.bottom);
+        that.ctx.lineTo(bottomRect.left, bottomRect.bottom);
+        that.ctx.lineTo(bottomRect.left, bottomRect.top);
+        that.ctx.lineTo(topRect.left, bottomRect.top);
+        that.ctx.lineTo(topRect.left, topRect.top);
+        that.ctx.lineTo(topRect.right, topRect.top);
+
+      } else if (leftThreeRectSel.length === 3) {
+        let topRect = leftThreeRectSel[0],
+          middleRect = leftThreeRectSel[1],
+          bottomRect = leftThreeRectSel[2];
+
+        that.ctx.moveTo(middleRect.right, middleRect.bottom);
+        that.ctx.lineTo(bottomRect.right, middleRect.bottom);
+        that.ctx.lineTo(bottomRect.right, bottomRect.bottom);
+        that.ctx.lineTo(bottomRect.left, bottomRect.bottom);
+        that.ctx.lineTo(middleRect.left, middleRect.top);
+        that.ctx.lineTo(topRect.left, middleRect.top);
+        that.ctx.lineTo(topRect.left, topRect.top);
+        that.ctx.lineTo(topRect.right, topRect.top);
+      }
+    }, drawRightContainer = function() {
+      //start from top left corner
+
+      if (rightTreeRectSel.length === 1) {
+        let rect = rightTreeRectSel[0];
+        that.ctx.lineTo(rect.right, rect.top);
+        that.ctx.lineTo(rect.right, rect.bottom);
+        that.ctx.lineTo(rect.left, rect.bottom);
+
+      } else if (rightTreeRectSel.length === 2) {
+        let topRect = rightTreeRectSel[0],
+          bottomRect = rightTreeRectSel[1];
+
+        that.ctx.lineTo(topRect.left, topRect.bottom);
+        that.ctx.lineTo(topRect.left, topRect.top);
+        that.ctx.lineTo(topRect.right, topRect.top);
+        that.ctx.lineTo(topRect.right, topRect.bottom);
+        that.ctx.lineTo(bottomRect.right, topRect.bottom);
+        that.ctx.lineTo(bottomRect.right, bottomRect.bottom);
+        that.ctx.lineTo(bottomRect.left, bottomRect.bottom);
+
+      } else if (rightTreeRectSel.length === 3) {
+        let topRect = rightTreeRectSel[0],
+          middleRect = rightTreeRectSel[1],
+          bottomRect = rightTreeRectSel[2];
+
+        that.ctx.lineTo(topRect.left, middleRect.top);
+        that.ctx.lineTo(topRect.left, topRect.top);
+        that.ctx.lineTo(topRect.right, topRect.top);
+        that.ctx.lineTo(middleRect.right, middleRect.bottom);
+        that.ctx.lineTo(bottomRect.right, middleRect.bottom);
+        that.ctx.lineTo(bottomRect.right, bottomRect.bottom);
+        that.ctx.lineTo(bottomRect.left, bottomRect.bottom);
+      }
+    };
 
     that.ctx.save();
-    that.ctx.globalAlpha = 0.2;
-
-    that.drawRects(leftThreeRectSel.rects, color);
-    that.drawRects(rightTreeRectSel.rects, color);
+    if (!stroke) {
+      that.ctx.globalAlpha = 0.2;
+      that.ctx.fillStyle = color;
+    } else {
+      //stroke connection should not contain interior lines
+      that.ctx.strokeStyle = color;
+      that.ctx.lineWidth = 3;
+    }
 
     //draw connection between threeRectsSelections
     that.ctx.beginPath();
-    that.ctx.moveTo(leftThreeRectSel.rightBound.x, leftThreeRectSel.rightBound.y);
-    that.ctx.lineTo(leftThreeRectSel.rightBound.x + margin, leftThreeRectSel.rightBound.y);
-    that.ctx.lineTo(rightTreeRectSel.leftBound.x - margin, rightTreeRectSel.leftBound.y);
+    let leftBound = getLeftJoinPoints(),
+      rightBound = getRightJoinPoints();
+
+    drawLeftContainer();
+    that.ctx.lineTo(rightBound.top.x, rightBound.top.y);
+    drawRightContainer();
+    that.ctx.lineTo(leftBound.bottom.x, leftBound.bottom.y);
+
+    /*that.ctx.moveTo(leftThreeRectSel.rightBound.x, leftThreeRectSel.rightBound.y);
     that.ctx.lineTo(rightTreeRectSel.leftBound.x, rightTreeRectSel.leftBound.y);
     that.ctx.lineTo(rightTreeRectSel.leftBound.x, rightTreeRectSel.leftBound.y +
                                                   rightTreeRectSel.leftBound.height);
-    that.ctx.lineTo(rightTreeRectSel.leftBound.x - margin, rightTreeRectSel.leftBound.y +
-                                                  rightTreeRectSel.leftBound.height);
-    that.ctx.lineTo(leftThreeRectSel.rightBound.x + margin, leftThreeRectSel.rightBound.y +
-                                                  leftThreeRectSel.rightBound.height);
     that.ctx.lineTo(leftThreeRectSel.rightBound.x, leftThreeRectSel.rightBound.y +
-                                                  leftThreeRectSel.rightBound.height);
-    that.ctx.fill();
+                                                  leftThreeRectSel.rightBound.height);*/
+    if (stroke) {
+      that.ctx.stroke();
+    } else {
+      that.ctx.fill();
+    }
 
     that.ctx.restore();
 
