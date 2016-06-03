@@ -95,33 +95,35 @@ ilex.widgetsCollection.textToolbar = function ($parentWidget, textWidget, canvas
       }
     });
     transcludeButton.on('mouseenter', function (event) {
-      var range = document.createRange(),
-        transclusionsLength = 0,
-        transclusionElement = $('<span class="ilex-new-transclusion">')
-                   .append(alternateTextWidget.selectionRange.cloneContents());
+      if (!$(this).hasClass('ilex-disabled')) {
+        var range = document.createRange(),
+          transclusionsLength = 0,
+          transclusionElement = $('<span class="ilex-new-transclusion">')
+                     .append(alternateTextWidget.selectionRange.cloneContents());
 
-      if (ilex.view !== undefined && ilex.view.transclusions !== undefined) {
-       transclusionsLength = ilex.view.transclusions.length
-      }
-      textWidget.selectionRange.insertNode(transclusionElement[0]);
-      //redraw connection with new node
-      $(document).trigger('canvasRedraw');
-      transcludeButton.on('mouseleave', function (event) {
-        //we didn't save transclusion
-        if (!transclusionElement.hasClass('ilex-transclusion')) {
-          transclusionElement.remove();
+        if (ilex.view !== undefined && ilex.view.transclusions !== undefined) {
+         transclusionsLength = ilex.view.transclusions.length
         }
+        textWidget.selectionRange.insertNode(transclusionElement[0]);
+        //redraw connection with new node
         $(document).trigger('canvasRedraw');
-        transcludeButton.off('mouseleave');
-      });
+        transcludeButton.on('mouseleave', function (event) {
+          //we didn't save transclusion
+          if (!transclusionElement.hasClass('ilex-transclusion')) {
+            transclusionElement.remove();
+          }
+          $(document).trigger('canvasRedraw');
+          transcludeButton.off('mouseleave');
+        });
 
-      range.selectNode(transclusionElement[0]);
+        range.selectNode(transclusionElement[0]);
 
-      canvas.drawConnection(alternateTextWidget.selectionRange.getClientRects(),
-                            range.getClientRects(),
-                            //select next avalible color for next connection
-                            ilex.transclusionsColors[transclusionsLength %
-                                                  ilex.transclusionsColors.length], true);
+        canvas.drawConnection(alternateTextWidget.selectionRange.getClientRects(),
+                              range.getClientRects(),
+                              //select next avalible color for next connection
+                              ilex.transclusionsColors[transclusionsLength %
+                                                    ilex.transclusionsColors.length], true);
+      }
     });
 
     //draw all transclusions
