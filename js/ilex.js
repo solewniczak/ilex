@@ -61,6 +61,9 @@ ilex.transclusionsColors = [
 //views represenst user views in application
 ilex.views = {};
 
+//additional ilex tools
+ilex.tools = {};
+
 //apply sizes to elements
 ilex.applySize = function() {
   $('.ilex-resize').trigger('windowResize');

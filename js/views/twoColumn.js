@@ -1,11 +1,12 @@
 'use strict';
 
 //requires:
-//ilex.widgetsCollection.horizontalSplit
 if (ilex === undefined)
   throw 'ilex undefined';
 if (ilex.widgetsCollection === undefined)
     throw 'ilex.widgetsCollection undefined';
+if (ilex.views === undefined)
+    throw 'ilex.views undefined';
 
 ilex.views.twoColumn = function(canvas) {
   var view = {};
@@ -14,6 +15,9 @@ ilex.views.twoColumn = function(canvas) {
   view.leftText = ilex.widgetsCollection.text(view.pannels.left, canvas);
   view.rightText = ilex.widgetsCollection.text(view.pannels.right, canvas);
 
+  view.leftText.setAlternateTextWidget(view.rightText);
+  view.rightText.setAlternateTextWidget(view.leftText);
+  
   view.leftText.dock.toolbar.setAlternateTextWidget(view.rightText);
   view.rightText.dock.toolbar.setAlternateTextWidget(view.leftText);
 
@@ -23,6 +27,8 @@ ilex.views.twoColumn = function(canvas) {
                                                         view.leftText,
                                                         view.rightText,
                                                         view.pannels.handler);
+
+  view.connections = ilex.widgetsCollection.connections($(window), canvas);
 
   //move scrollbar to left
   view.leftText.scrollWindow.css('direction', 'rtl');

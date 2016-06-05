@@ -61,38 +61,41 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
       linksLength = ilex.view.links.length
     }
 
-    if (that.button.is(':hover')) {
+    if (that.button.filter(':hover').length > 0) {
       canvas.drawConnection(doc1.selectionRange.getClientRects(),
                             doc2.selectionRange.getClientRects(),
                             //select next avalible color for next connection
                             ilex.linksColors[linksLength %
                                                   ilex.linksColors.length]);
-      selection.removeAllRanges();
     }
   });
 
   that.button.on('mouseup', function(event) {
+    //link := { 'id': String, 'link':
+    //            [ {'span-set': String, 'range': Range},
+    //            {'span-set': String, 'range': Range} ] }
+    var link;
+
     //create Array of links
     if (ilex.view.links === undefined) {
       ilex.view.links = [];
     }
-    ilex.view.links.push({'left': doc1.selectionRange, 'right': doc2.selectionRange});
+
+    link = {
+      'id': 'l'+ilex.view.links.length,
+      'link': [
+               {'span-set': '', 'range': doc1.selectionRange},
+               {'span-set': '', 'range': doc2.selectionRange}
+              ]
+    };
+
+
+    ilex.view.links.push(link);
+    ilex.tools.markup.addConnectionTag(link);
     that.button.hide();
   });
 
-  //draw all links
-  $(document).on('canvasRedraw', function (event) {
-    if (ilex.view === undefined || ilex.view.links === undefined) {
-      return;
-    }
-    let i = 0;
-    for (let con of ilex.view.links) {
-      canvas.drawConnection(con.left.getClientRects(),
-                            con.right.getClientRects(),
-                            ilex.linksColors[i % ilex.linksColors.length]);
-      i++;
-    }
-  });
+
 
   return that;
 }
