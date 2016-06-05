@@ -126,21 +126,6 @@ ilex.widgetsCollection.textToolbar = function ($parentWidget, textWidget, canvas
       }
     });
 
-    //draw all transclusions
-    $(document).on('canvasRedraw', function (event) {
-      if (ilex.view === undefined || ilex.view.transclusions === undefined) {
-        return;
-      }
-      let i = 0;
-      for (let con of ilex.view.transclusions) {
-        canvas.drawConnection(con.left.getClientRects(),
-                              con.right.getClientRects(),
-                              ilex.transclusionsColors[i %
-                                              ilex.transclusionsColors.length], true);
-        i++;
-      }
-    });
-
     that.toolbar.find('.ilex-button').addClass('ilex-disabled');
 
     //we enable transclusion button when:
