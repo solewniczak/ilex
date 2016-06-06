@@ -88,7 +88,7 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
                {'span-set': '', 'range': doc2.selectionRange, 'doc': doc2}
               ]
     };
-
+    console.log(link);
 
     ilex.view.links.push(link);
     ilex.tools.markup.addConnectionTag(link);

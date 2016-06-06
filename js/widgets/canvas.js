@@ -161,6 +161,9 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
   //                                        rightBound: {x, y, height}}
   //leftBound and rightBound are used by ray drawing algorithm.
   that.threeRectsSelection = function (rects) {
+    if (rects.length === 0) {
+      throw 'cannot create threeRectsSelection: no rects was passed';
+    }
     var rects = that.getRectsStrips(rects),
       topRect = rects[0],
       bottomRect = rects[rects.length - 1],
