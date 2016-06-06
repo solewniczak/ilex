@@ -10,6 +10,12 @@ ilex.tools.markup = {};
 
 //span count is used to create unique identifiers for all visible spans
 ilex.tools.markup.spanCount = 0;
+ilex.tools.markup.createIlexSpan = function () {
+    var $span =
+      $('<span class="ilex-connection" id="ilex-span-'+ilex.tools.markup.spanCount+'">');
+    ilex.tools.markup.spanCount += 1;
+    return $span;
+};
 
 //returns root parent of DocumentFragment or undefined if fragment doesn't
 //have single root element
@@ -48,14 +54,14 @@ ilex.tools.markup.entireTagSelected = function (selRange) {
     let selRangeContents = selRange.cloneContents(),
       $root = ilex.tools.markup.getRoot(selRangeContents);
     if ($root) {
-        //if cloned DocumentFragmen has a root select it from original document
+        //if cloned DocumentFragmen has a root, select it from original document
         return $('#'+$root.attr('id'));
     }
   }
 
   return undefined;
 };
-var count = 0;
+
 ilex.tools.markup.addConnectionTag = function (link) {
   var addLink = function(linkEnd) {
     var $spanTag = ilex.tools.markup.entireTagSelected(linkEnd.range);
@@ -65,9 +71,7 @@ ilex.tools.markup.addConnectionTag = function (link) {
       links.push(link);
       $spanTag.data('ilex-links', links);
     } else {
-      let $cont = $('<span class="ilex-connection" id="ilex-span-'+ilex.tools.markup.spanCount+'">')
-                        .data('ilex-links' , [link]);
-      ilex.tools.markup.spanCount += 1;
+      let $cont = ilex.tools.markup.createIlexSpan().data('ilex-links', [link]);
       linkEnd.range.surroundContents($cont[0]);
     }
   }
