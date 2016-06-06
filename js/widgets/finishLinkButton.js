@@ -72,8 +72,8 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
 
   that.button.on('mouseup', function(event) {
     //link := { 'id': String, 'link':
-    //            [ {'span-set': String, 'range': Range},
-    //            {'span-set': String, 'range': Range} ] }
+    //            [ {'span-set': String, 'range': Range, 'doc': IlexDocumentObject},
+    //            {'span-set': String, 'range': Range, 'doc': IlexDocumentObject} ] }
     var link;
 
     //create Array of links
@@ -84,8 +84,8 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
     link = {
       'id': 'l'+ilex.view.links.length,
       'link': [
-               {'span-set': '', 'range': doc1.selectionRange},
-               {'span-set': '', 'range': doc2.selectionRange}
+               {'span-set': '', 'range': doc1.selectionRange, 'doc': doc1},
+               {'span-set': '', 'range': doc2.selectionRange, 'doc': doc2}
               ]
     };
 

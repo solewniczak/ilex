@@ -72,6 +72,7 @@ ilex.widgetsCollection.connections = function ($parentWidget, canvas) {
 
     //show pull-up menu to choose link
     } else if (links.length > 1) {
+      console.log(links);
     }
 
     event.preventDefault();
