@@ -14,26 +14,13 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
   var that = {},
     show = function (event) {
       var handlerOffset = handler.offset(),
-        width = that.button.width();
+        width = that.button.width(),
+        height = that.button.height();
       //if both ranges exisits
-      if (doc1.selectionRange.constructor.name === 'Range' &&
-          doc2.selectionRange.constructor.name === 'Range' &&
-          !doc1.selectionRange.collapsed &&
-          !doc2.selectionRange.collapsed) {
-        let r1 = doc1.selectionRange.getBoundingClientRect(),
-          r2 = doc2.selectionRange.getBoundingClientRect(),
-          top, bottom, distance;
-        if (r1.top > r2.top) {
-          top = r1;
-          bottom = r2;
-        } else {
-          top = r2;
-          bottom = r1;
-        }
-        distance = bottom.top - top.top;
-
+      if (ilex.tools.range.filterCollapsed(doc1.selectionRanges).length > 0 &&
+          ilex.tools.range.filterCollapsed(doc2.selectionRanges).length > 0) {
         that.button.css('left', handlerOffset.left - width/2);
-        that.button.css('top', top.top + distance/2);
+        that.button.css('top', handlerOffset.top + handler.height()/2 - height/2);
         that.button.show();
       } else {
         that.button.hide();
@@ -62,18 +49,23 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
     }
 
     if (that.button.filter(':hover').length > 0) {
-      canvas.drawConnection(doc1.selectionRange.getClientRects(),
-                            doc2.selectionRange.getClientRects(),
-                            //select next avalible color for next connection
-                            ilex.linksColors[linksLength %
-                                                  ilex.linksColors.length]);
+      //connect evetry part of link with its origins
+      for (let elm of
+        ilex.tools.range.cartesianOfNotCollapsedRanges(doc1.selectionRanges,
+                                                        doc2.selectionRanges)) {
+          canvas.drawConnection(elm[0].getClientRects(),
+                                elm[1].getClientRects(),
+                                //select next avalible color for next connection
+                                ilex.linksColors[linksLength %
+                                                      ilex.linksColors.length]);
+      }
     }
   });
 
   that.button.on('mouseup', function(event) {
     //link := { 'id': String, 'link':
-    //            [ {'span-set': String, 'range': Range, 'doc': IlexDocumentObject},
-    //            {'span-set': String, 'range': Range, 'doc': IlexDocumentObject} ] }
+    //            [ {'span-set': String, 'ranges': Array of Range, 'doc': IlexDocumentObject},
+    //            {'span-set': String, 'ranges': Array of Range, 'doc': IlexDocumentObject} ] }
     var link;
 
     //create Array of links
@@ -84,8 +76,10 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
     link = {
       'id': 'l'+ilex.view.links.length,
       'link': [
-               {'span-set': '', 'range': doc1.selectionRange, 'doc': doc1},
-               {'span-set': '', 'range': doc2.selectionRange, 'doc': doc2}
+               {'span-set': '', 'ranges':
+                  ilex.tools.range.filterCollapsed(doc1.selectionRanges), 'doc': doc1},
+               {'span-set': '', 'ranges':
+                  ilex.tools.range.filterCollapsed(doc2.selectionRanges), 'doc': doc2}
               ]
     };
     console.log(link);

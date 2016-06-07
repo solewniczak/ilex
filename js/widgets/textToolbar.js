@@ -126,12 +126,28 @@ ilex.widgetsCollection.textToolbar = function ($parentWidget, textWidget, canvas
       }
     });
 
+    addSeparator();
+
+    addButton(that, '<span>Group selections</span>', function (event) {
+      if ($(this).hasClass('ilex-active')) {
+        $(this).removeClass('ilex-active');
+        textWidget.groupSelections = false;
+      } else {
+        $(this).addClass('ilex-active');
+        textWidget.groupSelections = true;
+      }
+
+      //prevent selection lost
+      event.preventDefault();
+    });
+
     that.toolbar.find('.ilex-button').addClass('ilex-disabled');
 
     //we enable transclusion button when:
     //1. something is selected in alternate text
     //2. we have collapsed selection in text widget
     let enableTransclusion = function() {
+      return false;
       if (alternateTextWidget.selectionRange.collapsed !== undefined &&
           alternateTextWidget.selectionRange.collapsed === false) {
         if (textWidget.selectionRange.collapsed !== undefined &&
