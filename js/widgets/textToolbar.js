@@ -75,10 +75,10 @@ ilex.widgetsCollection.textToolbar = function ($parentWidget, textWidget, canvas
 
     that.toolbar = $('<div class="ilex-text-toolbar">').appendTo($parentWidget);
 
-    addButton(that, '&#xf032;', '<b>');
-    addButton(that, '&#xf033;', '<i>');
-    addButton(that, '&#xf0cd;', '<u>');
-    addSeparator();
+    //addButton(that, '&#xf032;', '<b>');
+    //addButton(that, '&#xf033;', '<i>');
+    //addButton(that, '&#xf0cd;', '<u>');
+    //addSeparator();
     var transcludeButton = addButton(that, '&#xf10d;', function(event) {
       var newTransclusionElement = $('.ilex-new-transclusion');
       //button is active
