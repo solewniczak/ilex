@@ -10,19 +10,17 @@ div:focus {
   outline: 0;
 }
 
-b {
-  font-family: IlexSansBold;
-}
-
-i {
-  font-family: IlexSansOblique;
-}
-
 /*CSS is based on Metro UI design*/
 /*becouse it's flat and looks well :)*/
 /*https://metroui.org.ua/*/
 ::selection {
   background: transparent; /* don't draw default selection color */
+}
+
+/*ilex links styling*/
+.ilex-connection {
+  color: #00f;
+  text-decoration: underline;
 }
 
 /*ilex buttons styling */
@@ -40,8 +38,17 @@ i {
   font-family: IlexSans;
 }
 
+.ilex-button.ilex-active {
+  background-color: #eaeaea;
+  border-color: #787878;
+}
+
 .ilex-awesome {
   font-family: Awesome;
+}
+
+.ilex-awesome span {
+  font-family: IlexSans;
 }
 
 .ilex-button:hover {

@@ -4,7 +4,7 @@
 if (ilex === undefined)
   throw 'ilex undefined';
 if (ilex.tools === undefined)
-    throw 'ilex.views undefined';
+    throw 'ilex.tools undefined';
 
 ilex.tools.markup = {};
 
@@ -64,15 +64,17 @@ ilex.tools.markup.entireTagSelected = function (selRange) {
 
 ilex.tools.markup.addConnectionTag = function (link) {
   var addLink = function(linkEnd) {
-    var $spanTag = ilex.tools.markup.entireTagSelected(linkEnd.range);
+    for (let range of linkEnd.ranges) {
+      let $spanTag = ilex.tools.markup.entireTagSelected(range);
 
-    if ($spanTag) {
-      let links = $spanTag.data('ilex-links');
-      links.push(link);
-      $spanTag.data('ilex-links', links);
-    } else {
-      let $cont = ilex.tools.markup.createIlexSpan().data('ilex-links', [link]);
-      linkEnd.range.surroundContents($cont[0]);
+      if ($spanTag) {
+        let links = $spanTag.data('ilex-links');
+        links.push(link);
+        $spanTag.data('ilex-links', links);
+      } else {
+        let $cont = ilex.tools.markup.createIlexSpan().data('ilex-links', [link]);
+        range.surroundContents($cont[0]);
+      }
     }
   }
 

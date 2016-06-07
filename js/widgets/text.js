@@ -49,15 +49,20 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
   //add toolbar at the end to give it access to entre text object
   that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container, that, canvas);
 
-  //draw selections
+
+  //draw selection
   $(document).on('selectionchange', function(event) {
     var selection = window.getSelection(),
       active = $('.ilex-text:hover');
-
     if (active.length > 0 && selection.rangeCount >= 1) {
       $('.ilex-text').each(function () {
         if ($(this).is(that.container) && $(this).is(active)) {
-          that.selectionRange = selection.getRangeAt(0);
+          //update newest selection
+          if (that.selectionRanges.length === 0) {
+            that.selectionRanges[0] = selection.getRangeAt(0);
+          } else {
+            that.selectionRanges[that.selectionRanges.length - 1] = selection.getRangeAt(0);
+          }
         }
       });
     }
@@ -80,8 +85,9 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
     //Filling algorithm
     textFill(text, that.content);
   };
-  //selections of the text
-  that.selections = [];
+
+
+
   that.container.on('windowResize', function(event) {
     var width = that.container.parent().data('ilex-width'),
       height = that.container.parent().data('ilex-height');
@@ -99,17 +105,19 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
     that.content.data('ilex-height', height - that.dock.container.height());
     that.scrollWindow.data('ilex-height', height - that.dock.container.height());
   });
+  //allow multiple selection
+  that.groupSelections = false;
   //nothing is selected at the begining
-  that.selectionRange = {};
-  that.container.on('mouseenter', function(event) {
+  that.selectionRanges = [];
+  /*that.container.on('mouseenter', function(event) {
     var selection = window.getSelection();
     selection.removeAllRanges();
-    //if something is selected get focus
-    if (that.selectionRange.constructor.name === 'Range') {
-      selection.addRange(that.selectionRange);
+
+    for (let range of that.selectionRanges) {
+      selection.addRange(range);
     }
-    $(document).trigger('canvasRedraw');
-  });
+    //$(document).trigger('canvasRedraw');
+  });*/
 
   //we don't want standard browsers draging procedure
   //it confuses the users
@@ -117,32 +125,12 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
     event.preventDefault();
   });
 
-  var drawSelection = function () {
-    var rects,
-      scrollWindowOffset = that.scrollWindow.offset(),
-      clipRect = canvas.createClientRect(scrollWindowOffset.left, scrollWindowOffset.top,
-                                            that.scrollWindow.data('ilex-width'),
-                                            that.scrollWindow.data('ilex-height'));
-
-
-    //duck typing
-    if (typeof that.selectionRange.getClientRects === 'function') {
-      rects = canvas.clipClientRectList(clipRect, that.selectionRange.getClientRects());
-    } else {
-      rects = [];
-    }
-
-    for (let i = 0; i < rects.length; i++) {
-      let rect = rects[i];
-      canvas.drawRect(rect, '#a8d1ff');
-    }
-  };
-
   //Ctrl + A doesn't work yet
   that.container.on('mouseup', function (event) {
     //selection finished, used by finishLinkButton
     that.container.trigger('selectend');
-
+    //group ranges
+    that.selectionRanges = ilex.tools.range.groupRanges(that.selectionRanges);
   });
   that.container.on('mousedown', function (event) {
     //we have to clear entire container to avoid 1 px artifact between
@@ -151,13 +139,39 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
       widgetRect = canvas.createClientRect(containerOffset.left, containerOffset.top,
                                             that.container.data('ilex-width'),
                                             that.container.data('ilex-height'));
-    that.selectionRange = {};
+
+    //clean previous selection
+    if (that.groupSelections === false) {
+      that.selectionRanges = [];
+    //start new selection
+    } else {
+      //create new range only when previously created is not collapsed
+      if (that.selectionRanges.length === 0 ||
+          that.selectionRanges[that.selectionRanges.length - 1].collapsed === false) {
+        that.selectionRanges[that.selectionRanges.length] = document.createRange();
+      }
+    }
+
     $(document).trigger('canvasRedraw');
   });
 
   //redraw selections
   $(document).on('canvasRedraw', function(event) {
-    drawSelection();
+    var rects = [],
+      scrollWindowOffset = that.scrollWindow.offset(),
+      clipRect = canvas.createClientRect(scrollWindowOffset.left, scrollWindowOffset.top,
+                                            that.scrollWindow.data('ilex-width'),
+                                            that.scrollWindow.data('ilex-height'));
+
+
+    //add all selection ranges to draw
+    for (let range of that.selectionRanges) {
+      let clientRects = canvas.clipClientRectList(clipRect, range.getClientRects());
+      for (let i = 0; i < clientRects.length; i++) {
+        let rect = clientRects[i];
+        canvas.drawRect(rect, '#a8d1ff');
+      }
+    }
   });
 
   //when user scrolls redraw the canvas
