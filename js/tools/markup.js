@@ -82,3 +82,23 @@ ilex.tools.markup.addConnectionTag = function (link) {
   addLink(link.link[1]);
 
 };
+
+//Range API returns start and end offsets relaively to start or end element.
+//Element can be DOM Node or continious text (text without any Nodes inside).
+
+//Function takes document offset (as return by Ilex back-end) and returns the
+//element and the relative offset proper for Range API.
+
+//To achieve intended behaviour, we bound jQuery.data('ilex-position') to every
+//node in IlexDocumentObject.content. 'ilex-position' means the absolute position of the
+//first character AFTER the Node.
+
+//IlexDocumentObject.content can consists of three element types:
+//  1. text elemens - we must take care of proper &something; handling
+//  2. <br> Nodes - <br> nodes represents '\n' back-end characters. We must count
+//     it as one character.
+//  3. <span> Nodes - span elements means nothing from back-end point of view
+
+ilex.tools.markup.findRelativePosition = function(doc, offset) {
+
+};

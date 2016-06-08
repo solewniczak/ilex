@@ -14,7 +14,7 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
   var that = {},
     textFill = function(text, $container) {
       var nl2br = function(string) {
-          return string.replace(/\n/g, "<br />");
+          return string.replace(/\n/g, '<br />');
       };
       $container.append(nl2br(text));
     },
