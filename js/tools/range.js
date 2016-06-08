@@ -5,6 +5,8 @@ if (ilex === undefined)
   throw 'ilex undefined';
 if (ilex.tools === undefined)
     throw 'ilex.tools undefined';
+if (ilex.tools.address === undefined)
+    throw 'ilex.tools.address undefined';
 
 ilex.tools.range = {};
 
@@ -59,4 +61,18 @@ ilex.tools.range.groupRanges = function(ranges) {
   newRanges.push(currentRange);
 console.log(newRanges);
   return newRanges;
+};
+
+//create Array of Range objects from vspan-set
+ilex.tools.range.createFromVspanSet = function(doc, vspanSet) {
+  var ranges = [],
+    vspanIntervals = ilex.tools.address.vspanSet(vspanSet);
+  for (let interval of vspanIntervals) {
+    let range = document.createRange();
+    console.log(doc.content.contents());
+    range.setStart(doc.content.contents()[0], interval.start);
+    range.setEnd(doc.content.contents()[0], interval.end);
+    ranges.push(range);
+  }
+  return ranges;
 };

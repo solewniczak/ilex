@@ -10,6 +10,7 @@ if (ilex.views === undefined)
 
 ilex.views.twoColumn = function(canvas) {
   var view = {};
+
   view.fileSelector = ilex.widgetsCollection.verticalSplit(ilex.window, [0.1, 0.9]);
   view.pannels = ilex.widgetsCollection.horizontalSplit(view.fileSelector.bottom);
   view.leftText = ilex.widgetsCollection.text(view.pannels.left, canvas);
@@ -17,7 +18,7 @@ ilex.views.twoColumn = function(canvas) {
 
   view.leftText.setAlternateTextWidget(view.rightText);
   view.rightText.setAlternateTextWidget(view.leftText);
-  
+
   view.leftText.dock.toolbar.setAlternateTextWidget(view.rightText);
   view.rightText.dock.toolbar.setAlternateTextWidget(view.leftText);
 
@@ -28,6 +29,8 @@ ilex.views.twoColumn = function(canvas) {
                                                         view.rightText,
                                                         view.pannels.handler);
 
+  /*Array of view links*/
+  view.links = [];
   view.connections = ilex.widgetsCollection.connections($(window), canvas);
 
   //move scrollbar to left
