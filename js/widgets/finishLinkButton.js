@@ -63,29 +63,7 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
   });
 
   that.button.on('mouseup', function(event) {
-    //link := { 'id': String, 'link':
-    //            [ {'span-set': String, 'ranges': Array of Range, 'doc': IlexDocumentObject},
-    //            {'span-set': String, 'ranges': Array of Range, 'doc': IlexDocumentObject} ] }
-    var link;
-
-    //create Array of links
-    if (ilex.view.links === undefined) {
-      ilex.view.links = [];
-    }
-
-    link = {
-      'id': 'l'+ilex.view.links.length,
-      'link': [
-               {'span-set': '', 'ranges':
-                  ilex.tools.range.filterCollapsed(doc1.selectionRanges), 'doc': doc1},
-               {'span-set': '', 'ranges':
-                  ilex.tools.range.filterCollapsed(doc2.selectionRanges), 'doc': doc2}
-              ]
-    };
-    console.log(link);
-
-    ilex.view.links.push(link);
-    ilex.tools.markup.addConnectionTag(link);
+    ilex.tools.connections.createLinkFromRanges(doc1.selectionRanges, doc2.selectionRanges);
     that.button.hide();
   });
 

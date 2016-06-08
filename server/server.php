@@ -12,8 +12,15 @@ class echoServer extends WebSocketServer {
     $text = dirname(__FILE__).'/texts/'.$json->{'text'}.'.txt';
     if (file_exists($text)) {
       $contet = file_get_contents($text);
-      $value = json_encode(array('target' => $json->{'target'},
-                                  'text' => $contet));
+      $value = json_encode(array(
+                            'target' => $json->{'target'},
+                            'text' => $contet,
+                            //test links hard coded
+                            'links' => array(
+                              array("1+10", "10+20")
+                            )
+                          )
+                        );
     } else {
       $value = "error: $text not found";
     }

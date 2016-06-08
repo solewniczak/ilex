@@ -13,16 +13,26 @@ ilex.widgetsCollection.popupMenu = function ($parentWidget, zIndex) {
     zIndex = zIndex || 3,
     elements = [];
 
-  that.show = function() {
+  that.menu = $('<div class="ilex-popup-menu">').appendTo($parentWidget)
+                                .css('z-index', zIndex)
+                                .css('position', 'absolute')
+                                .hide();
 
+  that.show = function(x, y) {
+    that.menu.offset({'top': top, 'left': left}).show();
   };
 
-  that.addElement = function(html, onselect) {
-
+  that.addElement = function(html, onclick) {
+    var $elm = $('<div>').html(html).appendTo(that.menu);
+    $elm.on('click', function (event) {
+      onclick(event);
+      that.menu.hide();
+    });
   };
 
-  that.cleanElements = function() {
-
+  that.clean = function() {
+    that.menu.html('');
   };
 
+  return that;
 };
