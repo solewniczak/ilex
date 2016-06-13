@@ -37,15 +37,19 @@ ilex.tools.connections.createLinkFromRanges = function (ranges1, ranges2) {
 //doc1, doc2 - IlexDocumentObject
 //vspanSet1, vspanSet2 - String - vspan-set
 ilex.tools.connections.createLinkVspanSets = function (doc1, vspanSet1, doc2, vspanSet2) {
-  var link = {
-    'id': 'l'+ilex.view.links.length,
-    'link': [
-             {'vspan-set': vspanSet1, 'ranges':
-                ilex.tools.range.createFromVspanSet(doc1, vspanSet1)},
-             {'vspan-set': vspanSet2, 'ranges':
-                ilex.tools.range.createFromVspanSet(doc2, vspanSet2)}
-            ]
-  };
+  var vspanSet1Array = ilex.tools.address.vspanSet(vspanSet1),
+    vspanSet2Array = ilex.tools.address.vspanSet(vspanSet2),
+    link = {
+      'id': 'l'+ilex.view.links.length,
+      'link': [
+               {'vspanSet': vspanSet1Array, 'ranges':
+                  ilex.tools.range.createFromVspanSet(doc1, vspanSet1Array)
+               },
+               {'vspanSet': vspanSet2Array, 'ranges':
+                  ilex.tools.range.createFromVspanSet(doc2, vspanSet2Array)
+               }
+              ]
+    };
 
   ilex.view.links.push(link);
   ilex.tools.markup.addConnectionTag(link);

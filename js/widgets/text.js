@@ -38,6 +38,9 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
 
   that.content = $('<div class="ilex-content">').appendTo(that.scrollWindow)
                 .data('ilex-height', height - that.dock.container.height())
+                //absolute offset for the element
+                .data('ilex-startoffset', 0)
+                .data('ilex-endoffset', 0)
                 .attr('contenteditable', 'true');
 
   //add toolbar at the end to give it access to entre text object

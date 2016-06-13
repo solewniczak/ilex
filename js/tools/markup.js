@@ -21,7 +21,12 @@ ilex.tools.markup.createIlexSpan = function () {
 //have single root element
 ilex.tools.markup.getRoot = function(documentFragment) {
   var $tmp = $("<div>").append(documentFragment),
-    contents = $tmp.contents();
+    //filter empty texts
+    contents = $tmp.contents().filter(function() {
+      return (this.nodeType === Node.ELEMENT_NODE) ||
+             (this.nodeType === Node.TEXT_NODE && this.length > 0);
+    });
+
   if (contents.length === 1 && contents[0].nodeType === Node.ELEMENT_NODE) {
     return $(contents[0]);
   }
@@ -64,19 +69,27 @@ ilex.tools.markup.entireTagSelected = function (selRange) {
 
 ilex.tools.markup.addConnectionTag = function (link) {
   var addLink = function(linkEnd) {
-    for (let range of linkEnd.ranges) {
-      let $spanTag = ilex.tools.markup.entireTagSelected(range);
+    for (let i = 0; i < linkEnd.ranges.length; i++) {
+      let range = linkEnd.ranges[i],
+        vspan = linkEnd.vspanSet[i],
+        $spanTag = ilex.tools.markup.entireTagSelected(range);
 
       if ($spanTag) {
         let links = $spanTag.data('ilex-links');
         links.push(link);
         $spanTag.data('ilex-links', links);
       } else {
-        let $cont = ilex.tools.markup.createIlexSpan().data('ilex-links', [link]);
+        let $cont = ilex.tools.markup.createIlexSpan()
+                                    //we use attr instead of data to see the
+                                    //value in the document inspector
+                                    .attr('data-ilex-startoffset', vspan.start)
+                                    .attr('data-ilex-endoffset', vspan.end)
+                                    .data('ilex-links', [link]);
+
         range.surroundContents($cont[0]);
       }
     }
-  }
+  };
 
   addLink(link.link[0]);
   addLink(link.link[1]);
@@ -89,48 +102,70 @@ ilex.tools.markup.addConnectionTag = function (link) {
 //Function takes document offset (as return by Ilex back-end) and returns the
 //element and the relative offset proper for Range API.
 
-//To achieve intended behaviour, we bound jQuery.data('ilex-position') to every
-//node in IlexDocumentObject.content. 'ilex-position' means the absolute position of the
-//FIRST character AFTER the Node.
+//To achieve intended behaviour, we bound jQuery.data('ilex-startoffset') and
+//jQuery.data('ilex-endoffset') to every node in IlexDocumentObject.content.
+//'ilex-startoffset' indicates the absolute position of the FIRST character
+//AFTER the Node opening tag.
+//'ilex-endoffset' indicates the absolute position of the FIRST character
+//AFTER the Node ending tag.
 
 //IlexDocumentObject.content can consists of three element types:
 //  1. text elemens - we must take care of proper &something; handling
-//  2. <br> Nodes - <br> is inserted just before \n character which it represents
+//  2. <br> Nodes - <br> is inserted after \n character which it represents
 //  3. <span> Nodes - span elements means nothing from back-end point of view
 
 //return {element: element, offset: relatieve offset}
-ilex.tools.markup.findRelativePosition = function(doc, absoluteOffset) {
-  var elements = doc.content.contents();
+ilex.tools.markup.findRelativePosition = function($parent, absoluteOffset) {
+  var elements = $parent.contents();
   if (elements.length === 0) {
     throw 'doc.content empty';
-  } else if (elements.length === 1) {
-    return {'element': elements[0], 'offset': absoluteOffset};
   }
+
   var prevElement, curElement;
-  console.log(absoluteOffset);
-  //console.log(elements);
-  //at the begining prevElement is virtual element with ilex-position = 0
-  prevElement = $('<span>').data('ilex-position', 0);
+
+  //doc.container has always ilex-position = 0
+  prevElement = $parent;
   for (let i = 0; i < elements.length; i++) {
     curElement = elements[i];
+
     //if the current element is TEXT_NODE, the previous must be ELEMENT_NODE
     //there cannot be two TEXT_NODEs in a row - becouse they will be one
     //TEXT_NODE :)
     if (curElement.nodeType === Node.TEXT_NODE) {
-      let ilexPosition = $(prevElement).data('ilex-position'),
+      let endOffset = $(prevElement).data('ilex-endoffset'),
         length = curElement.length;
-      if (absoluteOffset < ilexPosition + length) {
-        console.log(curElement, ilexPosition, absoluteOffset);
-        return {'element': curElement, 'offset': absoluteOffset - ilexPosition};
+
+      if (absoluteOffset <= endOffset + length) {
+        return {'element': curElement, 'offset': absoluteOffset - endOffset};
+      }
+    //check span content
+    //http://ejohn.org/blog/nodename-case-sensitivity/
+    } else if (curElement.tagName === 'SPAN') {
+      let endOffset = $(prevElement).data('ilex-endoffset');
+      if (absoluteOffset < endOffset) {
+        let result = ilex.tools.markup.findRelativePosition($(curElement), absoluteOffset);
+        if (result !== undefined) {
+          return result;
+        }
       }
     }
 
     prevElement = curElement;
   }
 
-
-  return {'element': [0], 'offset': absoluteOffset};
+  return undefined;
 };
+
+//translate relatieve offset into absolute offset
+ilex.tools.markup.findAbsolutePosition = function(node, relatieveOffset) {
+  if (node.previousSibling === null) {
+    return $(node.parentNode).data('ilex-startoffset') + relatieveOffset
+  } else {
+    return $(node.parentNode).data('ilex-startoffset') +
+            $(node.previousSibling).data('ilex-endoffset') +
+            relatieveOffset;
+  }
+}
 
 //Function takes UTF-8 content adds <br> before evety '\n' characters. Every <br>
 //contatins data-ilex-position attribute - absolute offset of the FIRST
@@ -140,7 +175,7 @@ ilex.tools.markup.nl2brWithAddresses = function(content) {
   for (let i = 0; i < content.length; i++) {
     let char = content[i];
     if (char === '\n') {
-      newContent += '<br data-ilex-position="'+i+'">\n';
+      newContent += '\n<br data-ilex-startoffset="'+(i+1)+'" data-ilex-endoffset="'+(i+1)+'">';
     } else {
       newContent += char;
     }
