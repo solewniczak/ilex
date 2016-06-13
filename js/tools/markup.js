@@ -83,7 +83,7 @@ ilex.tools.markup.addConnectionTag = function (link) {
 
 };
 
-//Range API returns start and end offsets relaively to start or end element.
+//Range API returns start and end offsets relaively to start or end Element.
 //Element can be DOM Node or continious text (text without any Nodes inside).
 
 //Function takes document offset (as return by Ilex back-end) and returns the
@@ -91,14 +91,60 @@ ilex.tools.markup.addConnectionTag = function (link) {
 
 //To achieve intended behaviour, we bound jQuery.data('ilex-position') to every
 //node in IlexDocumentObject.content. 'ilex-position' means the absolute position of the
-//first character AFTER the Node.
+//FIRST character AFTER the Node.
 
 //IlexDocumentObject.content can consists of three element types:
 //  1. text elemens - we must take care of proper &something; handling
-//  2. <br> Nodes - <br> nodes represents '\n' back-end characters. We must count
-//     it as one character.
+//  2. <br> Nodes - <br> is inserted just before \n character which it represents
 //  3. <span> Nodes - span elements means nothing from back-end point of view
 
-ilex.tools.markup.findRelativePosition = function(doc, offset) {
+//return {element: element, offset: relatieve offset}
+ilex.tools.markup.findRelativePosition = function(doc, absoluteOffset) {
+  var elements = doc.content.contents();
+  if (elements.length === 0) {
+    throw 'doc.content empty';
+  } else if (elements.length === 1) {
+    return {'element': elements[0], 'offset': absoluteOffset};
+  }
+  var prevElement, curElement;
+  console.log(absoluteOffset);
+  //console.log(elements);
+  //at the begining prevElement is virtual element with ilex-position = 0
+  prevElement = $('<span>').data('ilex-position', 0);
+  for (let i = 0; i < elements.length; i++) {
+    curElement = elements[i];
+    //if the current element is TEXT_NODE, the previous must be ELEMENT_NODE
+    //there cannot be two TEXT_NODEs in a row - becouse they will be one
+    //TEXT_NODE :)
+    if (curElement.nodeType === Node.TEXT_NODE) {
+      let ilexPosition = $(prevElement).data('ilex-position'),
+        length = curElement.length;
+      if (absoluteOffset < ilexPosition + length) {
+        console.log(curElement, ilexPosition, absoluteOffset);
+        return {'element': curElement, 'offset': absoluteOffset - ilexPosition};
+      }
+    }
 
+    prevElement = curElement;
+  }
+
+
+  return {'element': [0], 'offset': absoluteOffset};
+};
+
+//Function takes UTF-8 content adds <br> before evety '\n' characters. Every <br>
+//contatins data-ilex-position attribute - absolute offset of the FIRST
+//caracter AFTER <br> tag.
+ilex.tools.markup.nl2brWithAddresses = function(content) {
+  var newContent = '';
+  for (let i = 0; i < content.length; i++) {
+    let char = content[i];
+    if (char === '\n') {
+      newContent += '<br data-ilex-position="'+i+'">\n';
+    } else {
+      newContent += char;
+    }
+  }
+  return newContent;
+  //change every second space into &nbsp;
 };

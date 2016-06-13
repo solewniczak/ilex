@@ -48,8 +48,6 @@ ilex.tools.range.groupRanges = function(ranges) {
     //range overlaps currentRange
 
     if (currentRange.compareBoundaryPoints(Range.START_TO_END, range) >= 0) {
-      console.log(currentRange);
-      console.log(range);
       if (range.compareBoundaryPoints(Range.END_TO_END, currentRange) >= 0) {
         currentRange.setEnd(range.endContainer, range.endOffset);
       }
@@ -68,10 +66,11 @@ ilex.tools.range.createFromVspanSet = function(doc, vspanSet) {
   var ranges = [],
     vspanIntervals = ilex.tools.address.vspanSet(vspanSet);
   for (let interval of vspanIntervals) {
-    let range = document.createRange();
-    console.log(doc.content.contents());
-    range.setStart(doc.content.contents()[0], interval.start);
-    range.setEnd(doc.content.contents()[0], interval.end);
+    let range = document.createRange(),
+      start = ilex.tools.markup.findRelativePosition(doc, interval.start),
+      end = ilex.tools.markup.findRelativePosition(doc, interval.end);
+    range.setStart(start.element, start.offset);
+    range.setEnd(end.element, end.offset);
     ranges.push(range);
   }
   return ranges;
