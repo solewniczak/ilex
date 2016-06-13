@@ -12,12 +12,6 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
   if (canvas === undefined)
     throw 'canvas undefined';
   var that = {},
-    textFill = function(text, $container) {
-      var nl2br = function(string) {
-          return string.replace(/\n/g, '<br />');
-      };
-      $container.append(nl2br(text));
-    },
     width = $parentWidget.data('ilex-width'),
     height = $parentWidget.data('ilex-height');
 
@@ -83,7 +77,7 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
 
   that.loadText = function (text) {
     //Filling algorithm
-    textFill(text, that.content);
+    that.content.html(ilex.tools.markup.nl2brWithAddresses(text));
   };
 
 
