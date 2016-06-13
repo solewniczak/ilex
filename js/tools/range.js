@@ -37,7 +37,7 @@ ilex.tools.range.groupRanges = function(ranges) {
     return [];
   }
   var newRanges = [];
-  //console.log(ranges);
+
   ranges.sort(function (a,b) {
     return a.compareBoundaryPoints(Range.START_TO_START, b);
   });
@@ -45,8 +45,7 @@ ilex.tools.range.groupRanges = function(ranges) {
   let currentRange = ranges[0];
   for (let i = 1; i < ranges.length; i++) {
     let range = ranges[i];
-    //range overlaps currentRange
-
+    //range overlaps currentRang
     if (currentRange.compareBoundaryPoints(Range.START_TO_END, range) >= 0) {
       if (range.compareBoundaryPoints(Range.END_TO_END, currentRange) >= 0) {
         currentRange.setEnd(range.endContainer, range.endOffset);
@@ -57,18 +56,17 @@ ilex.tools.range.groupRanges = function(ranges) {
     }
   }
   newRanges.push(currentRange);
-console.log(newRanges);
+
   return newRanges;
 };
 
 //create Array of Range objects from vspan-set
 ilex.tools.range.createFromVspanSet = function(doc, vspanSet) {
-  var ranges = [],
-    vspanIntervals = ilex.tools.address.vspanSet(vspanSet);
-  for (let interval of vspanIntervals) {
+  var ranges = [];
+  for (let interval of vspanSet) {
     let range = document.createRange(),
-      start = ilex.tools.markup.findRelativePosition(doc, interval.start),
-      end = ilex.tools.markup.findRelativePosition(doc, interval.end);
+      start = ilex.tools.markup.findRelativePosition(doc.content, interval.start),
+      end = ilex.tools.markup.findRelativePosition(doc.content, interval.end);
     range.setStart(start.element, start.offset);
     range.setEnd(end.element, end.offset);
     ranges.push(range);

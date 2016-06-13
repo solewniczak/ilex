@@ -17,7 +17,9 @@ class echoServer extends WebSocketServer {
                             'text' => $contet,
                             //test links hard coded
                             'links' => array(
-                              array("1+10", "100+200")
+                              array("1+10", "100+200"),
+                              array("1+10", "500+100"),
+                              array("200+20", "310+10")
                             )
                           )
                         );
