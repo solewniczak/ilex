@@ -102,8 +102,9 @@ ilex.tools.markup.addConnectionTag = function (link) {
                .data('ilex-links', insideSpanLinks.concat(link));
           range.surroundContents($cont[0]);
 
-          let insideSpanContents = $(insideSpan).contents(),
-            $leftSpan = ilex.tools.markup.createIlexSpan()
+          let insideSpanContents = $(insideSpan).contents();
+          //console.log(insideSpanContents);
+          let $leftSpan = ilex.tools.markup.createIlexSpan()
                         .attr('data-ilex-startoffset', insideSpanStartoffset)
                         .attr('data-ilex-endoffset', vspan.start)
                         .addClass(insideSpanClasses)
@@ -114,12 +115,26 @@ ilex.tools.markup.addConnectionTag = function (link) {
                         .addClass(insideSpanClasses)
                         .data('ilex-links', insideSpanLinks);
 
-          $(insideSpanContents[0]).wrap($leftSpan);
-          $(insideSpanContents[2]).wrap($rightSpan);
+          let leftAppend = true;
+          for (let i = 0; i < insideSpanContents.length; i++) {
+            let element = insideSpanContents[i];
+            console.log(element);
+            if (element.nodeName === "SPAN") {
+              leftAppend = false;
+            } else if (leftAppend) {
+              $leftSpan.append(element);
+            } else {
+              $rightSpan.append(element);
+            }
+          }
+          $insideSpan.prepend($leftSpan);
+          $insideSpan.append($rightSpan);
+          //$(insideSpanContents[0]).wrap($leftSpan);
+          //$(insideSpanContents[2]).wrap($rightSpan);
           //remove parent span
           $cont.unwrap();
 
-          console.log($(insideSpan).contents());
+          //console.log($(insideSpan).contents());
 
         } else {
           range.surroundContents($cont[0]);
