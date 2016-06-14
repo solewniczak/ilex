@@ -73,3 +73,13 @@ ilex.tools.range.createFromVspanSet = function(doc, vspanSet) {
   }
   return ranges;
 };
+
+//check if range is inside span tag
+ilex.tools.range.insideSpan = function(range) {
+  if (range.startContainer.parentNode.nodeName === "SPAN" &&
+      range.endContainer.parentNode.nodeName === "SPAN") {
+    return range.startContainer.parentNode;
+  } else {
+    return undefined;
+  }
+};
