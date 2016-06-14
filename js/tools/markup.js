@@ -118,13 +118,22 @@ ilex.tools.markup.addConnectionTag = function (link) {
 ilex.tools.markup.findRelativePosition = function($parent, absoluteOffset) {
   var elements = $parent.contents();
   if (elements.length === 0) {
-    throw 'doc.content empty';
+    return undefined;
+  }
+  //doc.container has always ilex-startoffset = 0 and ilex-endoffset = 0
+  var prevElement = $parent,
+    curElement = elements[0];
+
+  //check if the offset is at the begin of a parent
+  if (curElement.nodeType  === Node.TEXT_NODE) {
+    let startOffset = $parent.data('ilex-startoffset'),
+      length = curElement.length;
+
+    if (absoluteOffset <= startOffset + length) {
+      return {'element': curElement, 'offset': absoluteOffset - startOffset};
+    }
   }
 
-  var prevElement, curElement;
-
-  //doc.container has always ilex-position = 0
-  prevElement = $parent;
   for (let i = 0; i < elements.length; i++) {
     curElement = elements[i];
 
@@ -141,7 +150,8 @@ ilex.tools.markup.findRelativePosition = function($parent, absoluteOffset) {
     //check span content
     //http://ejohn.org/blog/nodename-case-sensitivity/
     } else if (curElement.tagName === 'SPAN') {
-      let endOffset = $(prevElement).data('ilex-endoffset');
+      let endOffset = $(curElement).data('ilex-endoffset');
+
       if (absoluteOffset < endOffset) {
         let result = ilex.tools.markup.findRelativePosition($(curElement), absoluteOffset);
         if (result !== undefined) {
