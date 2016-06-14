@@ -9,28 +9,40 @@ if (ilex.tools.markup === undefined)
     throw 'ilex.tools.markup undefined';
 if (ilex.tools.range === undefined)
     throw 'ilex.tools.range undefined';
+  if (ilex.tools.address === undefined)
+      throw 'ilex.address.range undefined';
 
 ilex.tools.connections = {};
 
 //link := { 'id': String, 'link':
-//            [ {'vspan-set': String, 'ranges': Array of Range},
-//            {'vspan-set': String, 'ranges': Array of Range} ] }
+//            [ {'vspan-set': Object[ilex.tools.address.vspanSet],
+//               'ranges': Array of Range},
+//              {'vspan-set': Object[ilex.tools.address.vspanSet],
+//               'ranges': Array of Range} ]
+//        }
 
 //functions creates link and adds it to ilex.view.links
 //a, b - array of ranges
-ilex.tools.connections.createLinkFromRanges = function (ranges1, ranges2) {
-  var link = {
-    'id': 'l'+ilex.view.links.length,
-    'link': [
-             {'vspan-set': '', 'ranges':
-                ilex.tools.range.filterCollapsed(ranges1)},
-             {'vspan-set': '', 'ranges':
-                ilex.tools.range.filterCollapsed(ranges2)}
-            ]
-  };
+ilex.tools.connections.createLinkFromRanges = function (doc1, ranges1, doc2, ranges2) {
+  var ranges1 = ilex.tools.range.filterCollapsed(ranges1),
+    ranges2 = ilex.tools.range.filterCollapsed(ranges2),
+    link = {
+      'id': 'l'+ilex.view.links.length,
+      'link': [
+               {'vspanSet': ilex.tools.address.vspanSetFromRanges(ranges1),
+                'ranges': ranges1,
+                'doc': doc1
+               },
+               {'vspanSet': ilex.tools.address.vspanSetFromRanges(ranges2),
+                'ranges': ranges2,
+                'doc': doc2
+               }
+              ]
+    };
 
   ilex.view.links.push(link);
   ilex.tools.markup.addConnectionTag(link);
+  ilex.tools.connections.updateLinkRanges();
 };
 
 //functions creates link and adds it to ilex.view.links
@@ -42,15 +54,48 @@ ilex.tools.connections.createLinkVspanSets = function (doc1, vspanSet1, doc2, vs
     link = {
       'id': 'l'+ilex.view.links.length,
       'link': [
-               {'vspanSet': vspanSet1Array, 'ranges':
-                  ilex.tools.range.createFromVspanSet(doc1, vspanSet1Array)
+               {'vspanSet': vspanSet1Array,
+                'ranges':
+                  ilex.tools.range.createFromVspanSet(doc1, vspanSet1Array),
+                'doc': doc1
                },
-               {'vspanSet': vspanSet2Array, 'ranges':
-                  ilex.tools.range.createFromVspanSet(doc2, vspanSet2Array)
+               {'vspanSet': vspanSet2Array,
+                'ranges':
+                  ilex.tools.range.createFromVspanSet(doc2, vspanSet2Array),
+                'doc': doc2
                }
               ]
     };
 
   ilex.view.links.push(link);
   ilex.tools.markup.addConnectionTag(link);
+  ilex.tools.connections.updateLinkRanges();
+};
+
+//update link ranges to point into correct document fragments
+ilex.tools.connections.updateLinkRanges = function () {
+  var updateLinkRange = function(link, linkEnd) {
+    for (let i = 0; i < linkEnd.ranges.length; i++) {
+      let range = linkEnd.ranges[i],
+        className = '.ilex-link-id-'+link.id+'-range-'+i,
+        //http://stackoverflow.com/questions/8771463/jquery-find-what-order-does-it-return-elements-in
+        $spans = linkEnd.doc.content.find(className),
+        newRange = document.createRange(),
+        //get elements for range
+        firstSpanContents = $($spans[0]).contents(),
+        firstContentsElement = firstSpanContents[0],
+        lastSpanContents = $($spans[$spans.length-1]).contents(),
+        lastContentsElement = lastSpanContents[lastSpanContents.length - 1];
+
+      newRange.setStart(firstContentsElement, 0);
+      //last span element always is text (remember about <br>)
+      newRange.setEnd(lastContentsElement, lastContentsElement.length);
+      console.log(newRange);
+      linkEnd.ranges[i] = newRange;
+    }
+  };
+  for (let link of ilex.view.links) {
+    updateLinkRange(link, link.link[0]);
+    updateLinkRange(link, link.link[1]);
+  }
 };

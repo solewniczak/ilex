@@ -5,6 +5,8 @@ if (ilex === undefined)
   throw 'ilex undefined';
 if (ilex.tools === undefined)
     throw 'ilex.tools undefined';
+if (ilex.tools.markup === undefined)
+    throw 'ilex.tools.markup undefined';
 
 ilex.tools.address = {};
 
@@ -21,4 +23,19 @@ ilex.tools.address.vspanSet = function(vspanSet) {
   }
 
   return vspanIntervals;
+};
+
+ilex.tools.address.vspanSetFromRanges = function(ranges) {
+  var vspanSet = [];
+  for (let i = 0; i < ranges.length; i++) {
+    let range = ranges[i];
+    vspanSet.push({
+      'start':
+        ilex.tools.markup.findAbsolutePosition(range.startContainer, range.startOffset),
+      'end':
+        ilex.tools.markup.findAbsolutePosition(range.endContainer, range.endOffset),
+    });
+  }
+
+  return vspanSet;
 };
