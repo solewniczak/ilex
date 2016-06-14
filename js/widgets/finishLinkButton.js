@@ -63,7 +63,7 @@ ilex.widgetsCollection.finishLinkButton = function ($parentWidget, canvas, doc1,
   });
 
   that.button.on('mouseup', function(event) {
-    ilex.tools.connections.createLinkFromRanges(doc1.selectionRanges, doc2.selectionRanges);
+    ilex.tools.connections.createLinkFromRanges(doc1, doc1.selectionRanges, doc2, doc2.selectionRanges);
     that.button.hide();
   });
 

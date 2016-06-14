@@ -77,17 +77,22 @@ ilex.tools.markup.addConnectionTag = function (link) {
       if ($spanTag) {
         let links = $spanTag.data('ilex-links');
         links.push(link);
-        $spanTag.data('ilex-links', links);
+        $spanTag
+          .addClass('ilex-link-id-'+link.id+'-range-'+i)
+          .data('ilex-links', links);
       } else {
         let $cont = ilex.tools.markup.createIlexSpan()
                                     //we use attr instead of data to see the
                                     //value in the document inspector
                                     .attr('data-ilex-startoffset', vspan.start)
                                     .attr('data-ilex-endoffset', vspan.end)
+                                    .addClass('ilex-link-id-'+link.id+'-range-'+i)
                                     .data('ilex-links', [link]);
 
         range.surroundContents($cont[0]);
       }
+      //update links ranges
+
     }
   };
 
