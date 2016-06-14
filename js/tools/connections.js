@@ -88,9 +88,8 @@ ilex.tools.connections.updateLinkRanges = function () {
         lastContentsElement = lastSpanContents[lastSpanContents.length - 1];
 
       newRange.setStart(firstContentsElement, 0);
-      //last span element always is text (remember about <br>)
       newRange.setEnd(lastContentsElement, lastContentsElement.length);
-      console.log(newRange);
+
       linkEnd.ranges[i] = newRange;
     }
   };
