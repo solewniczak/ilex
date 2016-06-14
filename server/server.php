@@ -19,7 +19,9 @@ class echoServer extends WebSocketServer {
                             'links' => array(
                               array("1+10", "100+200"),
                               array("1+10", "500+100"),
-                              array("200+20", "310+10")
+                              array("200+20", "310+10"),
+                              array("400+10 500+10", "1000+10"),
+                              array("401+5", "312+5")
                             )
                           )
                         );
