@@ -26,24 +26,27 @@ $(document).ready(function(){
 
   var loadedTexts = 0;
   ilexServer.init(function () {
-    ilexServer.send({target: 'left', text: 'xanadu'});
-    ilexServer.send({target: 'right', text: 'powiesc_wajdeloty'});
+    ilexServer.send({action : "requestTextDump", parameters:  {target: 'left', text: 'xanadu'}});
+    ilexServer.send({action : "requestTextDump", parameters:  {target: 'right', text: 'powiesc_wajdeloty'}});
   }, function (data) {
     var json = JSON.parse(data);
-    if (json.target === 'left') {
-        ilex.view.leftText.loadText(json.text);
-    } else if (json.target === 'right') {
-        ilex.view.rightText.loadText(json.text);
-    }
-    loadedTexts++;
-    if (loadedTexts === 2) {
-      //load links
-      for (let link of json.links) {
-        ilex.tools.connections.createLinkVspanSets(ilex.view.leftText, link[0],
-                                                    ilex.view.rightText, link[1]);
-      }
-      $(document).trigger('canvasRedraw');
-    }
+	if (json.action === 'textRetrieved') {
+		var parameters = json.parameters
+    	if (parameters.target === 'left') {
+    	    ilex.view.leftText.loadText(parameters.text);
+    	} else if (parameters.target === 'right') {
+    	    ilex.view.rightText.loadText(parameters.text);
+    	}
+    	loadedTexts++;
+    	if (loadedTexts === 2) {
+    	  //load links
+    	  for (let link of parameters.links) {
+    	    ilex.tools.connections.createLinkVspanSets(ilex.view.leftText, link[0],
+    	                                                ilex.view.rightText, link[1]);
+    	  }
+    	  $(document).trigger('canvasRedraw');
+    	}
+	}
   });
 
 });
