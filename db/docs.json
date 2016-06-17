@@ -1,0 +1,124 @@
+{
+"Name" : "Barańczak - Pan tu nie stał",
+"Class" : "utf-8 encoded text file",
+"Format" : "plain text",
+"Created" : "2016-06-17T15:27:30Z",
+"Modified" : "2016-06-17T15:28:30Z",
+"TotalVersions" : 1,
+"Versions" : [
+	{
+	"No" : 1,
+	"Created" : "2016-06-17T15:27:30Z",
+	"Finished" : "2016-06-17T15:28:30Z",
+	"Size" : 493,
+	"Addresses" : [
+		[0, 0]
+	]
+	}]
+}
+
+{
+"Name" : "Barańczak - Już wkrótce",
+"Class" : "utf-8 encoded text file",
+"Format" : "plain text",
+"Created" : "2016-06-17T15:28:30Z",
+"Modified" : "2016-06-17T15:29:30Z",
+"TotalVersions" : 1,
+"Versions" : [
+	{
+	"No" : 1,
+	"Created" : "2016-06-17T15:28:30Z",
+	"Finished" : "2016-06-17T15:29:30Z",
+	"Size" : 524,
+	"Addresses" : [
+		[0, 493],
+		[81, 1115],
+		[90, 583]
+	]
+	}]
+}
+
+{
+"Name" : "Barańczak - Gdyby nie ludzie",
+"Class" : "utf-8 encoded text file",
+"Format" : "plain text",
+"Created" : "2016-06-17T15:29:30Z",
+"Modified" : "2016-06-17T15:30:30Z",
+"TotalVersions" : 1,
+"Versions" : [
+	{
+	"No" : 1,
+	"Created" : "2016-06-17T15:29:30Z",
+	"Finished" : "2016-06-17T15:30:30Z",
+	"Size" : 848,
+	"Addresses" : [
+		[0, 1017],
+		[98, 574],
+		[107, 1124]
+	]
+	}]
+}
+
+{
+"Name" : "Barańczak - Spójrzmy prawdzie w oczy",
+"Class" : "utf-8 encoded text file",
+"Format" : "plain text",
+"Created" : "2016-06-17T15:30:30Z",
+"Modified" : "2016-06-17T15:31:30Z",
+"TotalVersions" : 3,
+"Versions" : [
+	{
+	"No" : 1,
+	"Created" : "2016-06-17T15:30:30Z",
+	"Finished" : "2016-06-17T15:30:50Z",
+	"Size" : 748,
+	"Addresses" : [
+		[0, 1865]
+	]},
+	{
+	"No" : 2,
+	"Created" : "2016-06-17T15:30:50Z",
+	"Finished" : "2016-06-17T15:31:10Z",
+	"Size" : 795,
+	"Addresses" : [
+		[0, 1865]
+	]},
+	{
+	"No" : 3,
+	"Created" : "2016-06-17T15:31:10Z",
+	"Finished" : "2016-06-17T15:31:30Z",
+	"Size" : 841,
+	"Addresses" : [
+		[0, 1865]
+	]}
+	]
+}
+
+{
+"Name" : "Barańczak - Powiedz, że wkrótce",
+"Class" : "utf-8 encoded text file",
+"Format" : "plain text",
+"Created" : "2016-06-17T15:31:30Z",
+"Modified" : "2016-06-17T15:32:30Z",
+"TotalVersions" : 2,
+"Versions" : [
+	{
+	"No" : 1,
+	"Created" : "2016-06-17T15:31:30Z",
+	"Finished" : "2016-06-17T15:32:00Z",
+	"Size" : 956,
+	"Addresses" : [
+		[0, 2706]
+	]},
+	{
+	"No" : 2,
+	"Created" : "2016-06-17T15:32:00Z",
+	"Finished" : "2016-06-17T15:32:30Z",
+	"Size" : 961,
+	"Addresses" : [
+		[0, 2706],
+		[93, 3662],
+		[102, 2803]
+	]}
+	]
+}
