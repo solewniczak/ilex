@@ -45,14 +45,7 @@ http://ilex.imz.re/
 		? php server/server.php
 	
 		2. GO  
-			To set up a working Golang environment, follow the following tutorials:  
-			golang.org/doc/install  
-			golang.org/doc/code.html  
-	
-			Install websockets library:  
-			? go get golang.org/x/net/websocket
-	
-			In go-server directory:  
-			? go build
-			Run go-server
+		In go-server directory:  
+		? go build
+		Run go-server
 2. Open index.html in your web browser.
