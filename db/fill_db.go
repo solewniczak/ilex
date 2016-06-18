@@ -4,24 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 	"io/ioutil"
 	"log"
 )
 
-func fill_database() {
-	db_session, err := mgo.Dial("localhost")
-	if err != nil {
-		fmt.Println("Did not find database!")
-		panic(err)
-	}
-	defer db_session.Close()
+func fill_database(database *mgo.Database) {
 
 	// clear all
-	slices := db_session.DB("default").C("permascroll")
+	slices := database.C("permascroll")
 	slices.RemoveAll(nil)
-	docs := db_session.DB("default").C("docs")
+	docs := database.C("docs")
 	docs.RemoveAll(nil)
-	versions := db_session.DB("default").C("versions")
+	versions := database.C("versions")
 	versions.RemoveAll(nil)
 
 	// import slices
@@ -50,7 +45,8 @@ func fill_database() {
 		log.Fatal(err)
 	}
 
-	for _, doc := range sample_docs {
+	for i, doc := range sample_docs {
+		sample_docs[i].Id = bson.NewObjectId()
 		if err = docs.Insert(doc); err != nil {
 			log.Fatal(err)
 		}
@@ -81,4 +77,6 @@ func fill_database() {
 			log.Fatal(err)
 		}
 	}
+
+	fmt.Println("Database cleared and re-filled with sample data!")
 }

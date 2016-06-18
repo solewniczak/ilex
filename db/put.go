@@ -5,6 +5,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"log"
+	"time"
 )
 
 func min(a, b int) int {
@@ -15,23 +16,16 @@ func min(a, b int) int {
 	}
 }
 
-func add_doc(file_contents []byte, document_name *string) {
+func add_doc(file_contents []byte, document_name *string, database *mgo.Database) {
+	fmt.Println("Document inserted successfully!")
 	full_text := string(file_contents)
-	//text_length := len(full_text)
+	text_length := len(full_text)
 	runes_written, total_to_write := 0, len(full_text)
 
-	// - - - - - - - - - - - - - - - - - - -
-
-	db_session, err := mgo.Dial("localhost")
-	if err != nil {
-		fmt.Println("Did not find database!")
-		panic(err)
-	}
-	defer db_session.Close()
-
-	slices := db_session.DB("default").C("permascroll")
+	slices := database.C("permascroll")
 
 	total_slices, err := slices.Count()
+	fmt.Println(total_slices)
 	// @ TO DO: handle empty permascroll
 
 	// get the last slice:
@@ -40,9 +34,10 @@ func add_doc(file_contents []byte, document_name *string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("Document inserted successfully!")
 
 	slice_text_length := len(slice.Text)
-	//document_address := (total_slices-1)*SLICE_SIZE + slice_text_length
+	document_address := (total_slices-1)*SLICE_SIZE + slice_text_length
 
 	empty_space := SLICE_SIZE - slice_text_length
 	if empty_space != 0 {
@@ -68,4 +63,21 @@ func add_doc(file_contents []byte, document_name *string) {
 		runes_written += to_write
 	}
 
+	now := time.Now()
+	now_as_string := now.Format(time.RFC3339)
+	document := Document{bson.NewObjectId(), *document_name, "utf-8 encoded text file", "plain text", now_as_string, now_as_string, 1}
+
+	version := Version{bson.NewObjectId(), document.Id, 1, now_as_string, now_as_string, text_length, [][2]int{[2]int{0, document_address}}}
+
+	docs := database.C("docs")
+	if err = docs.Insert(document); err != nil {
+		log.Fatal(err)
+	}
+
+	versions := database.C("versions")
+	if err = versions.Insert(version); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Document >>", *document_name, "<< inserted successfully!")
 }

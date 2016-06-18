@@ -8,26 +8,26 @@ const SLICE_SIZE = 1000
 
 type Slice struct {
 	Id   bson.ObjectId `bson:"_id,omitempty"`
-	No   int
-	Text string
+	No   int           `bson:"No"`
+	Text string        `bson:"Text"`
 }
 
 type Version struct {
 	Id         bson.ObjectId `bson:"_id,omitempty"`
-	DocumentId bson.ObjectId `bson:omitempty`
-	No         int
-	Created    string
-	Finished   string
-	Size       int
-	Addresses  [][2]int
+	DocumentId bson.ObjectId `bson:"DocumentId"`
+	No         int           `bson:"No"`
+	Created    string        `bson:"Created"`
+	Finished   string        `bson:"Finished"`
+	Size       int           `bson:"Size"`
+	Addresses  [][2]int      `bson:"Addresses"`
 }
 
 type Document struct {
 	Id            bson.ObjectId `bson:"_id,omitempty"`
-	Name          string
-	Class         string
-	Format        string
-	Created       string
-	Modified      string
-	TotalVersions int
+	Name          string        `bson:"Name"`
+	Class         string        `bson:"Class"`
+	Format        string        `bson:"Format"`
+	Created       string        `bson:"Created"`
+	Modified      string        `bson:"Modified"`
+	TotalVersions int           `bson:"TotalVersions"`
 }
