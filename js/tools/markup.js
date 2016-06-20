@@ -118,7 +118,7 @@ ilex.tools.markup.addConnectionTag = function (link) {
           let leftAppend = true;
           for (let i = 0; i < insideSpanContents.length; i++) {
             let element = insideSpanContents[i];
-            console.log(element);
+
             if (element.nodeName === "SPAN") {
               leftAppend = false;
             } else if (leftAppend) {
@@ -129,12 +129,10 @@ ilex.tools.markup.addConnectionTag = function (link) {
           }
           $insideSpan.prepend($leftSpan);
           $insideSpan.append($rightSpan);
-          //$(insideSpanContents[0]).wrap($leftSpan);
-          //$(insideSpanContents[2]).wrap($rightSpan);
+
           //remove parent span
           $cont.unwrap();
 
-          //console.log($(insideSpan).contents());
 
         } else {
           range.surroundContents($cont[0]);
