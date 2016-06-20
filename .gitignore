@@ -1,2 +1,4 @@
 tags
+db/db
+go-server/go-server
 *.swp
