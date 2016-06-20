@@ -120,7 +120,7 @@ func requestTextDump(request *IlexMessage, ws *websocket.Conn) error {
 	if err != nil {
 		fmt.Println("Did not find database!")
 		response.Action = RETRIEVAL_FAILED
-		response.Parameters[ERROR] = err
+		response.Parameters[ERROR] = "Document error: " + err.Error()
 		goto send
 	}
 	defer db_session.Close()
@@ -134,13 +134,17 @@ func requestTextDump(request *IlexMessage, ws *websocket.Conn) error {
 		if err != nil {
 			fmt.Println(err)
 			response.Action = RETRIEVAL_FAILED
-			response.Parameters[ERROR] = err
+			response.Parameters[ERROR] = "Version error: " + err.Error()
 			goto send
 		}
 
-		requested_version, ok := request.Parameters[VERSION].(int)
+		// golang : all json numbers are unpacked to float64 values
+		var requested_version int
+		requested_version_float, ok := request.Parameters[VERSION].(float64)
 
-		if !ok {
+		if ok {
+			requested_version = int(requested_version_float)
+		} else {
 			requested_version = document.TotalVersions
 		}
 
@@ -158,14 +162,14 @@ func requestTextDump(request *IlexMessage, ws *websocket.Conn) error {
 		if err != nil {
 			fmt.Println(err)
 			response.Action = RETRIEVAL_FAILED
-			response.Parameters[ERROR] = err
+			response.Parameters[ERROR] = err.Error()
 			goto send
 		}
 
 		retrieved, err := get_string_from_addresses(version.Addresses, version.Size, database)
 		if err != nil {
 			response.Action = RETRIEVAL_FAILED
-			response.Parameters[ERROR] = err
+			response.Parameters[ERROR] = err.Error()
 			goto send
 		}
 
