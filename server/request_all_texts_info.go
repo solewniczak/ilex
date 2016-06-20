@@ -22,7 +22,7 @@ func requestAllTextsInfo(request *IlexMessage, ws *websocket.Conn) error {
 	if err != nil {
 		fmt.Println("Did not find database!")
 		response.Action = GETTING_INFO_FAILED
-		response.Parameters[ERROR] = err
+		response.Parameters[ERROR] = err.Error()
 		goto send
 	}
 	defer db_session.Close()
@@ -36,7 +36,7 @@ func requestAllTextsInfo(request *IlexMessage, ws *websocket.Conn) error {
 		if err != nil {
 			fmt.Println(err)
 			response.Action = GETTING_INFO_FAILED
-			response.Parameters[ERROR] = err
+			response.Parameters[ERROR] = err.Error()
 			goto send
 		}
 
