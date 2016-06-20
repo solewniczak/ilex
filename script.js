@@ -72,7 +72,7 @@ $(document).ready(function(){
 
 		// then, make requests with version:
 	    ilexServer.send({action : "requestTextDump", parameters: {target: 'left', text: names[3], version : 3}});
-		// then, make requests or without:
+		// or, make requests without version:
 		ilexServer.send({action : "requestTextDump", parameters: {target: 'right', text: names[4]}});
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - -
