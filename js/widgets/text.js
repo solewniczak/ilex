@@ -80,7 +80,8 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
 
   that.loadText = function (text) {
     //Filling algorithm
-    that.content.html(ilex.tools.markup.nl2brWithAddresses(text));
+    //that.content.html(ilex.tools.markup.nl2brWithAddresses(text));
+    ilex.tools.markup.loadText(text, that.content);
   };
 
 

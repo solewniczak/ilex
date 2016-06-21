@@ -80,19 +80,15 @@ ilex.tools.connections.updateLinkRanges = function () {
         className = '.ilex-link-id-'+link.id+'-range-'+i,
         //http://stackoverflow.com/questions/8771463/jquery-find-what-order-does-it-return-elements-in
         $spans = linkEnd.doc.content.find(className),
-        newRange = document.createRange(),
-        //get elements for range
-        firstSpanContents = $($spans[0]).contents(),
-        firstContentsElement = firstSpanContents[0],
-        lastSpanContents = $($spans[$spans.length-1]).contents(),
-        lastContentsElement = lastSpanContents[lastSpanContents.length - 1];
+        newRange = document.createRange();
 
-      newRange.setStart(firstContentsElement, 0);
-      newRange.setEnd(lastContentsElement, lastContentsElement.length);
-
+      newRange.setStart($spans[0], 0);
+      newRange.setEnd($spans[$spans.length-1], 0);
+      console.log(newRange);
       linkEnd.ranges[i] = newRange;
     }
   };
+  console.log('updateLinkRanges');
   for (let link of ilex.view.links) {
     updateLinkRange(link, link.link[0]);
     updateLinkRange(link, link.link[1]);
