@@ -67,8 +67,10 @@ ilex.tools.range.createFromVspanSet = function(doc, vspanSet) {
     let range = document.createRange(),
       start = ilex.tools.markup.findRelativePosition(doc.content, interval.start),
       end = ilex.tools.markup.findRelativePosition(doc.content, interval.end);
+
     range.setStart(start.element, start.offset);
     range.setEnd(end.element, end.offset);
+
     ranges.push(range);
   }
   return ranges;
