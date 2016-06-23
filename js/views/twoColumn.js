@@ -14,7 +14,7 @@ ilex.views.twoColumn = function(canvas) {
   view.topVertical = ilex.widgetsCollection.verticalSplit(ilex.window, [0.1, 0.9]);
   view.bottomVertical = ilex.widgetsCollection.verticalSplit(view.topVertical.bottom, [0.8, 0.2]);
 
-  view.fileSelector = view.topVertical.top;
+  view.fileSelector = ilex.widgetsCollection.fileSelector(view.topVertical.top);
   view.console = ilex.widgetsCollection.console(view.bottomVertical.bottom);
 
   view.pannels = ilex.widgetsCollection.horizontalSplit(view.bottomVertical.top);

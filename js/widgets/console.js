@@ -14,15 +14,15 @@ ilex.widgetsCollection.console = function ($parentWidget) {
     width = $parentWidget.data('ilex-width'),
     height = $parentWidget.data('ilex-height');
 
-  that.console = $('<div class="ilex-resize ilex-console">')
+  that.container = $('<div class="ilex-resize ilex-console">')
                   .css('overflow', 'auto')
                   .data('ilex-width', width)
                   .data('ilex-height', height);
-  $parentWidget.html(that.console);
+  $parentWidget.html(that.container);
 
   that.log = function (msg) {
     let date = new Date();
-    that.console.append('<span style="color: #ccc">'+date.toLocaleString()+'</span> '+msg+'<br>')
+    that.container.append('<span style="color: #ccc">'+date.toLocaleString()+'</span> '+msg+'<br>')
   }
 
   return that;
