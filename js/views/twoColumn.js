@@ -17,9 +17,9 @@ ilex.views.twoColumn = function(canvas) {
   view.fileSelector = ilex.widgetsCollection.fileSelector(view.topVertical.top);
   view.console = ilex.widgetsCollection.console(view.bottomVertical.bottom);
 
-  view.pannels = ilex.widgetsCollection.horizontalSplit(view.bottomVertical.top);
-  view.leftText = ilex.widgetsCollection.text(view.pannels.left, canvas);
-  view.rightText = ilex.widgetsCollection.text(view.pannels.right, canvas);
+  view.slider = ilex.widgetsCollection.documentsSlider(view.bottomVertical.top);
+  view.leftText = ilex.widgetsCollection.text(view.slider.window(0), canvas);
+  view.rightText = ilex.widgetsCollection.text(view.slider.window(1), canvas);
 
   view.leftText.setAlternateTextWidget(view.rightText);
   view.rightText.setAlternateTextWidget(view.leftText);
@@ -32,7 +32,7 @@ ilex.views.twoColumn = function(canvas) {
                                                         canvas,
                                                         view.leftText,
                                                         view.rightText,
-                                                        view.pannels.handler);
+                                                        view.slider.handler(0));
 
   /*Array of view links*/
   view.links = [];

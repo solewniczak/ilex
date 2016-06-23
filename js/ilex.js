@@ -68,10 +68,12 @@ ilex.tools = {};
 ilex.applySize = function() {
   $('.ilex-resize').trigger('windowResize');
   ilex.window.find('*').each(function () {
-    if ($(this).data('ilex-width'))
-      $(this).width($(this).data('ilex-width'))
-    if ($(this).data('ilex-height'))
+    if ($(this).data('ilex-width')) {
+      $(this).width($(this).data('ilex-width'));
+    }
+    if ($(this).data('ilex-height')) {
       $(this).height($(this).data('ilex-height'));
+    }
   });
   //redraw all canvas elements
   $(document).trigger('canvasRedraw');
