@@ -31,6 +31,17 @@ ilex.tools.range.cartesianOfNotCollapsedRanges = function(rangeList1, rangeList2
   return cartesian;
 };
 
+//returns cartesian of two ranges lists
+ilex.tools.range.cartesian = function(rangeList1, rangeList2) {
+  var cartesian = [];
+  for (let doc1Range of rangeList1) {
+    for (let doc2Range of rangeList2) {
+        cartesian.push([doc1Range, doc2Range]);
+    }
+  }
+  return cartesian;
+};
+
 //group as many ranges as possible and return resulting list
 ilex.tools.range.groupRanges = function(ranges) {
   if (ranges.length === 0) {
@@ -83,5 +94,77 @@ ilex.tools.range.insideSpan = function(range) {
     return range.startContainer.parentNode;
   } else {
     return undefined;
+  }
+};
+
+//It's very tricky.
+//In a Selection Range ALWAYS one of its ends is inside SPAN we will call it
+//ANCHOR. The second may or may not be inside span. If it is outside we try find
+//the first/last selected SPAN and treat it as end of seleciton.
+
+ilex.tools.range.getClientRects = function (range, doc) {
+  var pushClientRectsToArray = function(rects, clientRectsList) {
+    for (let i = 0; i < clientRectsList.length; i++) {
+      rects.push(clientRectsList[i]);
+    }
+  }, hasSpanParent = function (node) {
+    return node.parentNode && node.parentNode.nodeName === 'SPAN';
+  },
+  createClientRect = function (x, y, w, h) {
+    return {
+      left: x,
+      top: y,
+      right: x + w,
+      bottom: y + h,
+      width: w,
+      height: h
+    };
+  };
+
+  if (range.collapsed === true) {
+    return [];
+  }
+  if (range.startContainer === range.endContainer) {
+    return range.getClientRects();
+  } else {
+    var startElement, endElement;
+    //we assume that <BR> selection is not possible
+    let rects = [];
+    if (hasSpanParent(range.startContainer)) {
+      let startRange = document.createRange();
+      startRange.setStart(range.startContainer, range.startOffset);
+      startRange.setEnd(range.startContainer, range.startContainer.length);
+      pushClientRectsToArray(rects, startRange.getClientRects());
+      startElement = range.startContainer.parentNode.nextSibling;
+    //we have selected <div>
+    } else {
+      startElement = range.startContainer.childNodes[range.startOffset];
+    }
+
+
+    if (hasSpanParent(range.endContainer)) {
+      let endRange = document.createRange();
+      endRange.setStart(range.endContainer, 0);
+      endRange.setEnd(range.endContainer, range.endOffset);
+      pushClientRectsToArray(rects, endRange.getClientRects());
+      endElement = range.endContainer.parentNode;
+    //we have selected <div>
+    } else {
+      endElement = range.endContainer.childNodes[range.endOffset].previousSibling;
+      pushClientRectsToArray(rects, endElement.getClientRects());
+    }
+
+    let elm = startElement;
+    while (elm !== endElement) {
+      if (elm.nodeName === "BR") {
+        let elmRects = elm.getClientRects(),
+          rect = elmRects[0];
+        pushClientRectsToArray(rects, [createClientRect(rect.left, rect.top, 5, rect.height)]);
+      } else {
+        pushClientRectsToArray(rects, elm.getClientRects());
+      }
+      elm = elm.nextSibling;
+    }
+    return rects;
   }
 };

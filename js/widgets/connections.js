@@ -20,7 +20,7 @@ ilex.widgetsCollection.connections = function ($parentWidget, canvas) {
     if (ilex.view.links !== undefined) {
       for (let i = 0; i < ilex.view.links.length; i++) {
         let link = ilex.view.links[i];
-        for (let elm of
+        /*for (let elm of
           ilex.tools.range.cartesianOfNotCollapsedRanges(link.link[0].ranges,
                                                           link.link[1].ranges)) {
             canvas.drawConnection(elm[0].getClientRects(),
@@ -28,7 +28,15 @@ ilex.widgetsCollection.connections = function ($parentWidget, canvas) {
                                   //select next avalible color for next connection
                                   ilex.linksColors[i %
                                                         ilex.linksColors.length]);
-        }
+        }*/
+        /*for (let i = 0; i < link.vspanSet.length; i++) {
+          let vspan = link.vspanSet[i],
+            range = document.createRange(),
+            $spans = link.doc.content.find('.ilex-link-id-'+link.id+'-range-'+i);
+          range.setStart($spans[0], 0);
+          range.setEnd($spans[$spans.length-1], 0);
+          canvas.drawConnection()
+        }*/
       }
     }
     //draw all transclusions

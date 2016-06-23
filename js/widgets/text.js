@@ -164,7 +164,8 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
 
     //add all selection ranges to draw
     for (let range of that.selectionRanges) {
-      let clientRects = canvas.clipClientRectList(clipRect, range.getClientRects());
+      let rects = ilex.tools.range.getClientRects(range, that),
+        clientRects = canvas.clipClientRectList(clipRect, rects);
       for (let i = 0; i < clientRects.length; i++) {
         let rect = clientRects[i];
         canvas.drawRect(rect, '#a8d1ff');

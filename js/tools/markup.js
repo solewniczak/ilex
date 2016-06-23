@@ -39,8 +39,8 @@ ilex.tools.markup.sliceIlexSpanBefore = function (span, offset) {
     links = $(span).data('ilex-links') || [];
 
   $(span)
-        .attr('data-ilex-startoffset', startoffset + offset)
-        .attr('data-ilex-endoffset', endoffset)
+        .data('ilex-startoffset', startoffset + offset)
+        .data('ilex-endoffset', endoffset)
         .addClass(classes)
         .data('ilex-links', links)
         .text(rightText);
@@ -50,8 +50,8 @@ ilex.tools.markup.sliceIlexSpanBefore = function (span, offset) {
   }
 
   var $leftSpan = ilex.tools.markup.createIlexSpan()
-          .attr('data-ilex-startoffset', startoffset)
-          .attr('data-ilex-endoffset', startoffset + offset)
+          .data('ilex-startoffset', startoffset)
+          .data('ilex-endoffset', startoffset + offset)
           .addClass(classes)
           .data('ilex-links', links)
           .text(leftText);
@@ -78,19 +78,20 @@ ilex.tools.markup.sliceIlexSpanAfter = function (span, offset) {
     links = $(span).data('ilex-links') || [];
 
   $(span)
-        .attr('data-ilex-startoffset', startoffset)
-        .attr('data-ilex-endoffset', startoffset + offset)
+        .data('ilex-startoffset', startoffset)
+        .data('ilex-endoffset', startoffset + offset)
         .addClass(classes)
         .data('ilex-links', links)
         .text(leftText);
 
+  //don't create extra span element
   if (text === leftText) {
     return $(span);
   }
 
   var $rightSpan = ilex.tools.markup.createIlexSpan()
-            .attr('data-ilex-startoffset', startoffset + offset)
-            .attr('data-ilex-endoffset', endoffset)
+            .data('ilex-startoffset', startoffset + offset)
+            .data('ilex-endoffset', endoffset)
             .addClass(classes)
             .data('ilex-links', links)
             .text(rightText);
@@ -104,7 +105,6 @@ ilex.tools.markup.sliceIlexSpanAfter = function (span, offset) {
 //It may be used by Range API endContainer.
 ilex.tools.markup.sliceIlexSpanBetween = function (span, start, end) {
   if (span.nodeName !== 'SPAN') {
-    console.log(span);
     throw 'ilex.tools.markup.sliceIlexSpanBetween: first argument is not span node';
   }
   //don't create collapsed ranges
@@ -127,22 +127,22 @@ ilex.tools.markup.sliceIlexSpanBetween = function (span, start, end) {
     rightText  = text.slice(end);
 
     var $leftSpan = ilex.tools.markup.createIlexSpan()
-                .attr('data-ilex-startoffset', startoffset)
-                .attr('data-ilex-endoffset', startoffset + start)
+                .data('ilex-startoffset', startoffset)
+                .data('ilex-endoffset', startoffset + start)
                 .addClass(classes)
                 .data('ilex-links', links)
                 .text(leftText);
 
     //middle span
     $(span)
-                .attr('data-ilex-startoffset', startoffset + start)
-                .attr('data-ilex-endoffset', startoffset + end)
+                .data('ilex-startoffset', startoffset + start)
+                .data('ilex-endoffset', startoffset + end)
                 .data('ilex-links', links)
                 .text(middleText);
 
     var $rightSpan = ilex.tools.markup.createIlexSpan()
-                .attr('data-ilex-startoffset', startoffset + end)
-                .attr('data-ilex-endoffset', endoffset)
+                .data('ilex-startoffset', startoffset + end)
+                .data('ilex-endoffset', endoffset)
                 .addClass(classes)
                 .data('ilex-links', links)
                 .text(rightText);
@@ -213,15 +213,43 @@ ilex.tools.markup.entireTagSelected = function (selRange) {
 
 ilex.tools.markup.addConnectionTag = function (link) {
   var addLink = function(linkEnd) {
-    for (let i = 0; i < linkEnd.ranges.length; i++) {
-      let range = linkEnd.ranges[i],
-        vspan = linkEnd.vspanSet[i],
-        $spanTag = ilex.tools.markup.entireTagSelected(range);
+    for (let i = 0; i < linkEnd.vspanSet.length; i++) {
+      let vspan = linkEnd.vspanSet[i],
+        start = ilex.tools.markup.findRelativePosition(linkEnd.doc.content, vspan.start),
+        end = ilex.tools.markup.findRelativePosition(linkEnd.doc.content, vspan.end);
 
-      if ($spanTag) {
-        $spanTag.addClass('ilex-link-id-'+link.id+'-range-'+i);
-        $spanTag.addClass('ilex-connection');
-        ilex.tools.markup.addLink($spanTag, link);
+      if (start.element === end.element) {
+        let $span = ilex.tools.markup.sliceIlexSpanBetween(start.element.parentNode,
+                                                           start.offset,
+                                                           end.offset);
+        $span.addClass('ilex-link-id-'+link.id+'-range-'+i);
+        $span.addClass('ilex-connection');
+        ilex.tools.markup.addLink($span, link);
+      } else {
+        let $start = ilex.tools.markup.sliceIlexSpanBefore(start.element.parentNode, start.offset),
+          $end = ilex.tools.markup.sliceIlexSpanAfter(end.element.parentNode, end.offset);
+
+        for (let $node = $start; !$node.is($end); $node = $node.next()) {
+          if ($node[0].nodeName === "SPAN") {
+            $node.addClass('ilex-link-id-'+link.id+'-range-'+i);
+            $node.addClass('ilex-connection');
+            ilex.tools.markup.addLink($node, link);
+          }
+        };
+        $end.addClass('ilex-link-id-'+link.id+'-range-'+i);
+        $end.addClass('ilex-connection');
+        ilex.tools.markup.addLink($end, link);
+      }
+      //let $spanTag = ilex.tools.markup.entireTagSelected(range);
+      //entire tag selected
+      /*if (start.element === end.element && start.offset === 0) {
+
+        if (end.offset === end.element.length) {
+          let $span = $(start.parentNode);
+          $span.addClass('ilex-link-id-'+link.id+'-range-'+i);
+          $span.addClass('ilex-connection');
+          ilex.tools.markup.addLink($spanTag, link);
+        } else {}
       } else {
         //we are inside single span
         if (range.startContainer === range.endContainer) {
@@ -254,7 +282,7 @@ ilex.tools.markup.addConnectionTag = function (link) {
           $end.addClass('ilex-connection');
           ilex.tools.markup.addLink($end, link);
         }
-      }
+      }*/
       //update links ranges
 
     }
@@ -312,20 +340,22 @@ ilex.tools.markup.findAbsolutePosition = function(node, relatieveOffset) {
 //Function takes UTF-8 content adds <br> before evety '\n' characters.
 ilex.tools.markup.loadText = function(content, $parent) {
   var $span = ilex.tools.markup.createIlexSpan()
-                .attr('data-ilex-startoffset', 0),
+                .data('ilex-startoffset', 0),
       text = '';
 
   for (let i = 0; i < content.length; i++) {
     let char = content[i];
     if (char === '\n') {
-      text += '\n';
-      $span.append(text);
-      $span.attr('data-ilex-endoffset', i+1);
-      $parent.append($span);
+      //text += '\n';
+      if (text.length > 0) {
+        $span.append(text);
+        $span.data('ilex-endoffset', i+1);
+        $parent.append($span);
+        $span = ilex.tools.markup.createIlexSpan()
+                      .data('ilex-startoffset', i+1);
+        text = '';
+      }
       $parent.append('<br>');
-      $span = ilex.tools.markup.createIlexSpan()
-                    .attr('data-ilex-startoffset', i+1);
-      text = '';
     } else {
       text += char;
     }
