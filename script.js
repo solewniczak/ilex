@@ -37,53 +37,52 @@ $(document).ready(function(){
 		for (let i = 0; i < texts_info.length; i++) {
 			names.push(texts_info[i].Name);
 		}
-    	ilex.view.leftText.loadText(JSON.stringify(names));
+    ilex.view.console.log(JSON.stringify(names));
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - -
 		// Request texts using received names
-		// 
+		//
 		// first, we need a new function for receiving
 		ilexServer.socket.onmessage = function(msg) {
 			var json = JSON.parse(msg.data);
 			if (json.action === 'textRetrieved') {
-				var parameters = json.parameters
-		    	if (parameters.target === 'left') {
-		    	    ilex.view.leftText.loadText(parameters.text);
-		    	} else if (parameters.target === 'right') {
-		    	    ilex.view.rightText.loadText(parameters.text);
-		    	}
-		    	loadedTexts++;
-		    	if (loadedTexts === 2) {
-		    	  //load links
-		    	  for (let link of parameters.links) {
-		    	    ilex.tools.connections.createLinkVspanSets(ilex.view.leftText, link[0],
-		    	                                                ilex.view.rightText, link[1]);
-		    	  }
-		    	  $(document).trigger('canvasRedraw');
+				let parameters = json.parameters;
+	    	if (parameters.target === 'left') {
+	    	    ilex.view.leftText.loadText(parameters.text);
+	    	} else if (parameters.target === 'right') {
+	    	    ilex.view.rightText.loadText(parameters.text);
+	    	}
+	    	loadedTexts++;
+	    	if (loadedTexts === 2) {
+	    	  //load links
+	    	  for (let link of parameters.links) {
+	    	    ilex.tools.connections.createLinkVspanSets(ilex.view.leftText, link[0],
+	    	                                                ilex.view.rightText, link[1]);
+	    	  }
+	    	  $(document).trigger('canvasRedraw');
 		    	}
 			} else if (json.action === 'retrievalFailed') {
-    			ilex.view.leftText.loadText(json.parameters.error);
+    			ilex.view.console.log(json.parameters.error);
 		    	$(document).trigger('canvasRedraw');
 			} else {
-		    	ilex.view.leftText.loadText("Received unexpected response");
+		    	ilex.view.console.log("Received unexpected response");
 		    	$(document).trigger('canvasRedraw');
 			}
 		}
 
 		// then, make requests with version:
-	    ilexServer.send({action : "requestTextDump", parameters: {target: 'left', text: names[3], version : 3}});
+	  ilexServer.send({action : "requestTextDump", parameters: {target: 'left', text: names[3], version : 3}});
 		// or, make requests without version:
 		ilexServer.send({action : "requestTextDump", parameters: {target: 'right', text: names[4]}});
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - -
 	} else if (json.action === 'gettingInfoFailed') {
-    	ilex.view.leftText.loadText(json.parameters.error);
+    	ilex.view.console.log(json.parameters.error);
 		$(document).trigger('canvasRedraw');
 	} else {
-    	ilex.view.leftText.loadText("Received unexpected response");
+    	ilex.view.console.log("Received unexpected response");
 		$(document).trigger('canvasRedraw');
 	}
   });
 
 });
-
