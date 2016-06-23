@@ -31,9 +31,9 @@ ilex.tools.address.vspanSetFromRanges = function(ranges) {
     let range = ranges[i];
     vspanSet.push({
       'start':
-        ilex.tools.markup.findAbsolutePosition(range.startContainer, range.startOffset),
+        ilex.tools.markup.findAbsolutePosition(range.startContainer.parentNode, range.startOffset),
       'end':
-        ilex.tools.markup.findAbsolutePosition(range.endContainer, range.endOffset),
+        ilex.tools.markup.findAbsolutePosition(range.endContainer.parentNode, range.endOffset),
     });
   }
 

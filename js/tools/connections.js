@@ -29,20 +29,14 @@ ilex.tools.connections.createLinkFromRanges = function (doc1, ranges1, doc2, ran
     link = {
       'id': 'l'+ilex.view.links.length,
       'link': [
-               {'vspanSet': ilex.tools.address.vspanSetFromRanges(ranges1),
-                'ranges': ranges1,
-                'doc': doc1
-               },
-               {'vspanSet': ilex.tools.address.vspanSetFromRanges(ranges2),
-                'ranges': ranges2,
-                'doc': doc2
-               }
+                {'vspanSet': ilex.tools.address.vspanSetFromRanges(ranges1), 'doc': doc1},
+                {'vspanSet': ilex.tools.address.vspanSetFromRanges(ranges2), 'doc': doc2}
               ]
-    };
+      };
 
   ilex.view.links.push(link);
   ilex.tools.markup.addConnectionTag(link);
-  ilex.tools.connections.updateLinkRanges();
+  //ilex.tools.connections.updateLinkRanges();
 };
 
 //functions creates link and adds it to ilex.view.links
@@ -54,22 +48,14 @@ ilex.tools.connections.createLinkVspanSets = function (doc1, vspanSet1, doc2, vs
     link = {
       'id': 'l'+ilex.view.links.length,
       'link': [
-               {'vspanSet': vspanSet1Array,
-                'ranges':
-                  ilex.tools.range.createFromVspanSet(doc1, vspanSet1Array),
-                'doc': doc1
-               },
-               {'vspanSet': vspanSet2Array,
-                'ranges':
-                  ilex.tools.range.createFromVspanSet(doc2, vspanSet2Array),
-                'doc': doc2
-               }
+                  {'vspanSet': vspanSet1Array, 'doc': doc1},
+                  {'vspanSet': vspanSet2Array, 'doc': doc2}
               ]
     };
 
   ilex.view.links.push(link);
   ilex.tools.markup.addConnectionTag(link);
-  ilex.tools.connections.updateLinkRanges();
+  //ilex.tools.connections.updateLinkRanges();
 };
 
 //update link ranges to point into correct document fragments
