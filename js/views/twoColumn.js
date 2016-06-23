@@ -11,8 +11,13 @@ if (ilex.views === undefined)
 ilex.views.twoColumn = function(canvas) {
   var view = {};
 
-  view.fileSelector = ilex.widgetsCollection.verticalSplit(ilex.window, [0.1, 0.9]);
-  view.pannels = ilex.widgetsCollection.horizontalSplit(view.fileSelector.bottom);
+  view.topVertical = ilex.widgetsCollection.verticalSplit(ilex.window, [0.1, 0.9]);
+  view.bottomVertical = ilex.widgetsCollection.verticalSplit(view.topVertical.bottom, [0.8, 0.2]);
+
+  view.fileSelector = view.topVertical.top;
+  view.console = ilex.widgetsCollection.console(view.bottomVertical.bottom);
+
+  view.pannels = ilex.widgetsCollection.horizontalSplit(view.bottomVertical.top);
   view.leftText = ilex.widgetsCollection.text(view.pannels.left, canvas);
   view.rightText = ilex.widgetsCollection.text(view.pannels.right, canvas);
 
