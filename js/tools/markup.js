@@ -343,7 +343,8 @@ ilex.tools.markup.loadText = function(content, $parent) {
                 .data('ilex-startoffset', 0),
       text = '';
 
-  for (let i = 0; i < content.length; i++) {
+  var i;
+  for (i = 0; i < content.length; i++) {
     let char = content[i];
     if (char === '\n') {
       //text += '\n';
@@ -360,7 +361,10 @@ ilex.tools.markup.loadText = function(content, $parent) {
       text += char;
     }
   }
-  if (!$span.is(':empty')) {
+  //apend text to span
+  if (text !== '') {
+    $span.append(text);
+    $span.data('ilex-endoffset', i+1);
     $parent.append($span);
   }
 };

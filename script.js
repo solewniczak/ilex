@@ -55,11 +55,21 @@ $(document).ready(function(){
 	    	}
 	    	loadedTexts++;
 	    	if (loadedTexts === 2) {
+          //experiments with documentsSlider
+          let wind = ilex.view.slider.addWindow(),
+            hiddenText = ilex.widgetsCollection.text(wind, ilex.canvas);
+          //applySizes after creating new window
+          hiddenText.loadText("Lorem ipsum dolor sit ament.");
+          ilex.applySize();
+          ilex.view.slider.slideLeft();
+
 	    	  //load links
 	    	  for (let link of parameters.links) {
 	    	    ilex.tools.connections.createLinkVspanSets(ilex.view.leftText, link[0],
 	    	                                                ilex.view.rightText, link[1]);
 	    	  }
+
+
 	    	  $(document).trigger('canvasRedraw');
 		    	}
 			} else if (json.action === 'retrievalFailed') {
