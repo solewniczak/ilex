@@ -38,6 +38,7 @@ $(document).ready(function(){
 			names.push(texts_info[i].Name);
 		}
     ilex.view.console.log(JSON.stringify(names));
+    ilex.view.fileSelector.loadFilesList(names);
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - -
 		// Request texts using received names

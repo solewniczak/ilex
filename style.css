@@ -13,7 +13,7 @@ div:focus {
 /*CSS is based on Metro UI design*/
 /*becouse it's flat and looks well :)*/
 /*https://metroui.org.ua/*/
-::selection {
+.ilex-content span::selection, .ilex-content br::selection {
   background: transparent; /* don't draw default selection color */
 }
 
