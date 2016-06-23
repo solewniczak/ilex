@@ -10,14 +10,9 @@ import (
 )
 
 func fill_database(database *mgo.Database) {
-
-	// clear all
 	slices := database.C("permascroll")
-	slices.RemoveAll(nil)
 	docs := database.C("docs")
-	docs.RemoveAll(nil)
 	versions := database.C("versions")
-	versions.RemoveAll(nil)
 
 	// import slices
 	buffer, err := ioutil.ReadFile("ps2.json")
@@ -45,9 +40,9 @@ func fill_database(database *mgo.Database) {
 		log.Fatal(err)
 	}
 
-	for i, doc := range sample_docs {
+	for i, _ := range sample_docs {
 		sample_docs[i].Id = bson.NewObjectId()
-		if err = docs.Insert(doc); err != nil {
+		if err = docs.Insert(sample_docs[i]); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -78,5 +73,5 @@ func fill_database(database *mgo.Database) {
 		}
 	}
 
-	fmt.Println("Database cleared and re-filled with sample data!")
+	fmt.Println("Database re-filled with sample data!")
 }
