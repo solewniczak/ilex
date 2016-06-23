@@ -1,4 +1,4 @@
 tags
-db/db
-go-server/go-server
+dbtool/dbtool
+server/server
 *.swp

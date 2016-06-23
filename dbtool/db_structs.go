@@ -7,13 +7,13 @@ import (
 const SLICE_SIZE = 1000
 
 type Slice struct {
-	Id   bson.ObjectId `bson:"_id,omitempty"`
+	Id   bson.ObjectId `bson:"_id,omitempty" json:"-"`
 	No   int           `bson:"No"`
 	Text string        `bson:"Text"`
 }
 
 type Version struct {
-	Id         bson.ObjectId `bson:"_id,omitempty"`
+	Id         bson.ObjectId `bson:"_id,omitempty" json:"-"`
 	DocumentId bson.ObjectId `bson:"DocumentId"`
 	No         int           `bson:"No"`
 	Created    string        `bson:"Created"`
@@ -23,7 +23,7 @@ type Version struct {
 }
 
 type Document struct {
-	Id            bson.ObjectId `bson:"_id,omitempty"`
+	Id            bson.ObjectId `bson:"_id,omitempty" json:"-"`
 	Name          string        `bson:"Name"`
 	Class         string        `bson:"Class"`
 	Format        string        `bson:"Format"`
