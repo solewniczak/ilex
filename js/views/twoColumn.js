@@ -18,8 +18,11 @@ ilex.views.twoColumn = function(canvas) {
   view.console = ilex.widgetsCollection.console(view.bottomVertical.bottom);
 
   view.slider = ilex.widgetsCollection.documentsSlider(view.bottomVertical.top);
-  view.leftText = ilex.widgetsCollection.text(view.slider.window(0), canvas);
-  view.rightText = ilex.widgetsCollection.text(view.slider.window(1), canvas);
+  view.leftText = ilex.widgetsCollection.text(view.slider.window(0).element, canvas);
+  view.rightText = ilex.widgetsCollection.text(view.slider.window(1).element, canvas);
+
+  view.slider.window(0).setContentWidget(view.leftText);
+  view.slider.window(1).setContentWidget(view.rightText);
 
   view.leftText.setAlternateTextWidget(view.rightText);
   view.rightText.setAlternateTextWidget(view.leftText);
