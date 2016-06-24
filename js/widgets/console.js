@@ -22,7 +22,7 @@ ilex.widgetsCollection.console = function ($parentWidget) {
 
   that.log = function (msg) {
     let date = new Date();
-    that.container.append('<span style="color: #ccc">'+date.toLocaleString()+'</span> '+msg+'<br>')
+    that.container.append('<div style="font-size:12px"><span style="color: #ccc">'+date.toLocaleString()+'</span> '+msg+'</div>')
   }
 
   return that;
