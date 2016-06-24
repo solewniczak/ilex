@@ -31,12 +31,12 @@ ilex.widgetsCollection.verticalSplit = function ($parentWidget, position) {
   that.position = position;
   that.handler = $('<div class="ilex-handler">').appendTo(that.container)
                           .css('cursor', 'ns-resize')
-                          .data('ilex-width', $parentWidget.width())
+                          .data('ilex-width', width)
                           .data('ilex-height', ilex.widgetsCollection.handlerSize)
                           .css('background', '#000');
 
   that.bottom = $('<div class="ilex-bottom">').appendTo(that.container)
-                          .data('ilex-widht', width)
+                          .data('ilex-width', width)
                           .data('ilex-height', innerHeight * position[1]);
 
   //where ther is no text in top div the behaviour of a split is not correct
