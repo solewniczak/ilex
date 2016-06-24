@@ -111,7 +111,11 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, position) {
   };
   //return array of visible windows
   that.getVisibleWindows = function() {
-    return [that.window(windowPointer), that.window(windowPointer + 1)];
+    var visibleWindows = [];
+    for (let i = 0; i < that.position.length; i++) {
+      visibleWindows.push(that.window(windowPointer + i));
+    }
+    return visibleWindows;
   };
 
   that.getVisibleHandler = function() {
@@ -172,18 +176,24 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, position) {
     {'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf067;</span>'} //add new card
   ]);
 
-  /*var forwardButton = $('<div class="ilex-button ilex-awesome">&#xf105;</div>')
-                          .appendTo(that.rightButtons)
-                          .css('position', 'absolute')
-                          .css('font-size', '100px')
-                          .css('line-height', height+'px')
-                          .css('vertical-align', 'middle')
-                          .height(height);*/
-
-
-
+  //slide left
   rightButtons.buttons[0].on('mousedown', function() {
     that.slideLeft();
+  });
+
+  //add additional pannel
+  rightButtons.buttons[1].on('mousedown', function() {
+    let pannels = that.position.length + 1,
+      ratio = 1.0/pannels;
+    that.position = [];
+    for (let i = 0; i < pannels; i++) {
+      that.position.push(ratio);
+      that.window(windowPointer + i)
+          .data('ilex-width', innerWidth * ratio);
+      //$('.ilex-resize').trigger('windowResize');
+      //that.window(windowPointer + i).animate({'width': innerWidth * ratio});
+    }
+    ilex.applySize(true);
   });
 
   that.superContainer.on('windowResize', function(event) {
