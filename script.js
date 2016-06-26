@@ -33,8 +33,10 @@ $(document).ready(function(){
     var json = JSON.parse(data);
 	if (json.action === 'allTextsInfoResponse') {
 		var texts_info = json.parameters.texts;
+		var document_ids = [];
 		var names = [];
 		for (let i = 0; i < texts_info.length; i++) {
+			document_ids.push(texts_info[i].Id);
 			names.push(texts_info[i].Name);
 		}
     ilex.view.console.log(JSON.stringify(names));
@@ -87,9 +89,9 @@ $(document).ready(function(){
 		}
 
 		// then, make requests with version:
-	  ilexServer.send({action : "requestTextDump", parameters: {target: 'left', text: names[3], version : 3}});
+	  ilexServer.send({action : "requestTextDump", parameters: {target: 'left', text: document_ids[3], version : 3}});
 		// or, make requests without version:
-		ilexServer.send({action : "requestTextDump", parameters: {target: 'right', text: names[4]}});
+		ilexServer.send({action : "requestTextDump", parameters: {target: 'right', text: document_ids[4]}});
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - -
 	} else if (json.action === 'gettingInfoFailed') {

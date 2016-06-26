@@ -51,12 +51,11 @@ func main() {
 	}
 	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		server_path, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 		main_path := filepath.Dir(server_path)
-		//http.HandleFunc("/", http.FileServer(http.Dir(main_path)))
 		server := http.Server{Handler: http.FileServer(http.Dir(main_path))}
 		fmt.Println(server.Serve(file_listener))
-		wg.Done()
 	}()
 
 	ws_listener, err := net.Listen("tcp", ":9000")
@@ -65,17 +64,17 @@ func main() {
 	}
 	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		server := http.Server{Handler: websocket.Handler(ActionServer)}
 		fmt.Println(server.Serve(ws_listener))
-		wg.Done()
 	}()
 
 	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		<-StopServer
 		file_listener.Close()
 		ws_listener.Close()
-		wg.Done()
 	}()
 
 	wg.Wait()
