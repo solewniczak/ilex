@@ -23,7 +23,7 @@ type Version struct {
 }
 
 type Document struct {
-	Id            bson.ObjectId `bson:"_id,omitempty" json:"-"`
+	Id            bson.ObjectId `bson:"_id,omitempty"`
 	Name          string        `bson:"Name"`
 	Class         string        `bson:"Class"`
 	Format        string        `bson:"Format"`
