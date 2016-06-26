@@ -12,7 +12,7 @@ import (
 	"sync"
 )
 
-var Stop chan int = make(chan int)
+var StopServer chan int = make(chan int)
 
 func ActionServer(ws *websocket.Conn) {
 	for {
@@ -72,12 +72,10 @@ func main() {
 
 	wg.Add(1)
 	go func() {
-		select {
-		case <-Stop:
-			file_listener.Close()
-			ws_listener.Close()
-			wg.Done()
-		}
+		<-StopServer
+		file_listener.Close()
+		ws_listener.Close()
+		wg.Done()
 	}()
 
 	wg.Wait()

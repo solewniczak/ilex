@@ -11,5 +11,5 @@ func TestActionServer(t *testing.T) {
 
 	time.Sleep(time.Second)
 	fmt.Println("aweakened")
-	Stop <- 1
+	StopServer <- 1
 }
