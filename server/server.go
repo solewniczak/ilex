@@ -43,18 +43,18 @@ func main() {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		server_path, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 		main_path := filepath.Dir(server_path)
 		http.Handle("/", http.FileServer(http.Dir(main_path)))
 		log.Fatal(http.ListenAndServe(":8000", nil))
-		wg.Done()
 	}()
 
 	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		http.Handle("/echobot", websocket.Handler(ActionServer))
 		log.Fatal(http.ListenAndServe(":9000", nil))
-		wg.Done()
 	}()
 	wg.Wait()
 }

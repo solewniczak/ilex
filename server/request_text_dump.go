@@ -111,7 +111,7 @@ func get_string_from_addresses(addresses [][2]int, total_runes int, database *mg
 }
 
 func requestTextDump(request *IlexMessage, ws *websocket.Conn) error {
-	requested_text := request.Parameters[TEXT].(string)
+	requested_text_id := request.Parameters[TEXT].(string)
 
 	var response IlexMessage
 	response.Init()
@@ -130,11 +130,10 @@ func requestTextDump(request *IlexMessage, ws *websocket.Conn) error {
 		docs := database.C("docs")
 
 		var document Document
-		err = docs.Find(bson.M{"Name": requested_text}).One(&document)
+		err = docs.Find(bson.M{"_id": bson.ObjectIdHex(requested_text_id)}).One(&document)
 		if err != nil {
-			fmt.Println(err)
 			response.Action = RETRIEVAL_FAILED
-			response.Parameters[ERROR] = "Version error: " + err.Error()
+			response.Parameters[ERROR] = "Document error: " + err.Error()
 			goto send
 		}
 
@@ -160,9 +159,8 @@ func requestTextDump(request *IlexMessage, ws *websocket.Conn) error {
 		err = versions.Find(bson.M{"DocumentId": document.Id,
 			"No": requested_version}).One(&version)
 		if err != nil {
-			fmt.Println(err)
 			response.Action = RETRIEVAL_FAILED
-			response.Parameters[ERROR] = err.Error()
+			response.Parameters[ERROR] = "Version error: " + err.Error()
 			goto send
 		}
 
