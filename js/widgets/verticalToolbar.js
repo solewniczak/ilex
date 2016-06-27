@@ -33,7 +33,26 @@ ilex.widgetsCollection.verticalToolbar = function ($parentWidget, buttons) {
                       .width(width)
                       .height(buttonHeight)
                       .html(button.html);
-    buttonElm.on('click', button.callback);
+    //toggle button
+    if (button.callback === undefined) {
+      buttonElm.data('ilex-state', 'off');
+      buttonElm.data('ilex-button', button);
+      buttonElm.on('click', function (event) {
+        var $buttonElm = $(this),
+          button = buttonElm.data('ilex-button');
+        if ($buttonElm.data('ilex-state') === 'off') {
+          $buttonElm.html(button.htmlOn);
+          button.callbackOn();
+          $buttonElm.data('ilex-state', 'on');
+        } else {
+          $buttonElm.html(button.html);
+          button.callbackOff();
+          $buttonElm.data('ilex-state', 'off');
+        }
+      });
+    } else {
+      buttonElm.on('click', button.callback);
+    }
     that.buttons.push(buttonElm);
   }
   return that;
