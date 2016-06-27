@@ -1,4 +1,4 @@
-'use strict';
+  'use strict';
 
 //requires: ilex.widgetsCollection.handlerSize, ilex.widgetsCollection.verticalToolbar
 if (ilex === undefined)
@@ -9,6 +9,10 @@ if (ilex.widgetsCollection.handlerSize === undefined)
   throw 'ilex.widgetsCollection.handlerSize undefined';
 if (ilex.widgetsCollection.verticalToolbar === undefined)
   throw 'ilex.widgetsCollection.verticalToolbar undefined';
+if (ilex.widgetsCollection.verticalColumns === undefined)
+  throw 'ilex.widgetsCollection.verticalColumn undefined';
+if (ilex.widgetsCollection.toolbar === undefined)
+  throw 'ilex.widgetsCollection.toolbar undefined';
 if (ilex.widgetsCollection.documentsSlider !== undefined)
   throw 'ilex.widgetsCollection.horizontalSplit already defined';
 
@@ -18,49 +22,69 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, position) {
     position = position || [0.5, 0.5],
     //which window display left most
     windowPointer = 0,
-    buttonsWidth = 10,
     width = $parentWidget.data('ilex-width'),
     height = $parentWidget.data('ilex-height'),
+    buttonsWidth = 20,
     innerWidth = width - ilex.widgetsCollection.handlerSize;
 
-    //console.log($parentWidget, $parentWidget.data(), width);
   //contains slider and slider navigation buttons
   that.superContainer = $('<div class="ilex-resize ilex-documentsSlider">')
                     .data('ilex-width', width)
                     .data('ilex-height', height);
   $parentWidget.html(that.superContainer);
 
-  that.superTable = $('<div class="ilex-resize ilex-sliderNav">')
-                    .appendTo(that.superContainer)
-                    .data('ilex-width', width)
-                    .data('ilex-height', height)
-                    .css('display', 'table-row');
+  that.superTable = ilex.widgetsCollection.verticalColumns(that.superContainer, [buttonsWidth, '100%', buttonsWidth]);
 
-  that.leftButtons = $('<div class="ilex-resize">').appendTo(that.superTable)
-                          .css('display', 'table-cell')
-                          .css('position', 'relative')
-                          .css('z-index', 5)
-                          .data('ilex-width', buttonsWidth)
-                          .data('ilex-height', height);
+  that.leftButtons = that.superTable.columns[0];
+  that.leftButtons.css('position', 'relative').css('z-index', 5);
 
-  that.container = $('<div class="ilex-resize">').appendTo(that.superTable)
-                          .css('display', 'table-cell')
-                          .css('z-index', 4)
-                          .data('ilex-width', width - 2*buttonsWidth)
-                          .data('ilex-height', height);
+  //calculate ilex width later basing on buttons width
+  that.container = that.superTable.columns[1];
 
-  that.rightButtons = $('<div class="ilex-resize">').appendTo(that.superTable)
-                          .css('display', 'table-cell')
-                          .css('position', 'relative')
-                          .css('z-index', 5)
-                          .data('ilex-width', buttonsWidth)
-                          .data('ilex-height', height);
 
-  that.table = $('<div class="ilex-slider">').appendTo(that.container)
+  that.rightButtons = that.superTable.columns[2];
+  //position: absolute fixes strange chrome bug, that misspostion right buttons
+  that.rightButtons.css('position', 'absolute').css('z-index', 5).css('right', 0);
+
+  //create buttons
+  let fontSize = '20px';
+  ilex.widgetsCollection.verticalToolbar(that.leftButtons, [
+    { 'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf104;</span>',
+      'callback': function(event) {
+        that.slideRight();
+      }
+    }
+  ]);
+
+  ilex.widgetsCollection.verticalToolbar(that.rightButtons, [
+    { 'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf105;</span>',
+      'callback': function(event) {
+        that.slideLeft();
+      }
+    }, //forward
+    {'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf067;</span>',
+     'callback': function (event) {
+       let pannels = that.position.length + 1,
+         ratio = 1.0/pannels;
+       that.position = [];
+       for (let i = 0; i < pannels; i++) {
+         that.position.push(ratio);
+         that.window(windowPointer + i).element
+             .data('ilex-width', innerWidth * ratio);
+       }
+       ilex.applySize(true);
+     }
+   }
+  ]);
+
+  that.table = $('<div>').appendTo(that.container)
                     .css('display', 'table-row')
-                      //some huge value
-                    .css('width', '100000px')
-                    .css('position', 'absolute');
+                    //some huge value
+                  .css('width', '100000px')
+                  .data('ilex-height', height)
+                  .css('position', 'absolute');
+
+
 
 
   //console.log(that.container);
@@ -181,46 +205,20 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, position) {
   elements.push(addHandler());
   elements.push(addWindow(position[1]));
 
-  let fontSize = '20px';
-  //transform that.leftButtons into back button
-  that.leftButtons.html('&#xf104;')
-          .addClass('ilex-button')
-          .addClass('ilex-awesome')
-          .css('font-size', fontSize);
-  that.leftButtons.on('mousedown', function() {
-    that.slideRight();
-  });
-
-  let rightButtons = ilex.widgetsCollection.verticalToolbar(that.rightButtons, [
-    {'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf105;</span>'}, //forward
-    {'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf067;</span>'} //add new card
-  ]);
-
-  //slide left
-  rightButtons.buttons[0].on('mousedown', function() {
-    that.slideLeft();
-  });
-
-  //add additional pannel
-  rightButtons.buttons[1].on('mousedown', function() {
-    let pannels = that.position.length + 1,
-      ratio = 1.0/pannels;
-    that.position = [];
-    for (let i = 0; i < pannels; i++) {
-      that.position.push(ratio);
-      that.window(windowPointer + i).element
-          .data('ilex-width', innerWidth * ratio);
-    }
-    ilex.applySize(true);
-  });
-
   that.superContainer.on('windowResize', function(event) {
-    var width = that.superContainer.parent().data('ilex-width'),
+    /*var width = that.superContainer.parent().data('ilex-width'),
       height = that.superContainer.parent().data('ilex-height'),
       innerWidth = width - ilex.widgetsCollection.handlerSize;
 
     that.superContainer.data('ilex-width', width).data('ilex-height', height);
     that.container.children().data('ilex-height', height);
+
+    let visibleWindows = that.getVisibleWindows();
+    visibleWindows[0].element.data('ilex-width', innerWidth * that.position[0]);
+    visibleWindows[1].element.data('ilex-width', innerWidth * that.position[1]);*/
+    var width = that.container.data('ilex-width'),
+      height = that.container.data('ilex-height'),
+      innerWidth = width - ilex.widgetsCollection.handlerSize;
 
     let visibleWindows = that.getVisibleWindows();
     visibleWindows[0].element.data('ilex-width', innerWidth * that.position[0]);
