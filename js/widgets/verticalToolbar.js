@@ -28,8 +28,12 @@ ilex.widgetsCollection.verticalToolbar = function ($parentWidget, buttons) {
     let buttonCont = $('<div>').css('display', 'table-row').appendTo(that.container),
       buttonElm = $('<div class="ilex-button">').appendTo(buttonCont)
                       .css('display', 'table-cell')
+                      //padding of ilex-button is 0 10px
+                      //so mimimal width = 20px;
+                      .width(width)
                       .height(buttonHeight)
                       .html(button.html);
+    buttonElm.on('click', button.callback);
     that.buttons.push(buttonElm);
   }
   return that;
