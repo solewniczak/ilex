@@ -19,7 +19,7 @@ ilex.widgetsCollection.textToolbar = function ($parentWidget, textWidget, canvas
         }
         return false;
       },
-      $button = $('<div class="ilex-button ilex-awesome">').appendTo(that.toolbar)
+      $button = $('<div class="ilex-button ilex-rect-button ilex-awesome">').appendTo(that.toolbar)
                       .html(text);
       if (typeof node === 'function') {
         $button.on('mousedown', node);
