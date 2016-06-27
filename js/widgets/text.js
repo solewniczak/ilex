@@ -37,10 +37,9 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
                   .data('ilex-height', height - that.dock.container.height());
 
   that.content = $('<div class="ilex-content">').appendTo(that.scrollWindow)
+                //proper new line handling
+                .css('white-space', 'pre-wrap')
                 .data('ilex-height', height - that.dock.container.height())
-                //absolute offset for the element
-                .data('ilex-startoffset', 0)
-                .data('ilex-endoffset', 0)
                 .attr('contenteditable', 'true');
 
   //add toolbar at the end to give it access to entre text object
@@ -80,8 +79,10 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
 
   that.loadText = function (text) {
     //Filling algorithm
-    //that.content.html(ilex.tools.markup.nl2brWithAddresses(text));
-    ilex.tools.markup.loadText(text, that.content);
+    ilex.tools.markup.createIlexSpan().appendTo(that.content)
+                  .data('ilex-startoffset', 0)
+                  .data('ilex-endoffset', text.length)
+                  .text(text);
   };
 
 

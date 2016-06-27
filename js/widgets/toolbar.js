@@ -9,12 +9,12 @@ if (ilex.widgetsCollection.toolbar !== undefined)
   throw 'ilex.widgetsCollection.console already defined';
 
 
-ilex.widgetsCollection.toolbar = function (dock) {
+ilex.widgetsCollection.toolbar = function (dock, buttons) {
   var that = {};
 
   that.toolbar = $('<div class="ilex-toolbar">').appendTo(dock.container);
   that.addButton = function (html, callback) {
-    let $button = $('<div class="ilex-button">').html(html);
+    let $button = $('<div class="ilex-button ilex-rect-button">').html(html);
     $button.on('click', callback);
     this.toolbar.append($button);
     return $button;
