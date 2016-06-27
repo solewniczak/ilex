@@ -84,11 +84,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, position) {
                   .data('ilex-height', height)
                   .css('position', 'absolute');
 
-
-
-
-  //console.log(that.container);
-
   //Array of {element: jQuery, contentWidget: Objct, setContentWidget: function()}
   var windows = [];
   var addWindow = function(pos) {
