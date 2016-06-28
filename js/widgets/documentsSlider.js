@@ -185,9 +185,14 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, visibleWindows
     that.windowPointer += 1;
 
     ilex.applySize();
-    that.table.animate({'left': slide}, function () {
-      if (callback) {
-        callback();
+    that.table.animate({'left': slide}, {
+      'progress': function () {
+        $(document).trigger('canvasRedraw');
+      },
+      'done': function () {
+        if (callback) {
+          callback();
+        }
       }
     });
   };
@@ -211,9 +216,14 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, visibleWindows
     ilex.applySize();
 
     let slide = that.table.position().left + (rightWidth + ilex.widgetsCollection.handlerSize);
-    that.table.animate({'left': slide}, function () {
-      if (callback) {
-        callback();
+    that.table.animate({'left': slide}, {
+      'progress': function () {
+        $(document).trigger('canvasRedraw');
+      },
+      'done': function () {
+        if (callback) {
+          callback();
+        }
       }
     });
   };
