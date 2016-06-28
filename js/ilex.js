@@ -65,19 +65,20 @@ ilex.views = {};
 ilex.tools = {};
 
 //apply sizes to elements
-ilex.applySize = function(animate) {
-  animate = animate || false;
+ilex.applySize = function(animateWidth, animateHeight) {
+  animateWidth = animateWidth || false,
+  animateHeight = animateHeight || false,
   $('.ilex-resize').trigger('windowResize');
   ilex.window.find('*').each(function () {
-    if ($(this).data('ilex-width')) {
-      if (animate) {
+    if ($(this).data('ilex-width') && $(this).data('ilex-width') !== $(this).width()) {
+      if (animateWidth) {
         $(this).animate({'width': $(this).data('ilex-width')});
       } else {
         $(this).width($(this).data('ilex-width'));
       }
     }
-    if ($(this).data('ilex-height')) {
-      if (animate) {
+    if ($(this).data('ilex-height') && $(this).data('ilex-height') !== $(this).height()) {
+      if (animateHeight) {
         $(this).animate({'height': $(this).data('ilex-height')});
       } else {
         $(this).height($(this).data('ilex-height'));
