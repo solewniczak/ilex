@@ -49,5 +49,17 @@ ilex.widgetsCollection.verticalColumns = function ($parentWidget, columns) {
     that.columns.push($column);
   }
 
+  that.table.on('windowResize', function(event) {
+    var width = that.table.parent().data('ilex-width'),
+      height = that.table.parent().data('ilex-height');
+
+    that.table.data('ilex-width', width);
+    that.table.data('ilex-height', height);
+
+    for (let $column of that.columns) {
+      $column.data('ilex-height', height);
+    }
+  });
+
   return that;
 }

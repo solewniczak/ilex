@@ -24,12 +24,12 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, visibleWindows
     height = $parentWidget.data('ilex-height'),
     buttonsWidth = 20,
     innerWidth = 0,
-    updateInterWidth = function(width) {
+    updateInnerWidth = function(width) {
       innerWidth = width - (that.visibleWindows-1) * ilex.widgetsCollection.handlerSize - 2*buttonsWidth;
     };
 
   that.visibleWindows = visibleWindows;
-  updateInterWidth(width);
+  updateInnerWidth(width);
 
 
   //contains slider and slider navigation buttons
@@ -136,7 +136,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, visibleWindows
                   //send close message to widget
                   curWindow.contentWidget.close();
 
-                  updateInterWidth(width);
+                  updateInnerWidth(width);
                   setEqualWindowPositions();
                   applyWindowPosition();
 
@@ -262,7 +262,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, visibleWindows
     {'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf067;</span>',
      'callback': function (event) {
        that.visibleWindows += 1;
-       updateInterWidth(width);
+       updateInnerWidth(width);
 
        //create new text widndow
        if (that.windows.length < that.windowPointer + that.visibleWindows) {
@@ -279,23 +279,20 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, visibleWindows
 
 
   that.superContainer.on('windowResize', function(event) {
-    /*var width = that.superContainer.parent().data('ilex-width'),
-      height = that.superContainer.parent().data('ilex-height'),
-      innerWidth = width - ilex.widgetsCollection.handlerSize;
+    width = that.superContainer.parent().data('ilex-width');
+    height = that.superContainer.parent().data('ilex-height');
+    updateInnerWidth(width);
 
-    that.superContainer.data('ilex-width', width).data('ilex-height', height);
-    that.container.children().data('ilex-height', height);
+    that.superContainer.data('ilex-width', width);
+    that.container.data('ilex-width', innerWidth);
 
-    let visibleWindows = that.getVisibleWindows();
-    visibleWindows[0].element.data('ilex-width', innerWidth * that.position[0]);
-    visibleWindows[1].element.data('ilex-width', innerWidth * that.position[1]);*/
-    /*var width = that.container.data('ilex-width'),
-      height = that.container.data('ilex-height'),
-      innerWidth = width - ilex.widgetsCollection.handlerSize;
-
-    let visibleWindows = that.getVisibleWindows();
-    visibleWindows[0].element.data('ilex-width', innerWidth * that.position[0]);
-    visibleWindows[1].element.data('ilex-width', innerWidth * that.position[1]);*/
+    that.superContainer.data('ilex-height', height);
+    that.table.data('ilex-height', height);
+    for (let win of that.windows) {
+      win.element.data('ilex-height', height);
+      win.rightSideHandler.data('ilex-height', height);
+    }
+    applyWindowPosition();
   });
 
 

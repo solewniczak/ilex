@@ -25,11 +25,9 @@ ilex.widgetsCollection.verticalToolbar = function ($parentWidget, buttons) {
 
   that.buttons = [];
   for (let button of buttons) {
-    let buttonCont = $('<div>').css('display', 'table-row').appendTo(that.container),
-      buttonElm = $('<div class="ilex-button">').appendTo(buttonCont)
+    let buttonRow = $('<div>').css('display', 'table-row').appendTo(that.container),
+      buttonElm = $('<div class="ilex-button">').appendTo(buttonRow)
                       .css('display', 'table-cell')
-                      //padding of ilex-button is 0 10px
-                      //so mimimal width = 20px;
                       .width(width)
                       .height(buttonHeight)
                       .html(button.html);
@@ -55,5 +53,15 @@ ilex.widgetsCollection.verticalToolbar = function ($parentWidget, buttons) {
     }
     that.buttons.push(buttonElm);
   }
+
+  that.container.on('windowResize', function(event) {
+    var width = that.container.parent().data('ilex-width'),
+      height = that.container.parent().data('ilex-height'),
+      buttonHeight = height/buttons.length;
+    that.container.data('ilex-height', height);
+    for (let $button of that.buttons) {;
+      $button.data('ilex-height', buttonHeight);
+    }
+  });
   return that;
 };
