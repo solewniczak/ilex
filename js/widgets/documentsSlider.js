@@ -16,7 +16,7 @@ if (ilex.widgetsCollection.toolbar === undefined)
 if (ilex.widgetsCollection.documentsSlider !== undefined)
   throw 'ilex.widgetsCollection.horizontalSplit already defined';
 
-ilex.widgetsCollection.documentsSlider = function ($parentWidget, visibleWindows) {
+ilex.widgetsCollection.documentsSlider = function ($parentWidget, visibleWindows, newWindowWidgetCallback) {
   var that = {},
     //which window display left most
     windowPointer = 0,
@@ -82,22 +82,28 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, visibleWindows
                             .data('ilex-height', height)
                             .css('background', '#000');
   };
-  that.applyWindowPosition = function () {
+  //private
+  var applyWindowPosition = function () {
     for (let i = 0; i < that.visibleWindows; i++) {
       let ratio = that.position[i],
         win = that.windows[that.windowPointer + i];
-      if (win) {
         win.element.data('ilex-width', innerWidth * ratio);
-      } else {
-        that.addWindow(ratio);
-      }
+    }
+  },
+  setEqualWindowPositions = function() {
+    that.position = [];
+    let ratio = 1.0/that.visibleWindows;
+    for (let i = 0; i < that.visibleWindows; i++) {
+      that.position.push(ratio);
     }
   };
-  that.addWindow = function(widthRatio) {
-      var newWindow = {};
+  that.addWindow = function() {
+      var newWindow = {},
+        winInd = that.windows.length;
       newWindow.element = $('<div class="ilex-sliderWindow">').appendTo(that.table)
+                                .data('ilex-window', winInd)
                                 .css('display', 'table-cell')
-                                .data('ilex-width', innerWidth * widthRatio)
+                                //width is set by applyWindowPosition
                                 .data('ilex-height', height);
       newWindow.contentWidget = undefined;
       newWindow.setContentWidget = function(contentWidget) {
@@ -105,28 +111,67 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, visibleWindows
         this.toolbar = ilex.widgetsCollection.toolbar(contentWidget.dock);
         var curWindow = this;
 
+        //add close window button
         this.toolbar.addButton('<span class="ilex-awesome">&#xf068;</span>',
             function(event) {
               var windowHeight = $(window).height();
-              curWindow.contentWidget.container.css('position', 'relative');
+
+              //bakground for animanito purposes
+              curWindow.contentWidget.container.css('background', '#fff')
+                                               .css('position', 'relative');
               curWindow.contentWidget.container.animate({'top': windowHeight}, function() {
-                this.remove();
-                //remove slider window
-                curWindow.element.remove();
+                var removeWindow = function () {
+                  var winInd = curWindow.element.data('ilex-window');
+                  that.windows.splice(winInd, 1);
+                  //update indexes of windows
+                  for (let i = winInd; i < that.windows.length; i++) {
+                    let win = that.windows[i];
+                    win.element.data('ilex-window', i);
+                    win.rightSideHandler.data('ilex-window', i);
+                  }
+
+                  curWindow.element.remove();
+                  curWindow.rightSideHandler.remove();
+
+                  //send close message to widget
+                  curWindow.contentWidget.close();
+
+                  updateInterWidth(width);
+                  setEqualWindowPositions();
+                  applyWindowPosition();
+
+                  ilex.applySize();
+                }
+
+                that.visibleWindows -= 1;
+
+                if (that.visibleWindows === 0) {
+                  that.visibleWindows = 1;
+                  //if last window was closed, create new window
+                  if (that.windows.length === 1) {
+                    let lastWindow = that.windows[0],
+                      newWindowWidget = newWindowWidgetCallback(lastWindow.element);
+                    lastWindow.setContentWidget(newWindowWidget);
+                  //we don't have right side document but we have left side one
+                  } else if (that.windowPointer === that.windows.length - 1) {
+                    that.slideRight(function () {
+                      removeWindow();
+                    });
+                  } else {
+                    removeWindow();
+                  }
+                } else {
+                  removeWindow();
+                }
               });
             });
       };
-      newWindow.rightSideHandler = addHandler(that.windows.length);
+      newWindow.rightSideHandler = addHandler(winInd);
       that.windows.push(newWindow);
       return newWindow;
   };
 
-  //remove current window
-  that.removeCurrentWindow = function () {
-
-  };
-
-  that.slideLeft = function () {
+  that.slideLeft = function (callback) {
     if (that.windowPointer + that.visibleWindows >= that.windows.length) {
       return;
     }
@@ -140,33 +185,45 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, visibleWindows
     that.windowPointer += 1;
 
     ilex.applySize();
-    that.table.animate({'left': slide});
+    that.table.animate({'left': slide}, function () {
+      if (callback) {
+        callback();
+      }
+    });
   };
 
-  that.slideRight = function () {
+  that.slideRight = function (callback) {
     if (that.windowPointer === 0) {
       return;
     }
+
     that.windowPointer -= 1;
     var rightWidth = that.windows[that.windowPointer + that.visibleWindows]
                       .element.data('ilex-width'),
-      tablePos = that.table.position(),
-      slide = tablePos.left + (rightWidth + ilex.widgetsCollection.handlerSize);
+      //the window to show
+      windowToShow = that.windows[that.windowPointer];
 
-    //newly shown window
-    that.windows[that.windowPointer].element.data('ilex-width', rightWidth);
+    //align left position after resizing windowToShow
+    that.table.css('left', that.table.position().left + (windowToShow.element.data('ilex-width') - rightWidth));
+
+    //the window to show
+    windowToShow.element.data('ilex-width', rightWidth);
     ilex.applySize();
-    console.log(tablePos.left, slide);
-    that.table.animate({'left': slide});
+
+    let slide = that.table.position().left + (rightWidth + ilex.widgetsCollection.handlerSize);
+    that.table.animate({'left': slide}, function () {
+      if (callback) {
+        callback();
+      }
+    });
   };
 
   //create start windows
-  that.position = [];
-  let ratio = 1.0/that.visibleWindows;
   for (let i = 0; i < that.visibleWindows; i++) {
-    that.position.push(ratio);
-    that.addWindow(ratio);
+    that.addWindow();
   }
+  setEqualWindowPositions();
+  applyWindowPosition();
 
   //create buttons
   let fontSize = '20px';
@@ -176,6 +233,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, visibleWindows
         that.slideRight();
       }
     },
+    //Freeze window
     {
       'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf152;</span>',
       'htmlOn': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf191;</span>',
@@ -194,21 +252,26 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, visibleWindows
   ]);
 
   ilex.widgetsCollection.verticalToolbar(that.rightButtons, [
+    //forward
     { 'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf105;</span>',
       'callback': function(event) {
         that.slideLeft();
       }
-    }, //forward
+    },
+    //add
     {'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf067;</span>',
      'callback': function (event) {
        that.visibleWindows += 1;
        updateInterWidth(width);
-       let ratio = 1.0/that.visibleWindows;
-       that.position = [];
-       for (let i = 0; i < that.visibleWindows; i++) {
-         that.position.push(ratio);
+
+       //create new text widndow
+       if (that.windows.length < that.windowPointer + that.visibleWindows) {
+         let newWindow = that.addWindow(),
+          newWindowWidget = newWindowWidgetCallback(newWindow.element);
+        newWindow.setContentWidget(newWindowWidget);
        }
-       that.applyWindowPosition();
+       setEqualWindowPositions();
+       applyWindowPosition();
        ilex.applySize(true);
      }
    }
@@ -272,17 +335,13 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, visibleWindows
         that.position[winInd - that.windowPointer] = newLeftWidth/innerWidth;
         that.position[winInd + 1 - that.windowPointer] = newRightWidth/innerWidth;
 
-        that.applyWindowPosition();
+        applyWindowPosition();
         ilex.applySize();
 
         //prevent text selection while resizing
         event.preventDefault();
     });
   });
-  that.table.find('ilex-handler').on('dblclick', function (event) {
-    //return to start position
-    that.position = position;
-    ilex.applySize();
-  });
+
   return that;
 };

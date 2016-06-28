@@ -85,6 +85,10 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
                   .text(text);
   };
 
+  that.close = function () {
+    ilex.view.console.log('document closed');
+  }
+
 
 
   that.container.on('windowResize', function(event) {
