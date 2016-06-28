@@ -72,14 +72,22 @@ ilex.applySize = function(animateWidth, animateHeight) {
   ilex.window.find('*').each(function () {
     if ($(this).data('ilex-width') && $(this).data('ilex-width') !== $(this).width()) {
       if (animateWidth) {
-        $(this).animate({'width': $(this).data('ilex-width')});
+        $(this).animate({'width': $(this).data('ilex-width')}, {
+          'progress': function () {
+            $(document).trigger('canvasRedraw');
+          }
+        });
       } else {
         $(this).width($(this).data('ilex-width'));
       }
     }
     if ($(this).data('ilex-height') && $(this).data('ilex-height') !== $(this).height()) {
       if (animateHeight) {
-        $(this).animate({'height': $(this).data('ilex-height')});
+        $(this).animate({'height': $(this).data('ilex-height')}, {
+          'progress': function () {
+            $(document).trigger('canvasRedraw');
+          }
+        });
       } else {
         $(this).height($(this).data('ilex-height'));
       }

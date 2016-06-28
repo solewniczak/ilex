@@ -177,8 +177,6 @@ func requestTextDump(request *IlexMessage, ws *websocket.Conn) error {
 				{"1+10", "100+200"},
 				{"1+10", "500+100"},
 				{"200+20", "310+10"},
-				{"400+10 500+10", "1000+10"},
-				{"401+5", "312+5"},
 			}
 
 			response.Action = TEXT_RETRIEVED
