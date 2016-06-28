@@ -41,10 +41,51 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
                 .css('white-space', 'pre-wrap')
                 .data('ilex-height', height - that.dock.container.height())
                 .attr('contenteditable', 'true');
+  //initial span
+  ilex.tools.markup.createIlexSpan().appendTo(that.content)
+                                  .data('ilex-startoffset', 0)
+                                  .data('ilex-endoffset', 0);
+  //new lines custos
+  $('<div class="ilex-newlineGuard">').appendTo(that.content).css('display', 'block').text('\n');
 
   //add toolbar at the end to give it access to entre text object
   that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container, that, canvas);
 
+
+  that.content.on('keydown', function(event) {
+    //Disable Ctrl shortcouts
+    if (event.ctrlKey) {
+      event.preventDefault();
+    }
+  });
+
+  that.content.on('keypress', function(event) {
+    let selection = window.getSelection(),
+      $anchorParent = $(selection.anchorNode.parentNode);
+
+    console.log($anchorParent);
+    if ($anchorParent.hasClass('ilex-newlineGuard')) {
+      let lastSpan = $anchorParent.prev()[0],
+        lastSpanContent = lastSpan.childNodes[0];
+
+      if (event.keyCode === 13) {
+        lastSpan.innerHTML += '\n';
+        //scroll to end after inserting new lines
+        that.scrollWindow.scrollTop(that.scrollWindow[0].scrollHeight);
+      } else {
+        if (lastSpan.innerHTML.slice(-1) !== '\n') {
+          lastSpan.innerHTML += '\n'
+        }
+        lastSpan.innerHTML += String.fromCharCode(event.which);
+        that.scrollWindow.scrollTop(that.scrollWindow[0].scrollHeight);
+      }
+      selection.collapse(lastSpanContent, lastSpan.innerHTML.length);
+      return false;
+    } else if (event.keyCode === 13) {
+      document.execCommand('insertHTML', false, '\n');
+      return false;
+    }
+  });
 
   //draw selection
   $(document).on('selectionchange', function(event) {
@@ -65,22 +106,10 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
     $(document).trigger('canvasRedraw');
   });
 
-  //prevent inserting block elements when pressing return key
-  that.content.on('keydown', function(event) {
-    // trap the return key being pressed
-    if (event.keyCode === 13) {
-      let selection = window.getSelection();
-      // insert 2 br tags (if only one br tag is inserted the cursor won't go to the next line)
-      document.execCommand('insertHTML', false, '<br><br>');
-      // prevent the default behaviour of return key pressed
-      event.preventDefault();
-    }
-  });
 
   that.loadText = function (text) {
     //Filling algorithm
-    ilex.tools.markup.createIlexSpan().appendTo(that.content)
-                  .data('ilex-startoffset', 0)
+    that.content.find('span')
                   .data('ilex-endoffset', text.length)
                   .text(text);
   };
@@ -112,15 +141,6 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
   that.groupSelections = false;
   //nothing is selected at the begining
   that.selectionRanges = [];
-  /*that.container.on('mouseenter', function(event) {
-    var selection = window.getSelection();
-    selection.removeAllRanges();
-
-    for (let range of that.selectionRanges) {
-      selection.addRange(range);
-    }
-    //$(document).trigger('canvasRedraw');
-  });*/
 
   //we don't want standard browsers draging procedure
   //it confuses the users
@@ -129,13 +149,13 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
   });
 
   //Ctrl + A doesn't work yet
-  that.container.on('mouseup', function (event) {
+  that.content.on('mouseup', function (event) {
     //selection finished, used by finishLinkButton
     that.container.trigger('selectend');
     //group ranges
     that.selectionRanges = ilex.tools.range.groupRanges(that.selectionRanges);
   });
-  that.container.on('mousedown', function (event) {
+  that.content.on('mousedown', function (event) {
     //we have to clear entire container to avoid 1 px artifact between
     //toolbar and content
     var containerOffset = that.container.offset(),
