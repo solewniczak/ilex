@@ -46,7 +46,7 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
                                   .data('ilex-startoffset', 0)
                                   .data('ilex-endoffset', 0);
   //new lines custos
-  $('<div class="ilex-newlineGuard">').appendTo(that.content).css('display', 'block').text('\n');
+  $('<div class="ilex-newlineGuard">').appendTo(that.content);
 
   //add toolbar at the end to give it access to entre text object
   that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container, that, canvas);
@@ -63,26 +63,16 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
     let selection = window.getSelection(),
       $anchorParent = $(selection.anchorNode.parentNode);
 
-    console.log($anchorParent);
-    if ($anchorParent.hasClass('ilex-newlineGuard')) {
-      let lastSpan = $anchorParent.prev()[0],
-        lastSpanContent = lastSpan.childNodes[0];
-
-      if (event.keyCode === 13) {
-        lastSpan.innerHTML += '\n';
-        //scroll to end after inserting new lines
+    if (event.keyCode === 13) {
+      if ($anchorParent.is(that.content.find('span:last'))) {
+        if ($anchorParent.text().slice(-1) !== '\n') {
+          document.execCommand('insertHTML', false, '\n');
+        }
+        document.execCommand('insertHTML', false, '\n');
         that.scrollWindow.scrollTop(that.scrollWindow[0].scrollHeight);
       } else {
-        if (lastSpan.innerHTML.slice(-1) !== '\n') {
-          lastSpan.innerHTML += '\n'
-        }
-        lastSpan.innerHTML += String.fromCharCode(event.which);
-        that.scrollWindow.scrollTop(that.scrollWindow[0].scrollHeight);
+        document.execCommand('insertHTML', false, '\n');
       }
-      selection.collapse(lastSpanContent, lastSpan.innerHTML.length);
-      return false;
-    } else if (event.keyCode === 13) {
-      document.execCommand('insertHTML', false, '\n');
       return false;
     }
   });
