@@ -58,18 +58,7 @@ $(document).ready(function(){
 	    	loadedTexts++;
 	    	if (loadedTexts === 2) {
           //experiments with documentsSlider
-          let wind1 = ilex.view.slider.addWindow(),
-            wind2 = ilex.view.slider.addWindow(),
-            hiddenText1 = ilex.widgetsCollection.text(wind1.element, ilex.canvas),
-            hiddenText2 = ilex.widgetsCollection.text(wind2.element, ilex.canvas);
-          wind1.setContentWidget(hiddenText1);
-          wind2.setContentWidget(hiddenText2);
-          //applySizes after creating new window
-          hiddenText1.loadText("Gdańsk (kaszb. Gduńsk[4], łac. Dantiscum, Dantis, Gedanum[5], niem. Danzig) – miasto na prawach powiatu w północnej Polsce, położone nad Morzem Bałtyckim, u ujścia Motławy do Wisły, nad Zatoką Gdańską, na Pobrzeżu Gdańskim. Centrum kulturalne, naukowe i gospodarcze oraz węzeł komunikacyjny północnej Polski, stolica województwa pomorskiego. Ośrodek gospodarki morskiej z dużym portem handlowym.");
-          hiddenText2.loadText("oN-Line System (NLS) – system przeznaczony do współpracy, zaprojektowany w latach 60. przez Douglasa Engelbarta i badaczy z Augmentation Research Center w Stanford Research Institute. System ten jako pierwszy praktycznie wdrażał łącza hipertekstowe, mysz komputerową (wynalezioną przez Engelbarta i Billa Englisha), monitor, okna, prezentacje komputerowe i inne nowoczesne pomysły. System był finansowany przez ARPA, NASA i U.S. Air Force.");
-          ilex.applySize();
-          ilex.view.slider.slideLeft();
-          ilex.applySize();
+
 	    	  //load links
 	    	  for (let link of parameters.links) {
 	    	    ilex.tools.connections.createLinkVspanSets(ilex.view.leftText, link[0],

@@ -65,20 +65,29 @@ ilex.views = {};
 ilex.tools = {};
 
 //apply sizes to elements
-ilex.applySize = function(animate) {
-  animate = animate || false;
+ilex.applySize = function(animateWidth, animateHeight) {
+  animateWidth = animateWidth || false,
+  animateHeight = animateHeight || false,
   $('.ilex-resize').trigger('windowResize');
   ilex.window.find('*').each(function () {
-    if ($(this).data('ilex-width')) {
-      if (animate) {
-        $(this).animate({'width': $(this).data('ilex-width')});
+    if ($(this).data('ilex-width') && $(this).data('ilex-width') !== $(this).width()) {
+      if (animateWidth) {
+        $(this).animate({'width': $(this).data('ilex-width')}, {
+          'progress': function () {
+            $(document).trigger('canvasRedraw');
+          }
+        });
       } else {
         $(this).width($(this).data('ilex-width'));
       }
     }
-    if ($(this).data('ilex-height')) {
-      if (animate) {
-        $(this).animate({'height': $(this).data('ilex-height')});
+    if ($(this).data('ilex-height') && $(this).data('ilex-height') !== $(this).height()) {
+      if (animateHeight) {
+        $(this).animate({'height': $(this).data('ilex-height')}, {
+          'progress': function () {
+            $(document).trigger('canvasRedraw');
+          }
+        });
       } else {
         $(this).height($(this).data('ilex-height'));
       }
