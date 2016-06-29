@@ -115,8 +115,7 @@ func get_string_from_addresses(addresses [][2]int, total_runes int, database *mg
 func requestTextDump(request *IlexMessage, ws *websocket.Conn) error {
 	requested_text_id := request.Parameters[TEXT].(string)
 
-	var response IlexMessage
-	response.Init()
+	response := NewIlexResponse(request)
 
 	db_session, err := mgo.Dial("localhost")
 	if err != nil {
