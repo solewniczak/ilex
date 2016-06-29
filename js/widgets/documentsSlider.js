@@ -16,7 +16,7 @@ if (ilex.widgetsCollection.toolbar === undefined)
 if (ilex.widgetsCollection.documentsSlider !== undefined)
   throw 'ilex.widgetsCollection.horizontalSplit already defined';
 
-ilex.widgetsCollection.documentsSlider = function ($parentWidget, visibleWindows, newWindowWidgetCallback) {
+ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidgetCallback) {
   var that = {},
     //which window display left most
     windowPointer = 0,
@@ -27,9 +27,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, visibleWindows
     updateInnerWidth = function(width) {
       innerWidth = width - (that.visibleWindows-1) * ilex.widgetsCollection.handlerSize - 2*buttonsWidth;
     };
-
-  that.visibleWindows = visibleWindows;
-  updateInnerWidth(width);
 
 
   //contains slider and slider navigation buttons
@@ -228,10 +225,14 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, visibleWindows
     });
   };
 
-  //create start windows
-  for (let i = 0; i < that.visibleWindows; i++) {
-    that.addWindow();
-  }
+  //create default window
+  that.visibleWindows = 1;
+  updateInnerWidth(width);
+
+  let win = that.addWindow(),
+    newWindowWidget = newWindowWidgetCallback(win.element);
+  win.setContentWidget(newWindowWidget);
+
   setEqualWindowPositions();
   applyWindowPosition();
 

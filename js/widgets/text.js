@@ -33,6 +33,7 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
   that.scrollWindow = $('<div class="ilex-scrollWindow">')
                   .appendTo(that.container)
                   .css('overflow', 'auto')
+                  .css('overflow-x', 'hidden')
                   .data('ilex-width', width)
                   .data('ilex-height', height - that.dock.container.height());
 
@@ -61,15 +62,36 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
 
   that.content.on('keypress', function(event) {
     let selection = window.getSelection(),
+      selRange = selection.getRangeAt(0),
       $anchorParent = $(selection.anchorNode.parentNode);
 
+
+    if (selection.anchorNode === that.content[0]) {
+      let span = that.content.find('span:first')[0];
+      span.innerHTML += String.fromCharCode(event.which);
+      selection.collapse(span.childNodes[0], 1);
+
+      return false;
+    }
+
     if (event.keyCode === 13) {
+      console.log(selection.anchorOffset, $anchorParent.text().length);
       if ($anchorParent.is(that.content.find('span:last'))) {
-        if ($anchorParent.text().slice(-1) !== '\n') {
+        if ($anchorParent.text().slice(-1) !== '\n'
+            && selection.anchorOffset === $anchorParent.text().length) {
           document.execCommand('insertHTML', false, '\n');
         }
         document.execCommand('insertHTML', false, '\n');
-        that.scrollWindow.scrollTop(that.scrollWindow[0].scrollHeight);
+
+        let offset = that.content.offset();
+        let lineHeight = parseInt($anchorParent.css('line-height'));
+
+        //if new line is hidden scroll to it
+        if (selRange.getClientRects()[1].bottom - offset.top >=
+            that.scrollWindow.scrollTop() + that.scrollWindow.height() - lineHeight) {
+          that.scrollWindow.scrollTop(that.scrollWindow.scrollTop() + lineHeight);
+        }
+        //that.scrollWindow.scrollTop(that.scrollWindow[0].scrollHeight);
       } else {
         document.execCommand('insertHTML', false, '\n');
       }
