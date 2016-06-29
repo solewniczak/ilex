@@ -17,11 +17,11 @@ ilex.views.twoColumn = function(canvas) {
   view.fileSelector = ilex.widgetsCollection.fileSelector(view.topVertical.top);
   view.console = ilex.widgetsCollection.console(view.bottomVertical.bottom);
 
-  view.slider = ilex.widgetsCollection.documentsSlider(view.bottomVertical.top, 2, function ($parentNode) {
+  view.slider = ilex.widgetsCollection.documentsSlider(view.bottomVertical.top, function ($parentNode) {
     return ilex.widgetsCollection.text($parentNode, canvas);
   });
 
-  view.leftText = ilex.widgetsCollection.text(view.slider.windows[0].element, canvas);
+  /*view.leftText = ilex.widgetsCollection.text(view.slider.windows[0].element, canvas);
   view.rightText = ilex.widgetsCollection.text(view.slider.windows[1].element, canvas);
 
   view.slider.windows[0].setContentWidget(view.leftText);
@@ -34,19 +34,19 @@ ilex.views.twoColumn = function(canvas) {
   view.rightText.dock.toolbar.setAlternateTextWidget(view.leftText);
 
   view.finishLinkButton = ilex.widgetsCollection
-                                      .finishLinkButton(ilex.window,
-                                                        canvas,
-                                                        view.leftText,
-                                                        view.rightText,
-                                                        view.slider.windows[0].rightSideHandler);
+                    .finishLinkButton(ilex.window,
+                                      canvas,
+                                      view.leftText,
+                                      view.rightText,
+                                      view.slider.windows[0].rightSideHandler);*/
 
   /*Array of view links*/
   view.links = [];
   view.connections = ilex.widgetsCollection.connections($(window), canvas);
 
   //move scrollbar to left
-  view.leftText.scrollWindow.css('direction', 'rtl');
-  view.leftText.content.css('direction', 'ltr');
+  //view.leftText.scrollWindow.css('direction', 'rtl');
+  //view.leftText.content.css('direction', 'ltr');
 
   //create margin for better link presentation
   //view.leftText.content.css('margin-right', '10px');

@@ -14,7 +14,8 @@ div:focus {
 /*becouse it's flat and looks well :)*/
 /*https://metroui.org.ua/*/
 .ilex-content span::selection, .ilex-content br::selection {
-  background: transparent; /* don't draw default selection color */
+  /*rgba(215, 40, 40, 0.5)*/
+  background: rgba(215, 40, 40, 0.2); /* don't draw default selection color */
 }
 
 /*ilex links styling*/

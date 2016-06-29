@@ -1,49 +1,31 @@
 "use strict";
 
-var ilexServer = {};
-ilexServer.host = "ws://127.0.0.1:9000/echobot";
-ilexServer.socket = null;
-ilexServer.init = function (send, recieve) {
-	try {
-		ilexServer.socket = new WebSocket(ilexServer.host);
-		console.log('WebSocket - status '+ilexServer.socket);
-		ilexServer.socket.onopen = function(msg) {
-							   console.log("Welcome - status ", this.readyState);
-                 send();
-						   };
-		ilexServer.socket.onmessage = function(msg) {
-                 recieve(msg.data);
-						   };
-		ilexServer.socket.onclose = function(msg) {
-							   console.log("Disconnected - status ", this.readyState);
-						   };
-	} catch(ex) {
-		console.log(ex);
+var ilex.tools.protocol = {};
+ilex.tools.protocol.host = "ws://127.0.0.1:9000/echobot";
+ilex.tools.protocol.socket = null;
+
+ilex.tools.protocol.init = function (openCallback, messageCallback) {
+	ilexServer.socket = new WebSocket(ilex.tools.protocol.host);
+	console.log('WebSocket - status '+ilex.tools.protocol.socket);
+	ilex.tools.protocol.socket.onopen = function(msg) {
+						   console.log("Welcome - status ", this.readyState);
+               openCallback();
+					   };
+	ilex.tools.protocol.socket.onmessage = function(msg) {
+               messageCallback(msg.data);
+					   };
+	ilex.tools.protocol.socket.onclose = function(msg) {
+						   console.log("Disconnected - status ", this.readyState);
+					   };
+};
+
+ilex.tools.protocol.send = function (json) {
+	ilexServer.socket.send(JSON.stringify(json));
+};
+
+ilex.tools.protocol.quit = function () {
+  if (ilex.tools.protocol.socket != null) {
+		ilex.tools.protocol.socket.close();
+		ilex.tools.protocol.socket.socket = null;
 	}
-};
-
-ilexServer.recieve = function (data) {
-	
-};
-
-ilexServer.send = function (json) {
-	try {
-		ilexServer.socket.send(JSON.stringify(json));
-		console.log('Sent: ', json);
-	} catch(ex) {
-		console.log(ex);
-	}
-};
-
-ilexServer.quit = function () {
-  if (ilexServer.socket != null) {
-    console.log("Goodbye!");
-		ilexServer.socket.close();
-		ilexServer.socket = null;
-	}
-};
-
-ilexServer.reconnect = function () {
-	ilexServer.quit();
-	ilexServer.init();
 };

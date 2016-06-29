@@ -24,7 +24,13 @@ $(document).ready(function(){
 
   ilex.view = ilex.views.twoColumn(ilex.canvas);
 
-  var loadedTexts = 0;
+  ilex.server = ilex.tools.server.create('ws://127.0.0.1:9000/echobot');
+  //download text list
+  ilex.server.send('requestAllTextsInfo', {}, function (msg) {
+    console.log(msg);
+  });
+
+  /*var loadedTexts = 0;
 
   // init with requesting info about all texts
   ilexServer.init(function () {
@@ -90,6 +96,6 @@ $(document).ready(function(){
     	ilex.view.console.log("Received unexpected response");
 		$(document).trigger('canvasRedraw');
 	}
-  });
+  });*/
 
 });
