@@ -93,8 +93,8 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
     for (let i = 0; i < that.visibleWindows; i++) {
       that.position.push(ratio);
     }
-  };
-  that.addWindow = function() {
+  },
+  addWindow = function() {
       var newWindow = {},
         winInd = that.windows.length;
       newWindow.element = $('<div class="ilex-sliderWindow">').appendTo(that.table)
@@ -168,6 +168,26 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
       return newWindow;
   };
 
+  that.createWindow = function () {
+    var win = addWindow(),
+      newWindowWidget = newWindowWidgetCallback(win.element);
+    win.setContentWidget(newWindowWidget);
+    return win;
+  };
+
+  that.createWindowSplitSlider = function() {
+    that.visibleWindows += 1;
+    updateInnerWidth(width);
+
+    //create new text widndow
+    if (that.windows.length < that.windowPointer + that.visibleWindows) {
+      that.createWindow();
+    }
+    setEqualWindowPositions();
+    applyWindowPosition();
+    ilex.applySize(true);
+  }
+
   that.slideLeft = function (callback) {
     if (that.windowPointer + that.visibleWindows >= that.windows.length) {
       return;
@@ -229,9 +249,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
   that.visibleWindows = 1;
   updateInnerWidth(width);
 
-  let win = that.addWindow(),
-    newWindowWidget = newWindowWidgetCallback(win.element);
-  win.setContentWidget(newWindowWidget);
+  that.createWindow();
 
   setEqualWindowPositions();
   applyWindowPosition();
@@ -271,20 +289,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
     },
     //add
     {'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf067;</span>',
-     'callback': function (event) {
-       that.visibleWindows += 1;
-       updateInnerWidth(width);
-
-       //create new text widndow
-       if (that.windows.length < that.windowPointer + that.visibleWindows) {
-         let newWindow = that.addWindow(),
-          newWindowWidget = newWindowWidgetCallback(newWindow.element);
-        newWindow.setContentWidget(newWindowWidget);
-       }
-       setEqualWindowPositions();
-       applyWindowPosition();
-       ilex.applySize(true);
-     }
+     'callback': that.createWindowSplitSlider
    }
   ]);
 

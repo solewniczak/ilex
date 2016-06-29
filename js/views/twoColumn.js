@@ -17,9 +17,18 @@ ilex.views.twoColumn = function(canvas) {
   view.fileSelector = ilex.widgetsCollection.fileSelector(view.topVertical.top);
   view.console = ilex.widgetsCollection.console(view.bottomVertical.bottom);
 
-  view.slider = ilex.widgetsCollection.documentsSlider(view.bottomVertical.top, function ($parentNode) {
-    return ilex.widgetsCollection.text($parentNode, canvas);
+  view.slider = ilex.widgetsCollection.documentsSlider(view.bottomVertical.top,
+    function ($parentNode) {
+      return ilex.widgetsCollection.text($parentNode, canvas);
   });
+
+  view.loadText = function(winInd, text) {
+    if (winInd >= view.slider.windows.length) {
+      throw 'window: ' + winInd + 'does not exist';
+    }
+    view.slider.windows[winInd].contentWidget.loadText(text);
+  };
+
 
   /*view.leftText = ilex.widgetsCollection.text(view.slider.windows[0].element, canvas);
   view.rightText = ilex.widgetsCollection.text(view.slider.windows[1].element, canvas);
