@@ -63,5 +63,19 @@ ilex.tools.server.create = function (host) {
     socket = null;
   }
 
+  //actions
+  that.action = {};
+  that.action.charAdd = function(tabId, position, character) {
+    that.sendAndRecieve('charAdd', {
+      'tab': tabId,
+      'position': position,
+      'character': character,
+    },
+    {
+      'charAdded': function(params) {
+      }
+    });
+  };
+
   return that;
 };

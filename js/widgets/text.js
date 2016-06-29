@@ -8,17 +8,17 @@ if (ilex.widgetsCollection === undefined)
 if (ilex.widgetsCollection.text !== undefined)
   throw 'ilex.widgetsCollection.horizontalSplit already defined';
 
-ilex.widgetsCollection.text = function ($parentWidget, canvas) {
+ilex.widgetsCollection.text = function (windowObject, canvas) {
   if (canvas === undefined)
     throw 'canvas undefined';
   var that = {},
-    width = $parentWidget.data('ilex-width'),
-    height = $parentWidget.data('ilex-height');
+    width = windowObject.element.data('ilex-width'),
+    height = windowObject.element.data('ilex-height');
 
   that.container = $('<div class="ilex-resize ilex-text">')
                   .data('ilex-width', width)
                   .data('ilex-height', height);
-  $parentWidget.html(that.container);
+  windowObject.element.html(that.container);
 
   that.setAlternateTextWidget = function (widget) {
     that.container.data('ilex-alternate', widget);
@@ -62,41 +62,61 @@ ilex.widgetsCollection.text = function ($parentWidget, canvas) {
 
   that.content.on('keypress', function(event) {
     let selection = window.getSelection(),
-      selRange = selection.getRangeAt(0),
-      $anchorParent = $(selection.anchorNode.parentNode);
+      character, position, $parentSpan;
 
+    //when we are outside span
+    if (selection.anchorNode === that.content[0] && event.which !== 0) {
+      $parentSpan = that.content.find('span:first');
+      character = String.fromCharCode(event.which);
+      position = 0;
+      $parentSpan.append(character);
+      selection.collapse($paretnSpan[0].childNodes[0], 1);
+    } else {
+      $parentSpan = $(selection.anchorNode.parentNode);
+      if (event.keyCode === 13) {
 
-    if (selection.anchorNode === that.content[0]) {
-      let span = that.content.find('span:first')[0];
-      span.innerHTML += String.fromCharCode(event.which);
-      selection.collapse(span.childNodes[0], 1);
+        character = '\n';
+        position = selection.anchorOffset;
 
-      return false;
-    }
+        if ($parentSpan.is(that.content.find('span:last'))) {
+        /*  if ($anchorParent.text().slice(-1) !== '\n'
+              && selection.anchorOffset === $anchorParent.text().length) {
+            document.execCommand('insertHTML', false, '\n');
+          }*/
 
-    if (event.keyCode === 13) {
-      console.log(selection.anchorOffset, $anchorParent.text().length);
-      if ($anchorParent.is(that.content.find('span:last'))) {
-        if ($anchorParent.text().slice(-1) !== '\n'
-            && selection.anchorOffset === $anchorParent.text().length) {
+          document.execCommand('insertHTML', false, '\n');
+
+          let offset = that.content.offset();
+          let lineHeight = parseInt($anchorParent.css('line-height'));
+
+          //if new line is hidden scroll to it
+          if (selRange.getClientRects()[1].bottom - offset.top >=
+              that.scrollWindow.scrollTop() + that.scrollWindow.height() - lineHeight) {
+            that.scrollWindow.scrollTop(that.scrollWindow.scrollTop() + lineHeight);
+          }
+          //that.scrollWindow.scrollTop(that.scrollWindow[0].scrollHeight);
+        } else {
           document.execCommand('insertHTML', false, '\n');
         }
-        document.execCommand('insertHTML', false, '\n');
-
-        let offset = that.content.offset();
-        let lineHeight = parseInt($anchorParent.css('line-height'));
-
-        //if new line is hidden scroll to it
-        if (selRange.getClientRects()[1].bottom - offset.top >=
-            that.scrollWindow.scrollTop() + that.scrollWindow.height() - lineHeight) {
-          that.scrollWindow.scrollTop(that.scrollWindow.scrollTop() + lineHeight);
-        }
-        //that.scrollWindow.scrollTop(that.scrollWindow[0].scrollHeight);
-      } else {
-        document.execCommand('insertHTML', false, '\n');
+      } else if (event.which !== 0) {
+        character = String.fromCharCode(event.which);
+        position = selection.anchorOffset;
+        document.execCommand('insertHTML', false, String.fromCharCode(event.which));
       }
-      return false;
     }
+    //update offsets
+    $parentSpan.data('ilex-endoffset', $parentSpan.data('ilex-endoffset') + 1);
+    $parentSpan.nextAll().each(function () {
+      var startOffset = $(this).data('ilex-startoffset'),
+        endOffset = $(this).data('ilex-endoffset');
+
+      $(this).data('ilex-startoffset', startOffset+1);
+      $(this).data('ilex-endoffset', endOffset+1);
+    });
+    ilex.server.action.charAdd(windowObject.id,
+                              position + $parentSpan.data('ilex-startoffset'),
+                              character);
+    event.preventDefault();
   });
 
   //draw selection
