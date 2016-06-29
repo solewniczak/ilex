@@ -27,16 +27,16 @@ ilex.tools.server.create = function (host) {
   socket.onmessage = function(event) {
     var msg = JSON.parse(event.data);
     console.log('Recieve: ', msg);
-    if (typeof callbacks[msg.id] === 'function') {
-      callbacks[msg.id](msg);
+    if (typeof callbacks[msg.Id] === 'function') {
+      callbacks[msg.Id](msg);
     }
   };
 
   that.send = function(action, params, callback) {
     var msg = {
-      'id': id,
+      'Id': id,
       'action': action,
-      'params': params
+      'parameters': params
     };
     if (socket.readyState === 1) {
       send(msg);
@@ -47,8 +47,20 @@ ilex.tools.server.create = function (host) {
     id += 1;
   };
 
+  //response: [{'action': callback(msg)}]
+  that.sendAndRecieve = function(action, params, response) {
+    that.send(action, params, function (msg) {
+      if (typeof response[msg.action] === 'function') {
+        response[msg.action](msg.parameters);
+      } else {
+        throw 'action: ' + action + ' unknown response: ' + msg.action;
+      }
+    });
+  };
+
   that.close = function() {
     socket.close();
+    socket = null;
   }
 
   return that;

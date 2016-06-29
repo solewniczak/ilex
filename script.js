@@ -26,76 +26,42 @@ $(document).ready(function(){
 
   ilex.server = ilex.tools.server.create('ws://127.0.0.1:9000/echobot');
   //download text list
-  ilex.server.send('requestAllTextsInfo', {}, function (msg) {
-    console.log(msg);
+  ilex.server.sendAndRecieve('requestAllTextsInfo', {}, {
+    'allTextsInfoResponse':
+          function (params) {
+            var texts =  params.texts;
+            ilex.view.fileSelector.loadFilesList(texts);
+
+            //load example texts
+            ilex.view.slider.createWindowSplitSlider();
+            var loadToWindow = function (winInd, id, version) {
+              ilex.server.sendAndRecieve('requestTextDump', {
+                'text': id,
+                'version': version,
+                'tab': winInd,
+              },
+              {
+                'textRetrieved':
+                  function (params) {
+                    ilex.view.loadText(winInd, params.text);
+                    //load links
+          	    	  for (let link of params.links) {
+          	    	    ilex.tools.connections.createLinkVspanSets(ilex.view.slider.windows[0].contentWidget, link[0],
+          	    	                                                ilex.view.slider.windows[1].contentWidget, link[1]);
+          	    	  }
+                  },
+                'retrievalFailed':
+                  function (params) {
+                    ilex.view.console.log(params.error);
+                  },
+              })
+            };
+            loadToWindow(0, texts[0].Id, 1);
+            loadToWindow(1, texts[1].Id, 1);
+          },
+    'retrievalFailed':
+          function (params) {
+            ilex.view.console.log(params.error);
+          },
   });
-
-  /*var loadedTexts = 0;
-
-  // init with requesting info about all texts
-  ilexServer.init(function () {
-    ilexServer.send({action : "requestAllTextsInfo", parameters: {}});
-  }, function (data) {
-    var json = JSON.parse(data);
-	if (json.action === 'allTextsInfoResponse') {
-		var texts_info = json.parameters.texts;
-		var document_ids = [];
-		var names = [];
-		for (let i = 0; i < texts_info.length; i++) {
-			document_ids.push(texts_info[i].Id);
-			names.push(texts_info[i].Name);
-		}
-    ilex.view.console.log(JSON.stringify(names));
-    ilex.view.fileSelector.loadFilesList(names);
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - -
-		// Request texts using received names
-		//
-		// first, we need a new function for receiving
-		ilexServer.socket.onmessage = function(msg) {
-			var json = JSON.parse(msg.data);
-			if (json.action === 'textRetrieved') {
-				let parameters = json.parameters;
-	    	if (parameters.target === 'left') {
-	    	    ilex.view.leftText.loadText(parameters.text);
-	    	} else if (parameters.target === 'right') {
-	    	    ilex.view.rightText.loadText(parameters.text);
-	    	}
-	    	loadedTexts++;
-	    	if (loadedTexts === 2) {
-          //experiments with documentsSlider
-
-	    	  //load links
-	    	  for (let link of parameters.links) {
-	    	    ilex.tools.connections.createLinkVspanSets(ilex.view.leftText, link[0],
-	    	                                                ilex.view.rightText, link[1]);
-	    	  }
-
-
-	    	  $(document).trigger('canvasRedraw');
-		    	}
-			} else if (json.action === 'retrievalFailed') {
-    			ilex.view.console.log(json.parameters.error);
-		    	$(document).trigger('canvasRedraw');
-			} else {
-		    	ilex.view.console.log("Received unexpected response");
-		    	$(document).trigger('canvasRedraw');
-			}
-		}
-
-		// then, make requests with version:
-	  ilexServer.send({action : "requestTextDump", parameters: {target: 'left', text: document_ids[3], version : 3}});
-		// or, make requests without version:
-		ilexServer.send({action : "requestTextDump", parameters: {target: 'right', text: document_ids[4]}});
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - -
-	} else if (json.action === 'gettingInfoFailed') {
-    	ilex.view.console.log(json.parameters.error);
-		$(document).trigger('canvasRedraw');
-	} else {
-    	ilex.view.console.log("Received unexpected response");
-		$(document).trigger('canvasRedraw');
-	}
-  });*/
-
 });

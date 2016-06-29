@@ -22,8 +22,8 @@ ilex.widgetsCollection.fileSelector = function ($parentWidget) {
   $parentWidget.html(that.container);
 
   that.loadFilesList = function(filesList) {
-    for (let fileName of filesList) {
-      let $div = $('<div>').text(fileName).appendTo(that.container)
+    for (let file of filesList) {
+      let $div = $('<div>').text(file.Name).appendTo(that.container)
                 .attr('draggable', 'true')
                 .css('overflow', 'hidden')
                 .css('font-size', '10px')
