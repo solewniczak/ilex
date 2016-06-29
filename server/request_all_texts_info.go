@@ -15,8 +15,7 @@ const (
 )
 
 func requestAllTextsInfo(request *IlexMessage, ws *websocket.Conn) error {
-	var response IlexMessage
-	response.Init()
+	response := NewIlexResponse(request)
 
 	db_session, err := mgo.Dial("localhost")
 	if err != nil {

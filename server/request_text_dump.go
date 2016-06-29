@@ -12,7 +12,7 @@ import (
 
 const (
 	REQUEST_TEXT_DUMP = "requestTextDump"
-	TARGET            = "target"
+	TAB               = "tab"
 	TEXT              = "text"
 	VERSION           = "version"
 
@@ -33,10 +33,10 @@ func min(a, b int) int {
 	}
 }
 
-func get_substring(source *string, start_rune, end_rune int) string {
+func get_substring(source string, start_rune, end_rune int) string {
 	i := 0
 	var start_byte, end_byte int
-	for pos, _ := range *source {
+	for pos, _ := range source {
 		if i == start_rune {
 			start_byte = pos
 		}
@@ -46,9 +46,9 @@ func get_substring(source *string, start_rune, end_rune int) string {
 		i++
 	}
 	if end_byte == 0 {
-		end_byte = len(*source)
+		end_byte = len(source)
 	}
-	return (*source)[start_byte:end_byte]
+	return (source)[start_byte:end_byte]
 
 }
 
@@ -64,7 +64,7 @@ func read_block_from_permascroll_to_buffer(runes_to_read, address int, buffer *b
 	}
 	runes_in_slice := utf8.RuneCountInString(slice.Text)
 	runes_to_read_from_slice := min(runes_in_slice-rune_no_in_slice, runes_to_read)
-	buffer.WriteString(get_substring(&slice.Text, rune_no_in_slice, rune_no_in_slice+runes_to_read_from_slice))
+	buffer.WriteString(get_substring(slice.Text, rune_no_in_slice, rune_no_in_slice+runes_to_read_from_slice))
 
 	runes_to_read -= runes_to_read_from_slice
 
@@ -79,7 +79,7 @@ func read_block_from_permascroll_to_buffer(runes_to_read, address int, buffer *b
 
 		runes_in_slice := utf8.RuneCountInString(slice.Text)
 		runes_to_read_from_slice := min(runes_in_slice, runes_to_read)
-		buffer.WriteString(get_substring(&slice.Text, 0, runes_to_read_from_slice))
+		buffer.WriteString(get_substring(slice.Text, 0, runes_to_read_from_slice))
 
 		runes_to_read -= runes_to_read_from_slice
 	}
@@ -88,6 +88,8 @@ func read_block_from_permascroll_to_buffer(runes_to_read, address int, buffer *b
 }
 
 func get_string_from_addresses(addresses [][2]int, total_runes int, database *mgo.Database) (*string, error) {
+	// @ TO DO: add support for zero-length files
+
 	slices := database.C("permascroll")
 	var buffer bytes.Buffer
 	last_address := len(addresses) - 1
@@ -113,8 +115,7 @@ func get_string_from_addresses(addresses [][2]int, total_runes int, database *mg
 func requestTextDump(request *IlexMessage, ws *websocket.Conn) error {
 	requested_text_id := request.Parameters[TEXT].(string)
 
-	var response IlexMessage
-	response.Init()
+	response := NewIlexResponse(request)
 
 	db_session, err := mgo.Dial("localhost")
 	if err != nil {
@@ -181,7 +182,7 @@ func requestTextDump(request *IlexMessage, ws *websocket.Conn) error {
 
 			response.Action = TEXT_RETRIEVED
 			response.Parameters[TEXT] = *retrieved
-			response.Parameters[TARGET] = request.Parameters[TARGET]
+			response.Parameters[TAB] = request.Parameters[TAB]
 			response.Parameters[LINKS] = links
 		}
 

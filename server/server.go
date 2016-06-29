@@ -12,7 +12,7 @@ import (
 	"sync"
 )
 
-var StopServer chan int = make(chan int)
+var StopServer chan bool = make(chan bool)
 
 func ActionServer(ws *websocket.Conn) {
 	for {
@@ -43,7 +43,14 @@ func ActionServer(ws *websocket.Conn) {
 }
 
 func main() {
+	var stop_client_control chan bool = make(chan bool)
+
 	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		ControlClients(stop_client_control)
+	}()
 
 	file_listener, err := net.Listen("tcp", ":8000")
 	if err != nil {
@@ -75,6 +82,7 @@ func main() {
 		<-StopServer
 		file_listener.Close()
 		ws_listener.Close()
+		stop_client_control <- true
 	}()
 
 	wg.Wait()
