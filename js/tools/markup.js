@@ -17,8 +17,7 @@ ilex.tools.markup.generateIlexSpanId = function () {
 };
 
 ilex.tools.markup.createIlexSpan = function () {
-    var $span =
-      $('<span id="'+ilex.tools.markup.generateIlexSpanId()+'">');
+    var $span = $('<span id="'+ilex.tools.markup.generateIlexSpanId()+'">');
     return $span;
 };
 
