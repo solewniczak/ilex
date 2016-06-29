@@ -5,8 +5,17 @@ package main
 type IlexMessage struct {
 	Action     string                 `json:"action"`
 	Parameters map[string]interface{} `json:"parameters"`
+	Id         int
 }
 
-func (im *IlexMessage) Init() {
+func NewIlexMessage() *IlexMessage {
+	im := new(IlexMessage)
 	im.Parameters = make(map[string]interface{})
+	return im
+}
+
+func NewIlexResponse(request *IlexMessage) *IlexMessage {
+	im := NewIlexMessage()
+	im.Id = request.Id
+	return im
 }
