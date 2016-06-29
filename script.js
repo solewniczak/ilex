@@ -34,6 +34,7 @@ $(document).ready(function(){
 
             //load example texts
             ilex.view.slider.createWindowSplitSlider();
+            ilex.view.slider.createWindow();
             var loadToWindow = function (winInd, id, version) {
               ilex.server.sendAndRecieve('requestTextDump', {
                 'text': id,
@@ -58,6 +59,7 @@ $(document).ready(function(){
             };
             loadToWindow(0, texts[0].Id, 1);
             loadToWindow(1, texts[1].Id, 1);
+            loadToWindow(2, texts[2].Id, 1);
           },
     'retrievalFailed':
           function (params) {
