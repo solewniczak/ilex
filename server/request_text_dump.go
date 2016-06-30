@@ -180,10 +180,19 @@ func requestTextDump(request *IlexMessage, ws *websocket.Conn) error {
 				{"200+20", "310+10"},
 			}
 
+			client_tab_float, ok := request.Parameters[TAB].(float64)
+			if !ok {
+				response.Action = RETRIEVAL_FAILED
+				response.Parameters[ERROR] = "No tab id supplied!"
+				goto send
+			}
+			client_tab := int(client_tab_float)
+
 			response.Action = TEXT_RETRIEVED
 			response.Parameters[TEXT] = *retrieved
-			response.Parameters[TAB] = request.Parameters[TAB]
+			response.Parameters[TAB] = client_tab
 			response.Parameters[LINKS] = links
+			ClientControlMessages <- NewClientTabDoc(ws, client_tab, requested_text_id)
 		}
 
 	}

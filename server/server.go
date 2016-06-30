@@ -18,10 +18,10 @@ func ActionServer(ws *websocket.Conn) {
 	for {
 		var request IlexMessage
 		err := websocket.JSON.Receive(ws, &request)
-		js, _ := json.Marshal(request)
-		fmt.Println("received request: ", string(js))
 
 		if err != nil {
+			js, _ := json.Marshal(request)
+			fmt.Println("received request: ", string(js))
 			log.Print(err)
 			break
 		} else {
