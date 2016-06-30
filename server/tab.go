@@ -14,9 +14,10 @@ type ClientTabDoc struct {
 	DocumentId string
 }
 
-func NewClientTabDoc(client_tab *ClientTab, doc_id string) *ClientTabDoc {
+func NewClientTabDoc(ws *websocket.Conn, tab_id int, doc_id string) *ClientTabDoc {
 	result := new(ClientTabDoc)
-	result.ClientTab = *client_tab
+	result.WS = ws
+	result.TabId = tab_id
 	result.DocumentId = doc_id
 	return result
 }
