@@ -97,6 +97,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
   addWindow = function() {
       var newWindow = {},
         winInd = that.windows.length;
+      newWindow.id = winInd;
       newWindow.element = $('<div class="ilex-sliderWindow">').appendTo(that.table)
                                 .data('ilex-window', winInd)
                                 .css('display', 'table-cell')
@@ -147,7 +148,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
                   //if last window was closed, create new window
                   if (that.windows.length === 1) {
                     let lastWindow = that.windows[0],
-                      newWindowWidget = newWindowWidgetCallback(lastWindow.element);
+                      newWindowWidget = newWindowWidgetCallback(lastWindow);
                     lastWindow.setContentWidget(newWindowWidget);
                   //we don't have right side document but we have left side one
                   } else if (that.windowPointer === that.windows.length - 1) {
@@ -162,6 +163,20 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
                 }
               });
             });
+        this.toolbar.addButton('<span class="ilex-awesome">&#xf00d;</span>',
+            function(event) {
+              var windowHeight = $(window).height();
+
+              //bakground for animanito purposes
+              curWindow.contentWidget.container.css('background', '#fff')
+                                               .css('position', 'relative');
+              curWindow.contentWidget.container.animate({'top': windowHeight},
+              function() {
+                //send close message to widget
+                curWindow.contentWidget.close();
+                curWindow.setContentWidget(newWindowWidgetCallback(curWindow));
+              });
+            });
       };
       newWindow.rightSideHandler = addHandler(winInd);
       that.windows.push(newWindow);
@@ -170,7 +185,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
 
   that.createWindow = function () {
     var win = addWindow(),
-      newWindowWidget = newWindowWidgetCallback(win.element);
+      newWindowWidget = newWindowWidgetCallback(win);
     win.setContentWidget(newWindowWidget);
     return win;
   };
@@ -290,7 +305,20 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
     //add
     {'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf067;</span>',
      'callback': that.createWindowSplitSlider
-   }
+   },
+   //remove
+   {'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf068;</span>',
+    'callback': function(event) {
+      if (this.visibleWindows === 1) {
+        return;
+      }
+      that.visibleWindows--;
+      updateInnerWidth(width);
+      setEqualWindowPositions();
+      applyWindowPosition();
+      ilex.applySize(true);
+    }
+  }
   ]);
 
 

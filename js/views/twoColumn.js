@@ -18,8 +18,8 @@ ilex.views.twoColumn = function(canvas) {
   view.console = ilex.widgetsCollection.console(view.bottomVertical.bottom);
 
   view.slider = ilex.widgetsCollection.documentsSlider(view.bottomVertical.top,
-    function ($parentNode) {
-      return ilex.widgetsCollection.text($parentNode, canvas);
+    function (win) {
+      return ilex.widgetsCollection.text(win, canvas);
   });
 
   view.loadText = function(winInd, text) {
