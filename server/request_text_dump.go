@@ -192,7 +192,7 @@ func requestTextDump(request *IlexMessage, ws *websocket.Conn) error {
 			response.Parameters[TEXT] = *retrieved
 			response.Parameters[TAB] = client_tab
 			response.Parameters[LINKS] = links
-			ClientControlMessages <- NewClientTabDoc(ws, client_tab, requested_text_id)
+			TabControlMessages <- NewClientTabDoc(ws, client_tab, requested_text_id)
 		}
 
 	}

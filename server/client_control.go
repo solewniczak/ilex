@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"golang.org/x/net/websocket"
 )
 
-var ClientControlMessages chan *ClientTabDoc = make(chan *ClientTabDoc)
+var SocketControlMessages chan *websocket.Conn = make(chan *websocket.Conn)
+var TabControlMessages chan *ClientTabDoc = make(chan *ClientTabDoc)
 var client_doc map[ClientTab]string = make(map[ClientTab]string)
 var doc_clients map[string]([]ClientTab) = make(map[string]([]ClientTab))
 
@@ -47,13 +49,27 @@ func add_client_tab_to_doc(doc_id string, client_tab *ClientTab) {
 		docs[l] = *client_tab
 		doc_clients[doc_id] = docs
 	}
+}
 
+func clear_all_data_for_socket(ws *websocket.Conn) {
+	for client_tab, _ := range client_doc {
+		if client_tab.WS == ws {
+			delete(client_doc, client_tab)
+		}
+	}
+	for doc, client_tabs := range doc_clients {
+		for i, client_tab := range client_tabs {
+			if client_tab.WS == ws {
+				remove_client_tab_from_doc(doc, &client_tabs[i])
+			}
+		}
+	}
 }
 
 func ControlClients(stop_client_control chan bool) {
 	for {
 		select {
-		case message := <-ClientControlMessages:
+		case message := <-TabControlMessages:
 			previous_doc, ok := client_doc[message.ClientTab]
 			if ok {
 				// the client tab no longer uses the previous document
@@ -63,6 +79,10 @@ func ControlClients(stop_client_control chan bool) {
 			client_doc[message.ClientTab] = message.DocumentId
 			add_client_tab_to_doc(message.DocumentId, &message.ClientTab)
 			fmt.Println("Client tab", message.ClientTab, "opened doc", message.DocumentId)
+
+		case message := <-SocketControlMessages:
+			clear_all_data_for_socket(message)
+
 		case <-stop_client_control:
 			fmt.Println("Stop activity")
 			return
