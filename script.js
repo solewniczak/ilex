@@ -24,11 +24,12 @@ $(document).ready(function(){
 
   ilex.view = ilex.views.twoColumn(ilex.canvas);
 
-  ilex.server = ilex.tools.server.create('ws://127.0.0.1:9000/echobot');
+  ilex.server = ilex.tools.server.create('ws://127.0.0.1:9000');
   //download text list
   ilex.server.sendAndRecieve('requestAllTextsInfo', {}, {
     'allTextsInfoResponse':
           function (params) {
+            ilex.view.console.log("executing");
             var texts =  params.texts;
             ilex.view.fileSelector.loadFilesList(texts);
 
@@ -57,6 +58,7 @@ $(document).ready(function(){
                   },
               })
             };
+            ilex.view.console.log("loading");
             loadToWindow(0, texts[0].Id, 1);
             loadToWindow(1, texts[1].Id, 1);
             loadToWindow(2, texts[2].Id, 1);

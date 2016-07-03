@@ -49,6 +49,7 @@ ilex.tools.server.create = function (host) {
 
   //response: [{'action': callback(msg)}]
   that.sendAndRecieve = function(action, params, response) {
+    ilex.view.console.log(action);
     that.send(action, params, function (msg) {
       if (typeof response[msg.action] === 'function') {
         response[msg.action](msg.parameters);

@@ -20,11 +20,12 @@ func ActionServer(ws *websocket.Conn) {
 		err := websocket.JSON.Receive(ws, &request)
 
 		if err != nil {
-			js, _ := json.Marshal(request)
-			fmt.Println("received request: ", string(js))
 			log.Print(err)
 			break
 		} else {
+			js, _ := json.Marshal(request)
+			fmt.Println("received request: ", string(js))
+
 			switch request.Action {
 			case REQUEST_TEXT_DUMP:
 				err = requestTextDump(&request, ws)
