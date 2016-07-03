@@ -12,11 +12,11 @@ var doc_clients map[string]([]ClientTab) = make(map[string]([]ClientTab))
 
 func remove_client_tab_from_doc(doc_id string, client_tab *ClientTab) {
 	var pos int = -1
-	old_docs, ok := doc_clients[doc_id]
+	old_clients, ok := doc_clients[doc_id]
 	if !ok {
 		panic("Client connections data is incoherent!")
 	}
-	for i, val := range old_docs {
+	for i, val := range old_clients {
 		if val == *client_tab {
 			pos = i
 		}
@@ -24,30 +24,30 @@ func remove_client_tab_from_doc(doc_id string, client_tab *ClientTab) {
 	if pos == -1 {
 		panic("Client connections data is incoherent!")
 	}
-	new_docs := make([]ClientTab, len(old_docs)-1)
-	copy(new_docs, old_docs[0:pos])
-	copy(new_docs[pos:], old_docs[pos+1:])
-	doc_clients[doc_id] = new_docs
+	new_clients := make([]ClientTab, len(old_clients)-1)
+	copy(new_clients, old_clients[0:pos])
+	copy(new_clients[pos:], old_clients[pos+1:])
+	doc_clients[doc_id] = new_clients
 }
 
 func add_client_tab_to_doc(doc_id string, client_tab *ClientTab) {
-	docs, ok := doc_clients[doc_id]
+	clients, ok := doc_clients[doc_id]
 	if !ok {
 		// there was no clients slice
-		docs := make([]ClientTab, 1, 2)
-		docs[0] = *client_tab
-		doc_clients[doc_id] = docs
+		clients := make([]ClientTab, 1, 2)
+		clients[0] = *client_tab
+		doc_clients[doc_id] = clients
 	} else {
 		// append to clients
-		l := len(docs)
-		if l+1 > cap(docs) {
-			new_docs := make([]ClientTab, 2*l)
-			copy(new_docs, docs)
-			docs = new_docs[:l]
+		l := len(clients)
+		if l+1 > cap(clients) {
+			new_clients := make([]ClientTab, 2*(l+1))
+			copy(new_clients, clients)
+			clients = new_clients[:l]
 		}
-		docs = docs[:l+1]
-		docs[l] = *client_tab
-		doc_clients[doc_id] = docs
+		clients = clients[:l+1]
+		clients[l] = *client_tab
+		doc_clients[doc_id] = clients
 	}
 }
 
@@ -74,7 +74,7 @@ func ControlClients(stop_client_control chan bool) {
 			if ok {
 				// the client tab no longer uses the previous document
 				remove_client_tab_from_doc(previous_doc, &message.ClientTab)
-				fmt.Println("Client tab", message.ClientTab, "closed doc", message.DocumentId)
+				fmt.Println("Client tab", message.ClientTab, "closed doc", previous_doc)
 			}
 			client_doc[message.ClientTab] = message.DocumentId
 			add_client_tab_to_doc(message.DocumentId, &message.ClientTab)

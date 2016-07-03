@@ -1,11 +1,13 @@
 package main
 
 import (
-	//"fmt"
+	"fmt"
 	"golang.org/x/net/websocket"
 	"testing"
 	"time"
 )
+
+const interval time.Duration = 40 * time.Microsecond
 
 var REQUEST_ID int = 1
 
@@ -54,11 +56,25 @@ func clientRequestsText(t *testing.T, ws *websocket.Conn, tab_id int, doc_id str
 	REQUEST_ID++
 }
 
+func verify_clients(t *testing.T, expected map[string]int) {
+	for doc, clients := range expected {
+		actual_clients, ok := doc_clients[doc]
+		if len(actual_clients) != clients || !ok {
+			t.Fatal("Client connections data is incorrect! Too little connections!")
+		}
+		for _, client := range actual_clients {
+			if client_document, ok := client_doc[client]; client_document != doc || !ok {
+				t.Fatal("Client connections data is inconsistent!")
+			}
+		}
+	}
+}
+
 func TestActionServer(t *testing.T) {
 	go main()
-	time.Sleep(10 * time.Microsecond)
+	time.Sleep(interval)
 
-	ws, err := websocket.Dial("ws://localhost:9000", "", "http://localhost/")
+	ws1, err := websocket.Dial("ws://localhost:9000", "", "http://localhost/1")
 	if err != nil {
 		t.Fatal("Dial", err)
 	}
@@ -67,12 +83,12 @@ func TestActionServer(t *testing.T) {
 	request_all.Action = REQUEST_ALL_TEXTS_INFO
 	request_all.Id = REQUEST_ID
 
-	if err := websocket.JSON.Send(ws, request_all); err != nil {
+	if err := websocket.JSON.Send(ws1, request_all); err != nil {
 		t.Fatal("Writing", err)
 	}
 
 	var response AllTextsResponse
-	if err := websocket.JSON.Receive(ws, &response); err != nil {
+	if err := websocket.JSON.Receive(ws1, &response); err != nil {
 		t.Fatal("Receiving all texts", err)
 	}
 
@@ -81,11 +97,39 @@ func TestActionServer(t *testing.T) {
 	}
 	REQUEST_ID++
 
-	// Tab 1 enters the fray
-	clientRequestsText(t, ws, 1, response.Parameters.Texts[0].Id.String())
+	// Client Tab 1 enters the fray
+	clientRequestsText(t, ws1, 1, response.Parameters.Texts[0].Id.Hex())
+	time.Sleep(interval)
+	verify_clients(t, map[string]int{response.Parameters.Texts[0].Id.Hex(): 1})
 
-	time.Sleep(10 * time.Microsecond)
-	ws.Close()
-	time.Sleep(10 * time.Microsecond)
+	// Client Tab 2
+	clientRequestsText(t, ws1, 2, response.Parameters.Texts[1].Id.Hex())
+	time.Sleep(interval)
+	verify_clients(t, map[string]int{response.Parameters.Texts[0].Id.Hex(): 1, response.Parameters.Texts[1].Id.Hex(): 1})
+
+	// Client Tab 1 requests the same text as tab 2
+	clientRequestsText(t, ws1, 1, response.Parameters.Texts[1].Id.Hex())
+	time.Sleep(interval)
+	verify_clients(t, map[string]int{response.Parameters.Texts[0].Id.Hex(): 0, response.Parameters.Texts[1].Id.Hex(): 2})
+
+	// Client 2 appears!
+	ws2, err := websocket.Dial("ws://localhost:9000", "", "http://localhost/2")
+	if err != nil {
+		t.Fatal("Dial", err)
+	}
+
+	// Client 2 tab 1
+	clientRequestsText(t, ws2, 1, response.Parameters.Texts[0].Id.Hex())
+	time.Sleep(interval)
+	verify_clients(t, map[string]int{response.Parameters.Texts[0].Id.Hex(): 1, response.Parameters.Texts[1].Id.Hex(): 2})
+
+	clientRequestsText(t, ws2, 1, response.Parameters.Texts[1].Id.Hex())
+	time.Sleep(interval)
+	verify_clients(t, map[string]int{response.Parameters.Texts[0].Id.Hex(): 0, response.Parameters.Texts[1].Id.Hex(): 3})
+
+	time.Sleep(interval)
+	ws1.Close()
+	ws2.Close()
+	time.Sleep(interval)
 	StopServer <- true
 }
