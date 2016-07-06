@@ -176,8 +176,6 @@ func requestTextDump(request *IlexMessage, ws *websocket.Conn) error {
 			// hard coded test links
 			links := SimpleLink{
 				{"1+10", "100+200"},
-				{"1+10", "500+100"},
-				{"200+20", "310+10"},
 			}
 
 			response.Action = TEXT_RETRIEVED
