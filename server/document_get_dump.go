@@ -11,13 +11,14 @@ import (
 )
 
 const (
-	REQUEST_TEXT_DUMP = "requestTextDump"
+	DOCUMENT_GET_DUMP = "documentGetDump"
 	TAB               = "tab"
 	TEXT              = "text"
 	VERSION           = "version"
 
-	TEXT_RETRIEVED = "textRetrieved"
-	LINKS          = "links"
+	DOCUMENT_RETRIEVED = "documentRetrieved"
+	LINKS              = "links"
+	IS_EDITABLE        = "isEditable"
 
 	RETRIEVAL_FAILED = "retrievalFailed"
 	ERROR            = "error"
@@ -112,7 +113,7 @@ func get_string_from_addresses(addresses [][2]int, total_runes int, database *mg
 	return &str, nil
 }
 
-func requestTextDump(request *IlexMessage, ws *websocket.Conn) error {
+func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
 	requested_text_id := request.Parameters[TEXT].(string)
 
 	response := NewIlexResponse(request)
@@ -154,6 +155,11 @@ func requestTextDump(request *IlexMessage, ws *websocket.Conn) error {
 			goto send
 		}
 
+		var is_editable bool = false
+		if requested_version == document.TotalVersions {
+			is_editable = true
+		}
+
 		versions := database.C("versions")
 
 		var version Version
@@ -188,11 +194,12 @@ func requestTextDump(request *IlexMessage, ws *websocket.Conn) error {
 			}
 			client_tab := int(client_tab_float)
 
-			response.Action = TEXT_RETRIEVED
+			response.Action = DOCUMENT_RETRIEVED
 			response.Parameters[TEXT] = *retrieved
 			response.Parameters[TAB] = client_tab
 			response.Parameters[LINKS] = links
-			TabControlMessages <- NewClientTabDoc(ws, client_tab, requested_text_id)
+			response.Parameters[IS_EDITABLE] = is_editable
+			TabControlMessages <- ClientTabOpenedDoc(ws, client_tab, requested_text_id)
 		}
 
 	}

@@ -27,10 +27,12 @@ func ActionServer(ws *websocket.Conn) {
 			fmt.Println("received request: ", string(js))
 
 			switch request.Action {
-			case REQUEST_TEXT_DUMP:
-				err = requestTextDump(&request, ws)
-			case REQUEST_ALL_TEXTS_INFO:
-				err = requestAllTextsInfo(&request, ws)
+			case DOCUMENT_GET_DUMP:
+				err = documentGetDump(&request, ws)
+			case GET_ALL_DOCUMENTS_INFO:
+				err = getAllDocumentsInfo(&request, ws)
+			case TAB_CLOSE:
+				err = tabClose(&request, ws)
 			default:
 				fmt.Println("Unable to execute action ", request.Action)
 			}
