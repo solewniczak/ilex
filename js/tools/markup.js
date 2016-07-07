@@ -17,7 +17,9 @@ ilex.tools.markup.generateIlexSpanId = function () {
 };
 
 ilex.tools.markup.createIlexSpan = function () {
-    var $span = $('<span id="'+ilex.tools.markup.generateIlexSpanId()+'">');
+    //TextNode is required by Selection API to work properly
+    var $span = $('<span id="'+ilex.tools.markup.generateIlexSpanId()+'">')
+                  .append(document.createTextNode(''));
     return $span;
 };
 

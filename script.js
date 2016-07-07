@@ -45,11 +45,15 @@ $(document).ready(function(){
                 'documentRetrieved':
                   function (params) {
                     ilex.view.loadText(winInd, params.text);
-                    //load links
-          	    	  for (let link of params.links) {
-          	    	    ilex.tools.connections.createLinkVspanSets(ilex.view.slider.windows[0].contentWidget, link[0],
-          	    	                                                ilex.view.slider.windows[1].contentWidget, link[1]);
-          	    	  }
+                    
+                    if (winInd === 2) {
+                      //load links
+                      for (let link of params.links) {
+                        ilex.tools.connections
+                          .createLinkVspanSets(ilex.view.slider.windows[0].contentWidget, link[0],
+                                               ilex.view.slider.windows[1].contentWidget, link[1]);
+                      }
+                    }
                   },
                 'retrievalFailed':
                   function (params) {
