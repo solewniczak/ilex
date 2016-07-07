@@ -5,7 +5,7 @@ package main
 type IlexMessage struct {
 	Action     string                 `json:"action"`
 	Parameters map[string]interface{} `json:"parameters"`
-	Id         int
+	Id         int                    `json:"id"`
 }
 
 func NewIlexMessage() *IlexMessage {

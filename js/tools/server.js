@@ -27,14 +27,16 @@ ilex.tools.server.create = function (host) {
   socket.onmessage = function(event) {
     var msg = JSON.parse(event.data);
     console.log('Recieve: ', msg);
-    if (typeof callbacks[msg.Id] === 'function') {
-      callbacks[msg.Id](msg);
-    }
+    if (typeof callbacks[msg.id] === 'function') {
+      callbacks[msg.id](msg);
+    } else {
+        throw 'no callback registered for message ' + msg.id.toString();
+	}
   };
 
   that.send = function(action, params, callback) {
     var msg = {
-      'Id': id,
+      'id': id,
       'action': action,
       'parameters': params
     };
