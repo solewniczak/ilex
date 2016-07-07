@@ -56,10 +56,9 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   var cursor = {
     'span': null,
     'position': 0,
-    'atTheEnd': false,
     //update cursor using current Selection
     'needsUpdate': false,
-     'update': function () {
+    'update': function () {
        var selection = window.getSelection();
 
        //we are in custos div
@@ -71,15 +70,9 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
        if (selection.anchorNode === that.content[0]) {
           this.span = $initialSpan[0];
           this.position = 0;
-          this.atTheEnd = true;
        } else {
           this.span = selection.anchorNode.parentElement;
           this.position = selection.anchorOffset;
-          if (this.span.nextSibling === null && this.position === this.span.textContent.length) {
-            cursor.atTheEnd = true;
-          } else {
-            this.atTheEnd = false;
-          }
        }
        this.needsUpdate = false;
     }
@@ -93,11 +86,56 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   
   that.content.on('keydown', function(event) {
     var selection = window.getSelection(),
+        updateOffsets = function ($span, num) {
+          $span.nextAll().each(function () {
+            var startOffset = $(this).data('ilex-startoffset'),
+              endOffset = $(this).data('ilex-endoffset');
+
+            $(this).data('ilex-startoffset', startOffset + num);
+            $(this).data('ilex-endoffset', endOffset + num);
+          });
+        },
         insertAfterCursor = function(str) {
           var text = cursor.span.textContent;
+
+          //update offsets
+          let $span = $(cursor.span);
+          $span.data('ilex-endoffset', $span.data('ilex-endoffset') + str.length);
+          updateOffsets($span, str.length);
+          //index of charter AFTER which we insert new string
+          ilex.server.action.documentAddText(windowObject.id,
+                                    cursor.position - 1 + $span.data('ilex-startoffset'), str);
+                    
           cursor.span.textContent = text.slice(0, cursor.position) + str +
                                     text.slice(cursor.position);
           cursor.position += str.length;
+        },
+        updateAfterRemove = function(relPosition) {
+          //update offsets
+          let $span = $(cursor.span);
+          $span.data('ilex-endoffset', $span.data('ilex-endoffset') - 1);
+          updateOffsets($span, -1);
+
+          ilex.server.action.documentRemoveText(windowObject.id,
+                                        relPosition + $span.data('ilex-startoffset'), 1);
+        },
+        jumpToNextSpan = function() {
+          let nextSpan = cursor.span.nextElementSibling;
+
+          if (cursor.span.textContent.length === 0) {
+            cursor.span.remove();
+          }
+          cursor.span = nextSpan;
+          cursor.position = 0;
+        },
+        jumpToPrevSpan = function() {
+          let prevSpan = cursor.span.previousElementSibling;
+
+          if (cursor.span.textContent.length === 0) {
+            cursor.span.remove();
+          }
+          cursor.span = prevSpan;
+          cursor.position = cursor.span.textContent.length;
         };
 
     //default behaviour
@@ -137,136 +175,62 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     //Disable Ctrl shortcouts
     if (event.ctrlKey) {
       return false;
-    } else if (event.key === 'Backspace') {
-      //remove span
-      if (cursor.position === 0) {
-        let prevSpan = cursor.span.previousElementSibling;
-        
-        //do not remove last element
-        if (prevSpan !== null && cursor.span.textContent.length === 0) {
-          cursor.span.remove();
+    } else if (event.key === 'Backspace') {  
+      if (cursor.position !== 0 || cursor.span.previousElementSibling !== null) {
+        //remove span
+        if (cursor.position === 0) {
+          jumpToPrevSpan();
         }
-        cursor.span = prevSpan;
-        cursor.position = prevSpan.textContent.length;
-        
-      }
-      let text = cursor.span.textContent;
-      cursor.span.textContent = text.slice(0, cursor.position - 1) +
-                                  text.slice(cursor.position);
-      cursor.position -= 1;
-      
-      /*let text = cursor.span.textContent;
-       console.log(text);
-      if (cursor.atTheEnd) {
-        cursor.span.textContent = text.slice(0, -1);
-        cursor.position -= 1;
-        //new line is next charter
-        if (text[cursor.position - 1] === '\n') {
-          //remove new line from span
-          cursor.span.textContent = text.slice(0, -1);
-          let $span = ilex.tools.markup.createIlexSpan().appendTo(that.content)
-                                  .text('\n')
-                                  .css('display', 'block')
-                                  .data('ilex-startoffset', 0)
-                                  .data('ilex-endoffset', 0);
-        
-            cursor.span = $span[0];
-            cursor.position = 0;
-        }
-      } else {
+
+        //update offsets
+        updateAfterRemove(cursor.position - 1);
+
+        let text = cursor.span.textContent;
         cursor.span.textContent = text.slice(0, cursor.position - 1) +
-                                  text.slice(cursor.position);
+                              text.slice(cursor.position);
         cursor.position -= 1;
-      }*/
+
+        //if we backspaced last charter from span remove it
+        if (cursor.span.textContent.length === 0) {
+          if (cursor.span.previousElementSibling !== null) {
+            jumpToPrevSpan();
+          } else {
+            jumpToNextSpan();
+          }
+        }
+      }
+    } else if (event.key === 'Delete') {
+      //we are not at the end of file
+      if (cursor.span.nextElementSibling !== $custos[0]) {
+        //we are before new span
+        if (cursor.position === cursor.span.textContent.length) {
+          jumpToNextSpan();
+        }
+
+        //update offsets
+        updateAfterRemove(cursor.position);
+
+        let text = cursor.span.textContent;
+        cursor.span.textContent = text.slice(0, cursor.position) +
+                                    text.slice(cursor.position + 1);
+
+        //if we deleted last charter from span remove it
+        if (cursor.span.textContent.length === 0) {
+          jumpToNextSpan();
+        }
+      }
+      //position does not change
     } else if (event.key === 'Enter') {
       insertAfterCursor('\n');
-      /*if (cursor.atTheEnd) {
-        let $span = ilex.tools.markup.createIlexSpan().appendTo(that.content)
-                                  .append('<br>')
-                                  .css('display', 'block')
-                                  .data('ilex-startoffset', 0)
-                                  .data('ilex-endoffset', 0);
-        
-        cursor.span = $span[0];
-        cursor.position = 0;
-      }*/
+    } else if (event.key === 'Tab') {
+      insertAfterCursor('\t');
     } else {
-      if (event.key === 'Tab') {
-        insertAfterCursor('\t');
-      } else {
-        insertAfterCursor(event.key);
-      }
-      //only if it's not last span
-      //if (cursor.span.nextElementSibling !== null) {
-        $(cursor.span).css('display', 'inline');
-//      }
+       insertAfterCursor(event.key);
     }
     selection.collapse(cursor.span.childNodes[0], cursor.position);
     
     //prevent default contenteditable behaviour
     return false;
-  });
-
-  that.content.on('keypress', function(event) {
-    
-
-    
-//    let selection = window.getSelection(),
-//      character, position, $parentSpan;
-//
-//    //when we are outside span
-//    if (selection.anchorNode === that.content[0] && event.which !== 0) {
-//      $parentSpan = that.content.find('span:first');
-//      character = String.fromCharCode(event.which);
-//      position = 0;
-//      $parentSpan.append(character);
-//      selection.collapse($paretnSpan[0].childNodes[0], 1);
-//    } else {
-//      $parentSpan = $(selection.anchorNode.parentNode);
-//      if (event.keyCode === 13) {
-//
-//        character = '\n';
-//        position = selection.anchorOffset;
-//
-//        if ($parentSpan.is(that.content.find('span:last'))) {
-//        /*  if ($anchorParent.text().slice(-1) !== '\n'
-//              && selection.anchorOffset === $anchorParent.text().length) {
-//            document.execCommand('insertHTML', false, '\n');
-//          }*/
-//
-//          document.execCommand('insertHTML', false, '\n');
-//
-//          let offset = that.content.offset();
-//          let lineHeight = parseInt($anchorParent.css('line-height'));
-//
-//          //if new line is hidden scroll to it
-//          if (selRange.getClientRects()[1].bottom - offset.top >=
-//              that.scrollWindow.scrollTop() + that.scrollWindow.height() - lineHeight) {
-//            that.scrollWindow.scrollTop(that.scrollWindow.scrollTop() + lineHeight);
-//          }
-//          //that.scrollWindow.scrollTop(that.scrollWindow[0].scrollHeight);
-//        } else {
-//          document.execCommand('insertHTML', false, '\n');
-//        }
-//      } else if (event.which !== 0) {
-//        character = String.fromCharCode(event.which);
-//        position = selection.anchorOffset;
-//        document.execCommand('insertHTML', false, String.fromCharCode(event.which));
-//      }
-//    }
-    //update offsets
-//    $parentSpan.data('ilex-endoffset', $parentSpan.data('ilex-endoffset') + 1);
-//    $parentSpan.nextAll().each(function () {
-//      var startOffset = $(this).data('ilex-startoffset'),
-//        endOffset = $(this).data('ilex-endoffset');
-//
-//      $(this).data('ilex-startoffset', startOffset+1);
-//      $(this).data('ilex-endoffset', endOffset+1);
-//    });
-//    ilex.server.action.charAdd(windowObject.id,
-//                              position + $parentSpan.data('ilex-startoffset'),
-//                              character);
-//    event.preventDefault();
   });
 
   //draw selection

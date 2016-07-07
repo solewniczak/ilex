@@ -65,14 +65,27 @@ ilex.tools.server.create = function (host) {
 
   //actions
   that.action = {};
-  that.action.charAdd = function(tabId, position, character) {
-    that.sendAndRecieve('charAdd', {
+  that.action.documentAddText = function(tabId, position, str) {
+    that.sendAndRecieve('documentAddText', {
       'tab': tabId,
       'position': position,
-      'character': character,
+      'string': str,
+      'length': str.length
     },
     {
-      'charAdded': function(params) {
+      'documentTextAdded': function(params) {
+      }
+    });
+  };
+  
+  that.action.documentRemoveText = function(tabId, position, length) {
+    that.sendAndRecieve('documentRemoveText', {
+      'tab': tabId,
+      'position': position,
+      'length': length
+    },
+    {
+      'documentTextRemoved': function(params) {
       }
     });
   };
