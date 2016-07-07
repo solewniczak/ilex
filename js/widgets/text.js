@@ -41,82 +41,196 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
                 //proper new line handling
                 .css('white-space', 'pre-wrap')
                 .data('ilex-height', height - that.dock.container.height())
-                .attr('contenteditable', 'true');
+                .attr('contenteditable', 'true')
+                .attr('spellcheck', 'false');
   //initial span
-  ilex.tools.markup.createIlexSpan().appendTo(that.content)
+  var $initialSpan = ilex.tools.markup.createIlexSpan().appendTo(that.content)
                                   .data('ilex-startoffset', 0)
                                   .data('ilex-endoffset', 0);
   //new lines custos
-  $('<div class="ilex-newlineGuard">').appendTo(that.content);
+  var $custos = $('<div class="ilex-newlineGuard"><br></div>').appendTo(that.content);
 
   //add toolbar at the end to give it access to entre text object
   that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container, that, canvas);
 
+  var cursor = {
+    'span': null,
+    'position': 0,
+    //update cursor using current Selection
+    'needsUpdate': false,
+    'update': function () {
+       var selection = window.getSelection();
 
+       //we are in custos div
+       if (selection.anchorNode === $custos[0]) {
+         this.span = that.content.find('span:last')[0],
+         selection.collapse(this.span.childNodes[0], this.span.textContent.length);
+       }
+       //we are in main div
+       if (selection.anchorNode === that.content[0]) {
+          this.span = $initialSpan[0];
+          this.position = 0;
+       } else {
+          this.span = selection.anchorNode.parentElement;
+          this.position = selection.anchorOffset;
+       }
+       this.needsUpdate = false;
+    }
+  };
+ 
+  
+  //There cannot be empty spans in ilex document
+  that.content.on('mouseup', function(event) {
+    cursor.update();
+  });
+  
   that.content.on('keydown', function(event) {
+    var selection = window.getSelection(),
+        updateOffsets = function ($span, num) {
+          $span.nextAll().each(function () {
+            var startOffset = $(this).data('ilex-startoffset'),
+              endOffset = $(this).data('ilex-endoffset');
+
+            $(this).data('ilex-startoffset', startOffset + num);
+            $(this).data('ilex-endoffset', endOffset + num);
+          });
+        },
+        insertAfterCursor = function(str) {
+          var text = cursor.span.textContent;
+
+          //update offsets
+          let $span = $(cursor.span);
+          $span.data('ilex-endoffset', $span.data('ilex-endoffset') + str.length);
+          updateOffsets($span, str.length);
+          //index of charter AFTER which we insert new string
+          ilex.server.action.documentAddText(windowObject.id,
+                                    cursor.position - 1 + $span.data('ilex-startoffset'), str);
+                    
+          cursor.span.textContent = text.slice(0, cursor.position) + str +
+                                    text.slice(cursor.position);
+          cursor.position += str.length;
+        },
+        updateAfterRemove = function(relPosition) {
+          //update offsets
+          let $span = $(cursor.span);
+          $span.data('ilex-endoffset', $span.data('ilex-endoffset') - 1);
+          updateOffsets($span, -1);
+
+          ilex.server.action.documentRemoveText(windowObject.id,
+                                        relPosition + $span.data('ilex-startoffset'), 1);
+        },
+        jumpToNextSpan = function() {
+          let nextSpan = cursor.span.nextElementSibling;
+
+          if (cursor.span.textContent.length === 0) {
+            cursor.span.remove();
+          }
+          cursor.span = nextSpan;
+          cursor.position = 0;
+        },
+        jumpToPrevSpan = function() {
+          let prevSpan = cursor.span.previousElementSibling;
+
+          if (cursor.span.textContent.length === 0) {
+            cursor.span.remove();
+          }
+          cursor.span = prevSpan;
+          cursor.position = cursor.span.textContent.length;
+        };
+
+    //default behaviour
+    //https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
+    if (
+        event.key === 'Alt' ||
+        event.key === 'AltGraph' ||
+        event.key === 'Cancel' ||
+        event.key === 'CapsLock' ||
+        event.key === 'Clear' || 
+        event.key === 'Convert' ||
+        event.key === 'Escape' ||
+        event.key === 'Pause' ||
+        event.key === 'PageUp' || //there is no pages in hypertext
+        event.key === 'PageDown' ||
+        event.key === 'ScrollLock' || //maybe we should handle it in good old way :)
+        event.key === 'Shift' ||
+        event.key === 'Unidentified'
+      ) {
+      return true;
+    }
+    if (
+        event.key === 'ArrowLeft' ||
+        event.key === 'ArrowRight' ||
+        event.key === 'ArrowUp' ||
+        event.key === 'ArrowDown' ||
+        event.key === 'Home' ||
+        event.key === 'End'
+      ) {
+      //selection change
+      cursor.needsUpdate = true;
+      return true;
+    }
+    if (cursor.needsUpdate) {
+      cursor.update();
+    }
     //Disable Ctrl shortcouts
     if (event.ctrlKey) {
-      event.preventDefault();
-    }
-  });
-
-  that.content.on('keypress', function(event) {
-    let selection = window.getSelection(),
-      character, position, $parentSpan;
-
-    //when we are outside span
-    if (selection.anchorNode === that.content[0] && event.which !== 0) {
-      $parentSpan = that.content.find('span:first');
-      character = String.fromCharCode(event.which);
-      position = 0;
-      $parentSpan.append(character);
-      selection.collapse($paretnSpan[0].childNodes[0], 1);
-    } else {
-      $parentSpan = $(selection.anchorNode.parentNode);
-      if (event.keyCode === 13) {
-
-        character = '\n';
-        position = selection.anchorOffset;
-
-        if ($parentSpan.is(that.content.find('span:last'))) {
-        /*  if ($anchorParent.text().slice(-1) !== '\n'
-              && selection.anchorOffset === $anchorParent.text().length) {
-            document.execCommand('insertHTML', false, '\n');
-          }*/
-
-          document.execCommand('insertHTML', false, '\n');
-
-          let offset = that.content.offset();
-          let lineHeight = parseInt($anchorParent.css('line-height'));
-
-          //if new line is hidden scroll to it
-          if (selRange.getClientRects()[1].bottom - offset.top >=
-              that.scrollWindow.scrollTop() + that.scrollWindow.height() - lineHeight) {
-            that.scrollWindow.scrollTop(that.scrollWindow.scrollTop() + lineHeight);
-          }
-          //that.scrollWindow.scrollTop(that.scrollWindow[0].scrollHeight);
-        } else {
-          document.execCommand('insertHTML', false, '\n');
+      return false;
+    } else if (event.key === 'Backspace') {  
+      if (cursor.position !== 0 || cursor.span.previousElementSibling !== null) {
+        //remove span
+        if (cursor.position === 0) {
+          jumpToPrevSpan();
         }
-      } else if (event.which !== 0) {
-        character = String.fromCharCode(event.which);
-        position = selection.anchorOffset;
-        document.execCommand('insertHTML', false, String.fromCharCode(event.which));
-      }
-    }
-    //update offsets
-    $parentSpan.data('ilex-endoffset', $parentSpan.data('ilex-endoffset') + 1);
-    $parentSpan.nextAll().each(function () {
-      var startOffset = $(this).data('ilex-startoffset'),
-        endOffset = $(this).data('ilex-endoffset');
 
-      $(this).data('ilex-startoffset', startOffset+1);
-      $(this).data('ilex-endoffset', endOffset+1);
-    });
-    ilex.server.action.charAdd(windowObject.id,
-                              position + $parentSpan.data('ilex-startoffset'),
-                              character);
-    event.preventDefault();
+        //update offsets
+        updateAfterRemove(cursor.position - 1);
+
+        let text = cursor.span.textContent;
+        cursor.span.textContent = text.slice(0, cursor.position - 1) +
+                              text.slice(cursor.position);
+        cursor.position -= 1;
+
+        //if we backspaced last charter from span remove it
+        if (cursor.span.textContent.length === 0) {
+          if (cursor.span.previousElementSibling !== null) {
+            jumpToPrevSpan();
+          } else {
+            jumpToNextSpan();
+          }
+        }
+      }
+    } else if (event.key === 'Delete') {
+      //we are not at the end of file
+      if (cursor.span.nextElementSibling !== $custos[0]) {
+        //we are before new span
+        if (cursor.position === cursor.span.textContent.length) {
+          jumpToNextSpan();
+        }
+
+        //update offsets
+        updateAfterRemove(cursor.position);
+
+        let text = cursor.span.textContent;
+        cursor.span.textContent = text.slice(0, cursor.position) +
+                                    text.slice(cursor.position + 1);
+
+        //if we deleted last charter from span remove it
+        if (cursor.span.textContent.length === 0) {
+          jumpToNextSpan();
+        }
+      }
+      //position does not change
+    } else if (event.key === 'Enter') {
+      insertAfterCursor('\n');
+    } else if (event.key === 'Tab') {
+      insertAfterCursor('\t');
+    } else {
+       insertAfterCursor(event.key);
+    }
+    selection.collapse(cursor.span.childNodes[0], cursor.position);
+    
+    //prevent default contenteditable behaviour
+    return false;
   });
 
   //draw selection
@@ -194,7 +308,6 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
       widgetRect = canvas.createClientRect(containerOffset.left, containerOffset.top,
                                             that.container.data('ilex-width'),
                                             that.container.data('ilex-height'));
-
     //clean previous selection
     if (that.groupSelections === false) {
       that.selectionRanges = [];
