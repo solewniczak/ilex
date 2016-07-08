@@ -391,7 +391,10 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   };
 
   that.close = function () {
-    ilex.view.console.log('document closed');
+    if (that.document !== null) {
+      that.document.tabClose();
+    }
+    ilex.view.console.log('tab '+windowObject.id+' closed');
   }
 
 
