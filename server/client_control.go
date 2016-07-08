@@ -6,7 +6,7 @@ import (
 )
 
 var SocketControlMessages chan *websocket.Conn = make(chan *websocket.Conn)
-var TabControlMessages chan *ClientTabDoc = make(chan *ClientTabDoc)
+var TabControlMessages chan *ClientTabMessage = make(chan *ClientTabMessage)
 var client_doc map[ClientTab]string = make(map[ClientTab]string)
 var doc_clients map[string]([]ClientTab) = make(map[string]([]ClientTab))
 
@@ -70,15 +70,27 @@ func ControlClients(stop_client_control chan bool) {
 	for {
 		select {
 		case message := <-TabControlMessages:
-			previous_doc, ok := client_doc[message.ClientTab]
-			if ok {
-				// the client tab no longer uses the previous document
-				remove_client_tab_from_doc(previous_doc, &message.ClientTab)
-				fmt.Println("Client tab", message.ClientTab, "closed doc", previous_doc)
+			if message.Opened {
+				previous_doc, ok := client_doc[message.ClientTab]
+				if ok {
+					// the client tab no longer uses the previous document
+					remove_client_tab_from_doc(previous_doc, &message.ClientTab)
+					fmt.Println("Client tab", message.ClientTab, "closed doc", previous_doc)
+				}
+				client_doc[message.ClientTab] = message.DocumentId
+				add_client_tab_to_doc(message.DocumentId, &message.ClientTab)
+				fmt.Println("Client tab", message.ClientTab, "opened doc", message.DocumentId)
+			} else if message.Closed {
+				previous_doc, ok := client_doc[message.ClientTab]
+				if ok {
+					// the client tab no longer uses the previous document
+					remove_client_tab_from_doc(previous_doc, &message.ClientTab)
+					fmt.Println("Client tab", message.ClientTab, "closed doc", previous_doc)
+				} else {
+					fmt.Println("Received an unexpected tabClose message. Client tab did not have any documents opened.")
+				}
+				delete(client_doc, message.ClientTab)
 			}
-			client_doc[message.ClientTab] = message.DocumentId
-			add_client_tab_to_doc(message.DocumentId, &message.ClientTab)
-			fmt.Println("Client tab", message.ClientTab, "opened doc", message.DocumentId)
 
 		case message := <-SocketControlMessages:
 			clear_all_data_for_socket(message)

@@ -26,7 +26,7 @@ $(document).ready(function(){
 
   ilex.server = ilex.tools.server.create('ws://127.0.0.1:9000/echobot');
   //download text list
-  ilex.server.sendAndRecieve('requestAllTextsInfo', {}, {
+  ilex.server.sendAndRecieve('getAllDocumentsInfo', {}, {
     'allTextsInfoResponse':
           function (params) {
             var texts =  params.texts;
@@ -36,13 +36,13 @@ $(document).ready(function(){
             ilex.view.slider.createWindowSplitSlider();
             ilex.view.slider.createWindow();
             var loadToWindow = function (winInd, id, version) {
-              ilex.server.sendAndRecieve('requestTextDump', {
+              ilex.server.sendAndRecieve('documentGetDump', {
                 'text': id,
                 'version': version,
                 'tab': winInd,
               },
               {
-                'textRetrieved':
+                'documentRetrieved':
                   function (params) {
                     ilex.view.loadText(winInd, params.text);
                     
@@ -61,7 +61,7 @@ $(document).ready(function(){
                   },
               })
             };
-            loadToWindow(0, texts[0].Id, 1);
+            loadToWindow(0, texts[3].Id, 1);
             loadToWindow(1, texts[1].Id, 1);
             loadToWindow(2, texts[2].Id, 1);
           },
