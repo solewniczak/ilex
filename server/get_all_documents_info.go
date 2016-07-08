@@ -8,13 +8,13 @@ import (
 )
 
 const (
-	REQUEST_ALL_TEXTS_INFO  = "requestAllTextsInfo"
+	GET_ALL_DOCUMENTS_INFO  = "getAllDocumentsInfo"
 	ALL_TEXTS_INFO_RESPONSE = "allTextsInfoResponse"
 	TEXTS                   = "texts"
 	GETTING_INFO_FAILED     = "gettingInfoFailed"
 )
 
-func requestAllTextsInfo(request *IlexMessage, ws *websocket.Conn) error {
+func getAllDocumentsInfo(request *IlexMessage, ws *websocket.Conn) error {
 	response := NewIlexResponse(request)
 
 	db_session, err := mgo.Dial("localhost")
