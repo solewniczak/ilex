@@ -67,8 +67,9 @@ ilex.tools.server.create = function (host) {
 
   //actions
   that.action = {};
-  that.action.documentAddText = function(tabId, position, str) {
+  that.action.documentAddText = function(documentId, tabId, position, str) {
     that.sendAndRecieve('documentAddText', {
+      'document': documentId,
       'tab': tabId,
       'position': position,
       'string': str,
@@ -80,14 +81,27 @@ ilex.tools.server.create = function (host) {
     });
   };
   
-  that.action.documentRemoveText = function(tabId, position, length) {
+  that.action.documentRemoveText = function(documentId, tabId, position, length) {
     that.sendAndRecieve('documentRemoveText', {
+      'documentId': documentId,
       'tab': tabId,
       'position': position,
       'length': length
     },
     {
       'documentTextRemoved': function(params) {
+      }
+    });
+  };
+
+  that.action.documentChangeName = function(documentId, tabId, name) {
+    that.sendAndRecieve('documentChangeName', {
+      'doucment': documentId,
+      'tab': tabId,
+      'name': name
+    },
+    {
+      'documentNameChanged': function(params) {
       }
     });
   };
