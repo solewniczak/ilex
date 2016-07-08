@@ -44,11 +44,11 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
                 .attr('contenteditable', 'true')
                 .attr('spellcheck', 'false');
   //initial span
-  var $initialSpan = ilex.tools.markup.createIlexSpan().appendTo(that.content)
+  ilex.tools.markup.createIlexSpan().appendTo(that.content)
                                   .data('ilex-startoffset', 0)
                                   .data('ilex-endoffset', 0);
   //new lines custos
-  var $custos = $('<div class="ilex-newlineGuard"><br></div>').appendTo(that.content);
+  var $custos = $('<div class="ilex-custos"><br></div>').appendTo(that.content);
 
   //add toolbar at the end to give it access to entre text object
   that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container, that, canvas);
@@ -56,32 +56,38 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   var cursor = {
     'span': null,
     'position': 0,
+    
+    'collapsed': false,
+    
+    'endSpan': null,
+    'endPosition': 0,
+    
     //update cursor using current Selection
     'needsUpdate': false,
     'update': function () {
-       var selection = window.getSelection();
-
-       //we are in custos div
-       if (selection.anchorNode === $custos[0]) {
-         this.span = that.content.find('span:last')[0],
-         selection.collapse(this.span.childNodes[0], this.span.textContent.length);
-       }
-       //we are in main div
-       if (selection.anchorNode === that.content[0]) {
-          this.span = $initialSpan[0];
-          this.position = 0;
-       } else {
-          this.span = selection.anchorNode.parentElement;
-          this.position = selection.anchorOffset;
-       }
-       this.needsUpdate = false;
+      var selection = window.getSelection();
+      if (selection.anchorNode === $custos[0]) {
+        this.span = that.content.find('span:last')[0],
+        selection.collapse(this.span.childNodes[0], this.span.textContent.length);
+      //we are in main div
+      } else if (selection.anchorNode === that.content[0]) {
+        this.span = that.content.find('span')[0];
+        this.position = 0;
+      } else {
+        this.span = selection.anchorNode.parentElement;
+        this.position = selection.anchorOffset;
+      }
+      this.needsUpdate = false;
     }
   };
  
   
   //There cannot be empty spans in ilex document
   that.content.on('mouseup', function(event) {
-    cursor.update();
+    var selection = window.getSelection();
+    if (selection.isCollapsed) {
+      cursor.update();
+    }
   });
   
   that.content.on('keydown', function(event) {
@@ -97,7 +103,6 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
         },
         insertAfterCursor = function(str) {
           var text = cursor.span.textContent;
-
           //update offsets
           let $span = $(cursor.span);
           $span.data('ilex-endoffset', $span.data('ilex-endoffset') + str.length);
@@ -110,14 +115,15 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
                                     text.slice(cursor.position);
           cursor.position += str.length;
         },
-        updateAfterRemove = function(relPosition) {
+        updateAfterRemove = function(relPosition, length) {
+          length = length || -1;
           //update offsets
           let $span = $(cursor.span);
-          $span.data('ilex-endoffset', $span.data('ilex-endoffset') - 1);
-          updateOffsets($span, -1);
+          $span.data('ilex-endoffset', $span.data('ilex-endoffset') - length);
+          updateOffsets($span, -length);
 
           ilex.server.action.documentRemoveText(windowObject.id,
-                                        relPosition + $span.data('ilex-startoffset'), 1);
+                                        relPosition + $span.data('ilex-startoffset'), length);
         },
         jumpToNextSpan = function() {
           let nextSpan = cursor.span.nextElementSibling;
@@ -149,7 +155,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
         event.key === 'Convert' ||
         event.key === 'Escape' ||
         event.key === 'Pause' ||
-        event.key === 'PageUp' || //there is no pages in hypertext
+        event.key === 'PageUp' || //there is no pages in hypertext :)
         event.key === 'PageDown' ||
         event.key === 'ScrollLock' || //maybe we should handle it in good old way :)
         event.key === 'Shift' ||
@@ -169,14 +175,103 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
       cursor.needsUpdate = true;
       return true;
     }
+     //Disable Ctrl shortcouts
+    if (event.ctrlKey) {
+      return false;
+    }
+    
+    
+    let preventDeletion = false;
+    //if we have slected range remove it first
+    if (that.selectionRanges.length > 0 && that.selectionRanges[0].collapsed === false) {
+      //the last selected range is our edit range
+      //remove it from selection ranges
+      let editRange = that.selectionRanges.pop(),
+          startSpan = editRange.startContainer.parentElement,
+          endSpan = editRange.endContainer.parentElement;
+      
+      cursor.span = startSpan;
+      cursor.position = editRange.startOffset;
+      
+      if (startSpan === endSpan) {
+        
+        updateAfterRemove(editRange.startOffset, editRange.endOffset - editRange.startOffset);
+               
+        let text = startSpan.textContent;
+        startSpan.textContent = text.slice(0, editRange.startOffset) +
+                              text.slice(editRange.endOffset);
+        
+        //we have removed entire content
+        if (startSpan.textContent.length === 0) {
+          startSpan.appendChild(document.createTextNode(''));
+        }
+        
+      } else {
+        let length = startSpan.textContent.length - editRange.startOffset,
+            startOffset = editRange.startOffset;
+       
+
+        let elm = startSpan.nextElementSibling;
+         //remove from start span
+        if (editRange.startOffset === 0) {
+          
+          //start span is first span on the list
+          if (startSpan.previousElementSibling === null) {
+            cursor.span = endSpan;
+            cursor.position = 0;
+            $(endSpan).data('ilex-startoffset', $(startSpan).data('ilex-startoffset'));
+          } else {
+            cursor.span = startSpan.previousElementSibling;
+            cursor.position = cursor.span.textContent.lenght;
+          }
+          
+          startSpan.remove();
+        } else {
+          startSpan.textContent = startSpan.textContent.slice(0, editRange.startOffset);
+        }
+        while (elm !== endSpan) {
+          let elmToRemove = elm;
+          length += elm.textContent.length;
+          elm = elm.nextElementSibling;
+          elmToRemove.remove();
+        }
+        length += editRange.endOffset;
+        
+       
+        if (editRange.endOffset === endSpan.textContent.length) {
+          endSpan.remove();
+          
+          //create new ilex span
+          if (that.content.find('span').length === 0) {
+            let newSpan = ilex.tools.markup.createIlexSpan().prependTo(that.content)
+                                  .data('ilex-startoffset', 0)
+                                  .data('ilex-endoffset', 0);
+            cursor.span = newSpan[0];
+            cursor.position = 0;
+          }
+        } else {
+          endSpan.textContent = endSpan.textContent.slice(editRange.endOffset);
+        }
+        
+        console.log(cursor);
+        
+        updateAfterRemove(startOffset, length);
+      }    
+      
+      //we don't want backspace and delete
+      preventDeletion = true;
+    }
+
+    //update curosr span if it was moved by arrow keys
     if (cursor.needsUpdate) {
       cursor.update();
     }
-    //Disable Ctrl shortcouts
-    if (event.ctrlKey) {
-      return false;
-    } else if (event.key === 'Backspace') {  
-      if (cursor.position !== 0 || cursor.span.previousElementSibling !== null) {
+    
+    if (event.key === 'Backspace') {  
+      if (
+          !(cursor.position === 0 && cursor.span.previousElementSibling === null) &&
+          !preventDeletion
+        ) {
         //remove span
         if (cursor.position === 0) {
           jumpToPrevSpan();
@@ -201,7 +296,11 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
       }
     } else if (event.key === 'Delete') {
       //we are not at the end of file
-      if (cursor.span.nextElementSibling !== $custos[0]) {
+      if (
+          !(cursor.position === cursor.span.textContent.length &&
+            cursor.span.nextElementSibling === $custos[0]) &&
+          !preventDeletion
+        ) {
         //we are before new span
         if (cursor.position === cursor.span.textContent.length) {
           jumpToNextSpan();
@@ -227,6 +326,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     } else {
        insertAfterCursor(event.key);
     }
+
     selection.collapse(cursor.span.childNodes[0], cursor.position);
     
     //prevent default contenteditable behaviour
@@ -240,11 +340,12 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     if (active.length > 0 && selection.rangeCount >= 1) {
       $('.ilex-text').each(function () {
         if ($(this).is(that.container) && $(this).is(active)) {
+          let selectionRange = ilex.tools.range.normalize(selection.getRangeAt(0));
           //update newest selection
           if (that.selectionRanges.length === 0) {
-            that.selectionRanges[0] = selection.getRangeAt(0);
+            that.selectionRanges[0] = selectionRange;
           } else {
-            that.selectionRanges[that.selectionRanges.length - 1] = selection.getRangeAt(0);
+            that.selectionRanges[that.selectionRanges.length - 1] = selectionRange;
           }
         }
       });
@@ -336,6 +437,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     for (let range of that.selectionRanges) {
       let rects = ilex.tools.range.getClientRects(range, that),
         clientRects = canvas.clipClientRectList(clipRect, rects);
+
       for (let i = 0; i < clientRects.length; i++) {
         let rect = clientRects[i];
         canvas.drawRect(rect, '#a8d1ff');
