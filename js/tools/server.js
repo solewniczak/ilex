@@ -52,7 +52,7 @@ ilex.tools.server.create = function (host) {
   //response: [{'action': callback(msg)}]
   that.sendAndRecieve = function(action, params, response) {
     that.send(action, params, function (msg) {
-      if (typeof response[msg.action] === 'function') {
+      if (response !== undefined && typeof response[msg.action] === 'function') {
         response[msg.action](msg.parameters);
       } else {
         throw 'action: ' + action + ' unknown response: ' + msg.action;
@@ -63,47 +63,70 @@ ilex.tools.server.create = function (host) {
   that.close = function() {
     socket.close();
     socket = null;
-  }
-
-  //actions
-  that.action = {};
-  that.action.documentAddText = function(documentId, tabId, position, str) {
-    that.sendAndRecieve('documentAddText', {
-      'document': documentId,
-      'tab': tabId,
-      'position': position,
-      'string': str,
-      'length': str.length
-    },
-    {
-      'documentTextAdded': function(params) {
-      }
-    });
   };
   
-  that.action.documentRemoveText = function(documentId, tabId, position, length) {
-    that.sendAndRecieve('documentRemoveText', {
-      'documentId': documentId,
-      'tab': tabId,
-      'position': position,
-      'length': length
-    },
-    {
-      'documentTextRemoved': function(params) {
-      }
-    });
-  };
-
-  that.action.documentChangeName = function(documentId, tabId, name) {
-    that.sendAndRecieve('documentChangeName', {
-      'doucment': documentId,
-      'tab': tabId,
-      'name': name
-    },
-    {
-      'documentNameChanged': function(params) {
-      }
-    });
+  that.document = function(tabId, name, documentId) {
+    var thatDocument = {}, actionsQueue = [],
+        sendAction = function(method, params) {
+          var action = {'method': method, 'params': params};
+          if (documentId === undefined) {
+            actionsQueue.push(action);
+          } else {
+            that.sendAndRecieve(action.method, action.params);
+          }
+        };
+    //create new document
+    if (documentId === undefined) {
+      that.sendAndRecieve('createDocument', {
+        'tab': tabId,
+        'name': name
+      },
+      {
+        'documentCreated': function(params) {
+          documentId = params.id;
+          for (let action of actionsQueue) {
+            that.sendAndRecieve(action.methos, action.params);
+          }
+          actionsQueue = [];
+        }
+      });
+    }
+    
+    thatDocument.addText = function(position, str) {
+      sendAction('documentAddText', {
+          'document': documentId,
+          'tab': tabId,
+          'position': position,
+          'string': str,
+          'length': str.length
+      });
+    };
+    
+    thatDocument.removeText = function(position, length) {
+      sendAction('documentRemoveText', {
+          'document': documentId,
+          'tab': tabId,
+          'position': position,
+          'length': length
+      });
+    };
+    
+    thatDocument.changeName = function(name) {
+      sendAction('documentChangeName', {
+          'document': documentId,
+          'tab': tabId,
+          'name': name
+      });
+    };
+    
+    thatDocument.tabClose = function() {
+      sendAction('tabClose', {
+          'document': documentId,
+          'tab': tabId
+      });
+    };
+    
+    return thatDocument;
   };
 
   return that;
