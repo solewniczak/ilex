@@ -64,24 +64,23 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     }
   );
   
-  //id of current document
-  that.documentId = '';
+  //document on the server
+  that.document = null;
   //name input
   that.name = $('<input type="text">').appendTo(that.dock.toolbar.container)
   				.css('width', '250px');
 
   that.name.on('change', function () {
-    ilex.server.action.documentChangeName(that.documentId, windowObject.id, $(this).val());
+    //if we input to empty document, create new one
+    if (that.document === null) {
+      that.document = ilex.server.document(windowObject.id, that.name.val());
+    }
+    that.document.changeName($(this).val());
   });
 
   var cursor = {
     'span': null,
     'position': 0,
-    
-    'collapsed': false,
-    
-    'endSpan': null,
-    'endPosition': 0,
     
     //update cursor using current Selection
     'needsUpdate': false,
@@ -111,6 +110,10 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     }
   });
   
+  that.content.on('input', function(event) {
+
+  });
+  
   that.content.on('keydown', function(event) {
     var selection = window.getSelection(),
         updateOffsets = function ($span, num) {
@@ -129,8 +132,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
           $span.data('ilex-endoffset', $span.data('ilex-endoffset') + str.length);
           updateOffsets($span, str.length);
           //index of charter AFTER which we insert new string
-          ilex.server.action.documentAddText(that.documentId, windowObject.id,
-                                    cursor.position - 1 + $span.data('ilex-startoffset'), str);
+          that.document.addText(cursor.position - 1 + $span.data('ilex-startoffset'), str);
                     
           cursor.span.textContent = text.slice(0, cursor.position) + str +
                                     text.slice(cursor.position);
@@ -143,8 +145,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
           $span.data('ilex-endoffset', $span.data('ilex-endoffset') - length);
           updateOffsets($span, -length);
 
-          ilex.server.action.documentRemoveText(that.documentId, windowObject.id,
-                                        relPosition + $span.data('ilex-startoffset'), length);
+          that.document.removeText(relPosition + $span.data('ilex-startoffset'), length);
         },
         jumpToNextSpan = function() {
           let nextSpan = cursor.span.nextElementSibling;
@@ -199,6 +200,11 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
      //Disable Ctrl shortcouts
     if (event.ctrlKey) {
       return false;
+    }
+    
+    //if we input to empty document, create new one
+    if (that.document === null) {
+      that.document = ilex.server.document(windowObject.id, that.name.val());
     }
     
     
@@ -273,8 +279,6 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
         } else {
           endSpan.textContent = endSpan.textContent.slice(editRange.endOffset);
         }
-        
-        console.log(cursor);
         
         updateAfterRemove(startOffset, length);
       }
@@ -382,8 +386,8 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     that.content.find('span')
                   .data('ilex-endoffset', params.text.length)
                   .text(params.text);
-	that.name.val(params.name);
-    that.documentId = params.id;
+    that.name.val(params.name);
+    that.document = ilex.server.document(windowObject.id, params.name, params.id);
   };
 
   that.close = function () {
