@@ -51,7 +51,18 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   var $custos = $('<div class="ilex-custos"><br></div>').appendTo(that.content);
 
   //add toolbar at the end to give it access to entre text object
-  that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container, that, canvas);
+  //that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container, that, canvas);
+  that.dock.toolbar = ilex.widgetsCollection.toolbar(that.dock);
+  that.dock.toolbar.addButton('Group selections',
+    function(button) {
+      $(button).addClass('ilex-active');
+      that.groupSelections = true;
+    }, 
+    function (button) {
+      $(button).removeClass('ilex-active');
+      that.groupSelections = false;
+    }
+  );
 
   var cursor = {
     'span': null,
@@ -256,7 +267,9 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
         console.log(cursor);
         
         updateAfterRemove(startOffset, length);
-      }    
+      }
+      
+      that.selectionRanges = [];
       
       //we don't want backspace and delete
       preventDeletion = true;
@@ -336,10 +349,10 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   //draw selection
   $(document).on('selectionchange', function(event) {
     var selection = window.getSelection(),
-      active = $('.ilex-text:hover');
+      active = $('.ilex-content:hover');
     if (active.length > 0 && selection.rangeCount >= 1) {
-      $('.ilex-text').each(function () {
-        if ($(this).is(that.container) && $(this).is(active)) {
+      $('.ilex-content').each(function () {
+        if ($(this).is(that.content) && $(this).is(active)) {
           let selectionRange = ilex.tools.range.normalize(selection.getRangeAt(0));
           //update newest selection
           if (that.selectionRanges.length === 0) {
