@@ -52,7 +52,7 @@ ilex.tools.server.create = function (host) {
   //response: [{'action': callback(msg)}]
   that.sendAndRecieve = function(action, params, response) {
     that.send(action, params, function (msg) {
-      if (typeof response[msg.action] === 'function') {
+      if (response !== undefined && typeof response[msg.action] === 'function') {
         response[msg.action](msg.parameters);
       } else {
         throw 'action: ' + action + ' unknown response: ' + msg.action;
@@ -116,6 +116,13 @@ ilex.tools.server.create = function (host) {
           'document': documentId,
           'tab': tabId,
           'name': name
+      });
+    };
+    
+    thatDocument.tabClose = function() {
+      sendAction('tabClose', {
+          'document': documentId,
+          'tab': tabId
       });
     };
     
