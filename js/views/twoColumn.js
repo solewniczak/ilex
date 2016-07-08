@@ -22,11 +22,11 @@ ilex.views.twoColumn = function(canvas) {
       return ilex.widgetsCollection.text(win, canvas);
   });
 
-  view.loadText = function(winInd, text) {
+  view.loadText = function(winInd, params) {
     if (winInd >= view.slider.windows.length) {
       throw 'window: ' + winInd + 'does not exist';
     }
-    view.slider.windows[winInd].contentWidget.loadText(text);
+    view.slider.windows[winInd].contentWidget.loadText(params);
   };
 
 

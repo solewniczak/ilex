@@ -12,7 +12,7 @@ if (ilex.widgetsCollection.toolbar !== undefined)
 ilex.widgetsCollection.toolbar = function (dock) {
   var that = {};
 
-  that.toolbar = $('<div class="ilex-toolbar">').appendTo(dock.container);
+  that.container = $('<div class="ilex-toolbar">').appendTo(dock.container);
   that.addButton = function (html, callback, alternateCallback) {
     let $button = $('<div class="ilex-button ilex-rect-button">').html(html);
     if (alternateCallback === undefined) {
@@ -29,7 +29,7 @@ ilex.widgetsCollection.toolbar = function (dock) {
         }
       })
     }
-    this.toolbar.append($button);
+    this.container.append($button);
     return $button;
   };
 
