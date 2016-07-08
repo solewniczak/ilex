@@ -16,6 +16,7 @@ type Version struct {
 	Id         bson.ObjectId `bson:"_id,omitempty" json:"-"`
 	DocumentId bson.ObjectId `bson:"DocumentId"`
 	No         int           `bson:"No"`
+	Name       string        `bson:"Name"`
 	Created    string        `bson:"Created"`
 	Finished   string        `bson:"Finished"`
 	Size       int           `bson:"Size"`
@@ -24,7 +25,6 @@ type Version struct {
 
 type Document struct {
 	Id            bson.ObjectId `bson:"_id,omitempty"`
-	Name          string        `bson:"Name"`
 	Class         string        `bson:"Class"`
 	Format        string        `bson:"Format"`
 	Created       string        `bson:"Created"`
