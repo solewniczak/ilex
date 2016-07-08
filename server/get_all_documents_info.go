@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"golang.org/x/net/websocket"
 	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
 const (
@@ -13,6 +14,11 @@ const (
 	TEXTS                   = "texts"
 	GETTING_INFO_FAILED     = "gettingInfoFailed"
 )
+
+type DocumentWithName struct {
+	Document
+	Name string
+}
 
 func getAllDocumentsInfo(request *IlexMessage, ws *websocket.Conn) error {
 	response := NewIlexResponse(request)
@@ -39,8 +45,25 @@ func getAllDocumentsInfo(request *IlexMessage, ws *websocket.Conn) error {
 			goto send
 		}
 
+		versions := database.C("versions")
+		var version Version
+		texts := make([]DocumentWithName, len(found))
+
+		// Get the latest version's name as the document name.
+		for i, doc := range found {
+			texts[i].Document = doc
+			err = versions.Find(bson.M{"DocumentId": doc.Id,
+				"No": doc.TotalVersions}).One(&version)
+			if err != nil {
+				response.Action = GETTING_INFO_FAILED
+				response.Parameters[ERROR] = "Database error! Could not find latest version for document " + doc.Id.Hex()
+				goto send
+			}
+			texts[i].Name = version.Name
+		}
+
 		response.Action = ALL_TEXTS_INFO_RESPONSE
-		response.Parameters[TEXTS] = found
+		response.Parameters[TEXTS] = texts
 	}
 
 send:
