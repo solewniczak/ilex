@@ -64,8 +64,15 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     }
   );
   
+  //id of current document
+  that.documentId = '';
   //name input
-  let nameInput = $('<input type="text">').appendTo(that.dock.toolbar.container);
+  that.name = $('<input type="text">').appendTo(that.dock.toolbar.container)
+  				.css('width', '250px');
+
+  that.name.on('change', function () {
+    ilex.server.action.documentChangeName(that.documentId, windowObject.id, $(this).val());
+  });
 
   var cursor = {
     'span': null,
@@ -122,7 +129,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
           $span.data('ilex-endoffset', $span.data('ilex-endoffset') + str.length);
           updateOffsets($span, str.length);
           //index of charter AFTER which we insert new string
-          ilex.server.action.documentAddText(windowObject.id,
+          ilex.server.action.documentAddText(that.documentId, windowObject.id,
                                     cursor.position - 1 + $span.data('ilex-startoffset'), str);
                     
           cursor.span.textContent = text.slice(0, cursor.position) + str +
@@ -136,7 +143,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
           $span.data('ilex-endoffset', $span.data('ilex-endoffset') - length);
           updateOffsets($span, -length);
 
-          ilex.server.action.documentRemoveText(windowObject.id,
+          ilex.server.action.documentRemoveText(that.documentId, windowObject.id,
                                         relPosition + $span.data('ilex-startoffset'), length);
         },
         jumpToNextSpan = function() {
@@ -371,11 +378,12 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
 
 
   that.loadText = function (params) {
-    console.log(params);
     //Filling algorithm
     that.content.find('span')
                   .data('ilex-endoffset', params.text.length)
                   .text(params.text);
+	that.name.val(params.name);
+    that.documentId = params.id;
   };
 
   that.close = function () {
