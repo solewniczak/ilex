@@ -102,69 +102,73 @@ ilex.tools.range.insideSpan = function(range) {
 //ANCHOR. The second may or may not be inside span. If it is outside we try find
 //the first/last selected SPAN and treat it as end of seleciton.
 
+//range is normalized range
+
 ilex.tools.range.getClientRects = function (range, doc) {
   var pushClientRectsToArray = function(rects, clientRectsList) {
     for (let i = 0; i < clientRectsList.length; i++) {
       rects.push(clientRectsList[i]);
     }
-  }, hasSpanParent = function (node) {
-    return node.parentNode && node.parentNode.nodeName === 'SPAN';
-  },
-  createClientRect = function (x, y, w, h) {
-    return {
-      left: x,
-      top: y,
-      right: x + w,
-      bottom: y + h,
-      width: w,
-      height: h
-    };
   };
 
   if (range.collapsed === true) {
     return [];
   }
+
   if (range.startContainer === range.endContainer) {
     return range.getClientRects();
   } else {
     var startElement, endElement;
     //we assume that <BR> selection is not possible
     let rects = [];
-    if (hasSpanParent(range.startContainer)) {
-      let startRange = document.createRange();
-      startRange.setStart(range.startContainer, range.startOffset);
-      startRange.setEnd(range.startContainer, range.startContainer.length);
-      pushClientRectsToArray(rects, startRange.getClientRects());
-      startElement = range.startContainer.parentNode.nextSibling;
-    //we have selected <div>
-    } else {
-      startElement = range.startContainer.childNodes[range.startOffset];
-    }
-
-
-    if (hasSpanParent(range.endContainer)) {
-      let endRange = document.createRange();
-      endRange.setStart(range.endContainer, 0);
-      endRange.setEnd(range.endContainer, range.endOffset);
-      pushClientRectsToArray(rects, endRange.getClientRects());
-      endElement = range.endContainer.parentNode;
-    //we have selected <div>
-    } else {
-      endElement = range.endContainer.childNodes[range.endOffset].previousSibling;
-      pushClientRectsToArray(rects, endElement.getClientRects());
-    }
+    
+    let startRange = document.createRange();
+    startRange.setStart(range.startContainer, range.startOffset);
+    startRange.setEnd(range.startContainer, range.startContainer.length);
+    pushClientRectsToArray(rects, startRange.getClientRects());
+    startElement = range.startContainer.parentNode.nextSibling;
+    
+    let endRange = document.createRange();
+    endRange.setStart(range.endContainer, 0);
+    endRange.setEnd(range.endContainer, range.endOffset);
+    pushClientRectsToArray(rects, endRange.getClientRects());
+    endElement = range.endContainer.parentNode;
+   
 
     let elm = startElement;
     while (elm !== endElement) {
-      if (elm.nodeName === "BR") {
-        let elmRects = elm.getClientRects(),
-          rect = elmRects[0];
-        pushClientRectsToArray(rects, [createClientRect(rect.left, rect.top, 5, rect.height)]);
-      } else {
-        pushClientRectsToArray(rects, elm.getClientRects());
-      }
+      pushClientRectsToArray(rects, elm.getClientRects());
       elm = elm.nextSibling;
     }
     return rects;
   }
 };
+
+
+//start and end container are always span texts.
+ilex.tools.range.normalize = function (range) {
+  var hasSpanParent = function (node) {
+    return node.parentNode && node.parentNode.nodeName === 'SPAN';
+  };
+  
+  //remove custos from range
+  if (range.endContainer.className === 'ilex-custos') {
+    let selection = window.getSelection();
+    range.setStart(range.startContainer, range.startOffset);
+    range.setEnd(range.endContainer.previousElementSibling.childNodes[0], 
+                    range.endContainer.previousElementSibling.textContent.length);  
+  }
+
+  //we have selected <div>
+  if (!hasSpanParent(range.startContainer)) {
+    range.setStart(range.startContainer.childNodes[range.startOffset].childNodes[0], 0);
+  }
+
+  if (!hasSpanParent(range.endContainer)) {
+    let span = range.endContainer.childNodes[range.endOffset].previousSibling;
+    range.setEnd(span.childNodes[0], span.textContent.length);
+  }
+  
+  return range;
+};
+
