@@ -9,13 +9,26 @@ if (ilex.widgetsCollection.toolbar !== undefined)
   throw 'ilex.widgetsCollection.console already defined';
 
 
-ilex.widgetsCollection.toolbar = function (dock, buttons) {
+ilex.widgetsCollection.toolbar = function (dock) {
   var that = {};
 
   that.toolbar = $('<div class="ilex-toolbar">').appendTo(dock.container);
-  that.addButton = function (html, callback) {
+  that.addButton = function (html, callback, alternateCallback) {
     let $button = $('<div class="ilex-button ilex-rect-button">').html(html);
-    $button.on('click', callback);
+    if (alternateCallback === undefined) {
+      $button.on('click', callback);
+    } else {
+      var buttonState = 'off';
+      $button.on('click', function (event) {
+        if (buttonState === 'off') {
+          callback(this);
+          buttonState = 'on';
+        } else {
+          alternateCallback(this);
+          buttonState = 'off';
+        }
+      })
+    }
     this.toolbar.append($button);
     return $button;
   };
