@@ -44,7 +44,7 @@ $(document).ready(function(){
               {
                 'documentRetrieved':
                   function (params) {
-                    ilex.view.loadText(winInd, params.text);
+                    ilex.view.loadText(winInd, params);
                     
                     if (winInd === 2) {
                       //load links

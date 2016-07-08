@@ -63,6 +63,9 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
       that.groupSelections = false;
     }
   );
+  
+  //name input
+  let nameInput = $('<input type="text">').appendTo(that.dock.toolbar.container);
 
   var cursor = {
     'span': null,
@@ -367,11 +370,12 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   });
 
 
-  that.loadText = function (text) {
+  that.loadText = function (params) {
+    console.log(params);
     //Filling algorithm
     that.content.find('span')
-                  .data('ilex-endoffset', text.length)
-                  .text(text);
+                  .data('ilex-endoffset', params.text.length)
+                  .text(params.text);
   };
 
   that.close = function () {

@@ -19,6 +19,7 @@ const (
 	DOCUMENT_RETRIEVED = "documentRetrieved"
 	LINKS              = "links"
 	IS_EDITABLE        = "isEditable"
+	NAME               = "name"
 
 	RETRIEVAL_FAILED = "retrievalFailed"
 	ERROR            = "error"
@@ -197,6 +198,7 @@ func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
 			response.Parameters[TAB] = client_tab
 			response.Parameters[LINKS] = links
 			response.Parameters[IS_EDITABLE] = is_editable
+			response.Parameters[NAME] = document.Name
 			TabControlMessages <- ClientTabOpenedDoc(ws, client_tab, requested_text_id)
 		}
 
