@@ -17,7 +17,7 @@ const (
 
 type DocumentWithName struct {
 	Document
-	Name string `json : "name"`
+	Name string `json:"name"`
 }
 
 func getAllDocumentsInfo(request *IlexMessage, ws *websocket.Conn) error {
