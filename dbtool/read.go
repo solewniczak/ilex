@@ -31,7 +31,6 @@ func read_database(database *mgo.Database) {
 	}
 
 	for i, doc := range documents {
-		fmt.Println(i, "Name: ", doc.Name)
 		fmt.Println(i, "_id: ", doc.Id)
 		fmt.Println(i, "versions: ", doc.TotalVersions)
 	}
@@ -46,5 +45,6 @@ func read_database(database *mgo.Database) {
 		fmt.Println(i, "_id: ", version.Id)
 		fmt.Println(i, "DocumentId ", version.DocumentId)
 		fmt.Println(i, "No: ", version.No)
+		fmt.Println(i, "Name: ", version.Name)
 	}
 }

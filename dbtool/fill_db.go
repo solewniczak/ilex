@@ -57,7 +57,8 @@ func fill_database(database *mgo.Database) {
 		log.Fatal(err)
 	}
 
-	// assign versions to documents
+	// assign versions to documents.
+	// (this is a hardcoded mapping)
 	sample_versions[0].DocumentId = sample_docs[0].Id
 	sample_versions[1].DocumentId = sample_docs[1].Id
 	sample_versions[2].DocumentId = sample_docs[2].Id
