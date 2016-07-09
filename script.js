@@ -61,9 +61,9 @@ $(document).ready(function(){
                   },
               })
             };
-            loadToWindow(0, texts[3].Id, 1);
-            loadToWindow(1, texts[1].Id, 1);
-            loadToWindow(2, texts[2].Id, 1);
+            loadToWindow(0, texts[3].id, 1);
+            loadToWindow(1, texts[1].id, 1);
+            loadToWindow(2, texts[2].id, 1);
           },
     'retrievalFailed':
           function (params) {
