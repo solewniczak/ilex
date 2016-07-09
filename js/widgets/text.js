@@ -139,7 +139,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
           cursor.position += str.length;
         },
         updateAfterRemove = function(relPosition, length) {
-          length = length || -1;
+          length = length || 1;
           //update offsets
           let $span = $(cursor.span);
           $span.data('ilex-endoffset', $span.data('ilex-endoffset') - length);
@@ -230,18 +230,27 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
         
         //we have removed entire content
         if (startSpan.textContent.length === 0) {
-          startSpan.appendChild(document.createTextNode(''));
+          if (cursor.span.previousElementSibling !== null) {
+            cursor.span = cursor.span.previousElementSibling;
+            cursor.position = cursor.span.textContent.length;
+            startSpan.remove();
+          } else if (cursor.span.nextElementSibling !== null) {
+            cursor.span = cursor.span.nextElementSibling;
+            cursor.position = 0;
+            startSpan.remove();
+          //if curosr doesn't have previous and next element, it is only span and don't remove it.
+          } else {
+            cursor.span.appendChild(document.createTextNode(''));
+          }
         }
         
       } else {
         let length = startSpan.textContent.length - editRange.startOffset,
             startOffset = editRange.startOffset;
        
-
         let elm = startSpan.nextElementSibling;
          //remove from start span
         if (editRange.startOffset === 0) {
-          
           //start span is first span on the list
           if (startSpan.previousElementSibling === null) {
             cursor.span = endSpan;
@@ -249,7 +258,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
             $(endSpan).data('ilex-startoffset', $(startSpan).data('ilex-startoffset'));
           } else {
             cursor.span = startSpan.previousElementSibling;
-            cursor.position = cursor.span.textContent.lenght;
+            cursor.position = cursor.span.textContent.length;
           }
           
           startSpan.remove();
