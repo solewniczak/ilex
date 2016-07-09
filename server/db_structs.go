@@ -24,10 +24,10 @@ type Version struct {
 }
 
 type Document struct {
-	Id            bson.ObjectId `bson:"_id,omitempty"`
-	Class         string        `bson:"Class"`
-	Format        string        `bson:"Format"`
-	Created       string        `bson:"Created"`
-	Modified      string        `bson:"Modified"`
-	TotalVersions int           `bson:"TotalVersions"`
+	Id            bson.ObjectId `bson:"_id,omitempty" json:"id"`
+	Class         string        `bson:"Class"         json:"class"`
+	Format        string        `bson:"Format"        json:"format"`
+	Created       string        `bson:"Created"       json:"created"`
+	Modified      string        `bson:"Modified"      json:"modified"`
+	TotalVersions int           `bson:"TotalVersions" json:"totalVersions"`
 }
