@@ -179,6 +179,10 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
             });
       };
       newWindow.rightSideHandler = addHandler(winInd);
+      //function returns window object of antother window 
+      newWindow.getWindow = function(id) {
+        return that.windows[id];
+      };
       that.windows.push(newWindow);
       return newWindow;
   };
