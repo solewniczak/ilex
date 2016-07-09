@@ -40,6 +40,8 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   that.content = $('<div class="ilex-content">').appendTo(that.scrollWindow)
                 //proper new line handling
                 .css('white-space', 'pre-wrap')
+                //proper outline handling
+                .css('margin-top', '5px')
                 .data('ilex-height', height - that.dock.container.height())
                 .attr('contenteditable', 'true')
                 .attr('spellcheck', 'false');
@@ -54,31 +56,17 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   //that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container, that, canvas);
   that.dock.toolbar = ilex.widgetsCollection.toolbar(that.dock);
   that.dock.toolbar.addButton('Group selections',
-    function(button) {
-      $(button).addClass('ilex-active');
+    function() {
+      $(this).addClass('ilex-active');
       that.groupSelections = true;
     }, 
-    function (button) {
-      $(button).removeClass('ilex-active');
+    function () {
+      $(this).removeClass('ilex-active');
       that.groupSelections = false;
     }
   );
-  
-  //document on the server
-  that.document = null;
-  //name input
-  that.name = $('<input type="text">').appendTo(that.dock.toolbar.container)
-  				.css('width', '250px');
 
-  that.name.on('change', function () {
-    //if we input to empty document, create new one
-    if (that.document === null) {
-      that.document = ilex.server.document(windowObject.id, that.name.val());
-    }
-    that.document.changeName($(this).val());
-  });
-
-  var cursor = {
+  var cursor = new Proxy({
     'span': null,
     'position': 0,
     
@@ -98,8 +86,70 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
         this.position = selection.anchorOffset;
       }
       this.needsUpdate = false;
+    },
+    'toSelection':  function () {
+      var selection = window.getSelection();
+      selection.collapse(this.span.childNodes[0], this.position);
     }
-  };
+  },
+  //proxy handlers
+  {
+    set: function(obj, prop, value) {
+      if (prop === 'span') {
+        that.content.find('span').css('outline', '0');
+        $(value).css('outline', '1px solid rgba(0, 0, 0, 0.3)');
+      }
+      
+      //the default behaviour
+      obj[prop] = value;
+      return true;
+    }
+  });
+
+  
+  
+  
+  that.dock.toolbar.addButton('Escape link',
+  function(event) {
+    var span = cursor.span;
+    if ($(span).hasClass('ilex-connection')) {
+      if (span.nextElementSibling !== $custos[0]) {
+        cursor.span = span.nextElementSibling;
+      } else {
+        cursor.span = ilex.tools.markup.createIlexSpan().insertAfter(span)[0];
+      }
+      cursor.position = 0;
+    }
+    
+    cursor.toSelection();
+    //don't loose selection
+    event.preventDefault();
+  });
+  
+  that.dock.toolbar.addButton('Link left',
+  function(button) {
+
+  });
+  
+  that.dock.toolbar.addButton('Link right',
+  function(button) {
+      
+  });
+  
+  //document on the server
+  that.document = null;
+  //name input
+  that.name = $('<input type="text">').appendTo(that.dock.toolbar.container)
+  				.css('width', '250px');
+
+  that.name.on('change', function () {
+    //if we input to empty document, create new one
+    if (that.document === null) {
+      that.document = ilex.server.document(windowObject.id, that.name.val());
+    }
+    that.document.changeName($(this).val());
+  });
+
  
   
   //There cannot be empty spans in ilex document
@@ -108,10 +158,6 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     if (selection.isCollapsed) {
       cursor.update();
     }
-  });
-  
-  that.content.on('input', function(event) {
-
   });
   
   that.content.on('keydown', function(event) {
@@ -362,8 +408,9 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     } else {
        insertAfterCursor(event.key);
     }
+    
+    cursor.toSelection();
 
-    selection.collapse(cursor.span.childNodes[0], cursor.position);
     
     //prevent default contenteditable behaviour
     return false;
@@ -465,8 +512,8 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     $(document).trigger('canvasRedraw');
   });
 
-  //redraw selections
   $(document).on('canvasRedraw', function(event) {
+    //redraw selections
     var rects = [],
       scrollWindowOffset = that.scrollWindow.offset(),
       clipRect = canvas.createClientRect(scrollWindowOffset.left, scrollWindowOffset.top,
