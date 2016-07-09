@@ -55,7 +55,9 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   //add toolbar at the end to give it access to entre text object
   //that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container, that, canvas);
   that.dock.toolbar = ilex.widgetsCollection.toolbar(that.dock);
-  that.dock.toolbar.addButton('Group selections',
+  
+  //'Group selection' may be supported in futhure releses
+  /*that.dock.toolbar.addButton('Group selections',
     function() {
       $(this).addClass('ilex-active');
       that.groupSelections = true;
@@ -64,7 +66,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
       $(this).removeClass('ilex-active');
       that.groupSelections = false;
     }
-  );
+  );*/
 
   var cursor = new Proxy({
     'span': null,
@@ -96,8 +98,12 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   {
     set: function(obj, prop, value) {
       if (prop === 'span') {
+        let span = value;
         that.content.find('span').css('outline', '0');
-        $(value).css('outline', '1px solid rgba(0, 0, 0, 0.3)');
+        $(span).css('outline', '1px solid rgba(0, 0, 0, 0.3)');
+        if ($(span).hasClass('ilex-connection')) {
+          console.log(span.classList);
+        }
       }
       
       //the default behaviour
@@ -106,8 +112,6 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     }
   });
 
-  
-  
   
   that.dock.toolbar.addButton('Escape link',
   function(event) {
@@ -126,14 +130,25 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     event.preventDefault();
   });
   
+  //target - id, version, position, range
+  that.createLink = function(target) {
+    
+  };
+  
   that.dock.toolbar.addButton('Link left',
   function(button) {
-
+    var leftWindow = windowObject.getWindow(windowObject.id-1);
+    if (leftWindow !== undefined) {
+      console.log(leftWindow);
+    }
   });
   
   that.dock.toolbar.addButton('Link right',
   function(button) {
-      
+    var rightWindow = windowObject.getWindow(windowObject.id+1);
+    if (rightWindow !== undefined) {
+      that.createLink();
+    }
   });
   
   //document on the server
