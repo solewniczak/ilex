@@ -199,7 +199,7 @@ func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
 			response.Parameters[TAB] = client_tab
 			response.Parameters[LINKS] = links
 			response.Parameters[IS_EDITABLE] = is_editable
-			response.Parameters[NAME] = document.Name
+			response.Parameters[NAME] = version.Name
 			response.Parameters[ID] = document.Id
 			TabControlMessages <- ClientTabOpenedDoc(ws, client_tab, requested_text_id)
 		}
