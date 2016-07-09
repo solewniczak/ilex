@@ -21,10 +21,10 @@ ilex.widgetsCollection.toolbar = function (dock) {
       var buttonState = 'off';
       $button.on('click', function (event) {
         if (buttonState === 'off') {
-          callback(this);
+          callback.call(this, event);
           buttonState = 'on';
         } else {
-          alternateCallback(this);
+          alternateCallback.call(this, event);
           buttonState = 'off';
         }
       })
