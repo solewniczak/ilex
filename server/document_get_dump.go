@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"golang.org/x/net/websocket"
 	"gopkg.in/mgo.v2"
@@ -125,89 +124,81 @@ func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
 		fmt.Println("Did not find database!")
 		response.Action = RETRIEVAL_FAILED
 		response.Parameters[ERROR] = "Document error: " + err.Error()
-		goto send
+		return respond(ws, response)
 	}
 	defer db_session.Close()
 
-	{
-		database := db_session.DB("default")
-		docs := database.C("docs")
+	database := db_session.DB("default")
+	docs := database.C("docs")
 
-		var document Document
-		err = docs.Find(bson.M{"_id": bson.ObjectIdHex(requested_text_id)}).One(&document)
-		if err != nil {
-			response.Action = RETRIEVAL_FAILED
-			response.Parameters[ERROR] = "Document error: " + err.Error()
-			goto send
-		}
-
-		// golang : all json numbers are unpacked to float64 values
-		var requested_version int
-		requested_version_float, ok := request.Parameters[VERSION].(float64)
-
-		if ok {
-			requested_version = int(requested_version_float)
-		} else {
-			requested_version = document.TotalVersions
-		}
-
-		if ok && requested_version > document.TotalVersions {
-			response.Action = RETRIEVAL_FAILED
-			response.Parameters[ERROR] = "version unavailable"
-			goto send
-		}
-
-		var is_editable bool = false
-		if requested_version == document.TotalVersions {
-			is_editable = true
-		}
-
-		versions := database.C("versions")
-
-		var version Version
-		err = versions.Find(bson.M{"DocumentId": document.Id,
-			"No": requested_version}).One(&version)
-		if err != nil {
-			response.Action = RETRIEVAL_FAILED
-			response.Parameters[ERROR] = "Version error: " + err.Error()
-			goto send
-		}
-
-		retrieved, err := get_string_from_addresses(version.Addresses, version.Size, database)
-		if err != nil {
-			response.Action = RETRIEVAL_FAILED
-			response.Parameters[ERROR] = err.Error()
-			goto send
-		}
-
-		{
-			// hard coded test links
-			links := SimpleLink{
-				{"1+10", "100+200"},
-			}
-
-			client_tab_float, ok := request.Parameters[TAB].(float64)
-			if !ok {
-				response.Action = RETRIEVAL_FAILED
-				response.Parameters[ERROR] = "No tab id supplied!"
-				goto send
-			}
-			client_tab := int(client_tab_float)
-
-			response.Action = DOCUMENT_RETRIEVED
-			response.Parameters[TEXT] = *retrieved
-			response.Parameters[TAB] = client_tab
-			response.Parameters[LINKS] = links
-			response.Parameters[IS_EDITABLE] = is_editable
-			response.Parameters[NAME] = version.Name
-			response.Parameters[ID] = document.Id
-			TabControlMessages <- ClientTabOpenedDoc(ws, client_tab, requested_text_id)
-		}
-
+	var document Document
+	err = docs.Find(bson.M{"_id": bson.ObjectIdHex(requested_text_id)}).One(&document)
+	if err != nil {
+		response.Action = RETRIEVAL_FAILED
+		response.Parameters[ERROR] = "Document error: " + err.Error()
+		return respond(ws, response)
 	}
 
-send:
-	js, _ := json.Marshal(response)
-	fmt.Println("sending response: ", string(js))
-	return websocket.JSON.Send(ws, response)
+	// golang : all json numbers are unpacked to float64 values
+	var requested_version int
+	requested_version_float, ok := request.Parameters[VERSION].(float64)
+
+	if ok {
+		requested_version = int(requested_version_float)
+	} else {
+		requested_version = document.TotalVersions
+	}
+
+	if ok && requested_version > document.TotalVersions {
+		response.Action = RETRIEVAL_FAILED
+		response.Parameters[ERROR] = "version unavailable"
+		return respond(ws, response)
+	}
+
+	var is_editable bool = false
+	if requested_version == document.TotalVersions {
+		is_editable = true
+	}
+
+	versions := database.C("versions")
+
+	var version Version
+	err = versions.Find(bson.M{"DocumentId": document.Id,
+		"No": requested_version}).One(&version)
+	if err != nil {
+		response.Action = RETRIEVAL_FAILED
+		response.Parameters[ERROR] = "Version error: " + err.Error()
+		return respond(ws, response)
+	}
+
+	retrieved, err := get_string_from_addresses(version.Addresses, version.Size, database)
+	if err != nil {
+		response.Action = RETRIEVAL_FAILED
+		response.Parameters[ERROR] = err.Error()
+		return respond(ws, response)
+	}
+
+	// hard coded test links
+	links := SimpleLink{
+		{"1+10", "100+200"},
+	}
+
+	client_tab_float, ok := request.Parameters[TAB].(float64)
+	if !ok {
+		response.Action = RETRIEVAL_FAILED
+		response.Parameters[ERROR] = "No tab id supplied!"
+		return respond(ws, response)
+	}
+	client_tab := int(client_tab_float)
+
+	response.Action = DOCUMENT_RETRIEVED
+	response.Parameters[TEXT] = *retrieved
+	response.Parameters[TAB] = client_tab
+	response.Parameters[LINKS] = links
+	response.Parameters[IS_EDITABLE] = is_editable
+	response.Parameters[NAME] = version.Name
+	response.Parameters[ID] = document.Id
+	TabControlMessages <- ClientTabOpenedDoc(ws, client_tab, requested_text_id)
+
+	return respond(ws, response)
 }

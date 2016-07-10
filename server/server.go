@@ -14,6 +14,12 @@ import (
 
 var StopServer chan bool = make(chan bool)
 
+func respond(ws *websocket.Conn, response *IlexMessage) error {
+	js, _ := json.Marshal(response)
+	fmt.Println("sending response: ", string(js))
+	return websocket.JSON.Send(ws, response)
+}
+
 func ActionServer(ws *websocket.Conn) {
 	for {
 		var request IlexMessage
@@ -27,6 +33,10 @@ func ActionServer(ws *websocket.Conn) {
 			fmt.Println("received request: ", string(js))
 
 			switch request.Action {
+			case DOCUMENT_ADD_TEXT:
+				err = documentAddText(&request, ws)
+			case DOCUMENT_REMOVE_TEXT:
+				err = documentRemoveText(&request, ws)
 			case DOCUMENT_GET_DUMP:
 				err = documentGetDump(&request, ws)
 			case GET_ALL_DOCUMENTS_INFO:

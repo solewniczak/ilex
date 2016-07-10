@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"golang.org/x/net/websocket"
 	"gopkg.in/mgo.v2"
@@ -28,46 +27,41 @@ func getAllDocumentsInfo(request *IlexMessage, ws *websocket.Conn) error {
 		fmt.Println("Did not find database!")
 		response.Action = GETTING_INFO_FAILED
 		response.Parameters[ERROR] = err.Error()
-		goto send
+		return respond(ws, response)
 	}
 	defer db_session.Close()
 
-	{
-		database := db_session.DB("default")
-		docs := database.C("docs")
+	database := db_session.DB("default")
+	docs := database.C("docs")
 
-		var found []Document
-		err = docs.Find(nil).All(&found)
-		if err != nil {
-			fmt.Println(err)
-			response.Action = GETTING_INFO_FAILED
-			response.Parameters[ERROR] = err.Error()
-			goto send
-		}
-
-		versions := database.C("versions")
-		var version Version
-		texts := make([]DocumentWithName, len(found))
-
-		// Get the latest version's name as the document name.
-		for i, doc := range found {
-			texts[i].Document = doc
-			err = versions.Find(bson.M{"DocumentId": doc.Id,
-				"No": doc.TotalVersions}).One(&version)
-			if err != nil {
-				response.Action = GETTING_INFO_FAILED
-				response.Parameters[ERROR] = "Database error! Could not find latest version for document " + doc.Id.Hex()
-				goto send
-			}
-			texts[i].Name = version.Name
-		}
-
-		response.Action = ALL_TEXTS_INFO_RESPONSE
-		response.Parameters[TEXTS] = texts
+	var found []Document
+	err = docs.Find(nil).All(&found)
+	if err != nil {
+		fmt.Println(err)
+		response.Action = GETTING_INFO_FAILED
+		response.Parameters[ERROR] = err.Error()
+		return respond(ws, response)
 	}
 
-send:
-	js, _ := json.Marshal(response)
-	fmt.Println("sending response: ", string(js))
-	return websocket.JSON.Send(ws, response)
+	versions := database.C("versions")
+	var version Version
+	texts := make([]DocumentWithName, len(found))
+
+	// Get the latest version's name as the document name.
+	for i, doc := range found {
+		texts[i].Document = doc
+		err = versions.Find(bson.M{"DocumentId": doc.Id,
+			"No": doc.TotalVersions}).One(&version)
+		if err != nil {
+			response.Action = GETTING_INFO_FAILED
+			response.Parameters[ERROR] = "Database error! Could not find latest version for document " + doc.Id.Hex()
+			return respond(ws, response)
+		}
+		texts[i].Name = version.Name
+	}
+
+	response.Action = ALL_TEXTS_INFO_RESPONSE
+	response.Parameters[TEXTS] = texts
+
+	return respond(ws, response)
 }

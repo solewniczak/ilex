@@ -26,10 +26,9 @@ func ClientTabOpenedDoc(ws *websocket.Conn, tab_id int, doc_id string) *ClientTa
 	return result
 }
 
-func ClientTabClosed(ws *websocket.Conn, tab_id int) *ClientTabMessage {
+func ClientTabClosed(tab ClientTab) *ClientTabMessage {
 	result := new(ClientTabMessage)
-	result.WS = ws
-	result.TabId = tab_id
+	result.ClientTab = tab
 	result.Opened = false
 	result.Closed = true
 	return result
