@@ -26,7 +26,7 @@ func length_of_first_n_runes_in_array(array []byte, n int) int {
 	return length
 }
 
-func add_doc(file_contents []byte, document_name *string, database *mgo.Database) {
+func add_doc(file_contents []byte, document_name string, database *mgo.Database) {
 	if !utf8.Valid(file_contents) {
 		log.Fatal("The file is not a valid utf-8 text")
 	}
@@ -88,7 +88,7 @@ If you try to fill the database (using option -f) after this operation, your dat
 	now_as_string := now.Format(time.RFC3339)
 	document := Document{bson.NewObjectId(), "utf-8 encoded text file", "plain text", now_as_string, now_as_string, 1}
 
-	version := Version{bson.NewObjectId(), document.Id, 1, *document_name, now_as_string, now_as_string, text_length_runes, [][2]int{[2]int{0, document_address}}}
+	version := Version{bson.NewObjectId(), document.Id, 1, document_name, now_as_string, now_as_string, text_length_runes, [][2]int{[2]int{0, document_address}}}
 
 	docs := database.C("docs")
 	if err = docs.Insert(document); err != nil {
@@ -100,5 +100,5 @@ If you try to fill the database (using option -f) after this operation, your dat
 		log.Fatal(err)
 	}
 
-	fmt.Println("Document >>", *document_name, "<< inserted successfully!")
+	fmt.Println("Document >>", document_name, "<< inserted successfully!")
 }
