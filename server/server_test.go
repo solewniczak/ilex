@@ -57,15 +57,14 @@ func clientRequestsText(t *testing.T, ws *websocket.Conn, tab_id int, doc_id str
 }
 
 func verify_clients(t *testing.T, expected map[string]int) {
+	actual := make(map[string]int)
+	for _, doc := range client_doc {
+		actual[doc]++
+	}
 	for doc, clients := range expected {
-		actual_clients, ok := doc_clients[doc]
-		if len(actual_clients) != clients || !ok {
-			t.Fatal("Client connections data is incorrect! Too little connections!")
-		}
-		for _, client := range actual_clients {
-			if client_document, ok := client_doc[client]; client_document != doc || !ok {
-				t.Fatal("Client connections data is inconsistent!")
-			}
+		actual_clients := actual[doc]
+		if actual_clients != clients {
+			t.Fatal("Client connections data is incorrect! Too little connections for", doc)
 		}
 	}
 }

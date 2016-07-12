@@ -26,6 +26,7 @@ var doc_tab_control_messages map[string](chan *ClientTabMessage) = make(map[stri
 var controllers map[string]bool = make(map[string]bool)
 
 func control_document(document_id string, add_text_messages chan *AddTextMessage, remove_text_messages chan *RemoveTextMessage, tab_control_messages chan *ClientTabMessage) {
+	fmt.Println("Document controller for ", document_id, " is starting up.")
 	clients := make(map[ClientTab]bool)
 	total_clients := 0
 
@@ -40,7 +41,7 @@ loop:
 
 		case message := <-tab_control_messages:
 			{
-				fmt.Println("a client connected or disconnected")
+				fmt.Println("A client control message was received.")
 				if message.Opened {
 					if clients[message.ClientTab] {
 						fmt.Println("Received an unexpected document opened message. Document did not have the tab registered as a client.")
