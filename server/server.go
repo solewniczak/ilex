@@ -14,6 +14,14 @@ import (
 
 var StopServer chan bool = make(chan bool)
 
+func respond_with_nak(ws *websocket.Conn, response *IlexMessage, error_description string) error {
+	response.Action = NAK
+	response.Parameters[ERROR] = error_description
+	js, _ := json.Marshal(response)
+	fmt.Println("sending response: ", string(js))
+	return websocket.JSON.Send(ws, response)
+}
+
 func respond(ws *websocket.Conn, response *IlexMessage) error {
 	js, _ := json.Marshal(response)
 	fmt.Println("sending response: ", string(js))
