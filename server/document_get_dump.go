@@ -89,7 +89,7 @@ func read_block_from_permascroll_to_buffer(runes_to_read, address int, buffer *b
 	return nil
 }
 
-func get_string_from_addresses(addresses [][2]int, total_runes int, database *mgo.Database) (*string, error) {
+func get_string_from_addresses(addresses AddressTable, total_runes int, database *mgo.Database) (*string, error) {
 	// @ TO DO: add support for zero-length files
 
 	slices := database.C("permascroll")

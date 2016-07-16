@@ -2,6 +2,7 @@ package main
 
 type Node interface {
 	AddRune(r rune, position int)
+	SetParent(*Branch)
 }
 
 type Branch struct {
@@ -70,4 +71,16 @@ func (p *PNode) AddRune(r rune, position int) {
 	} else {
 		p.Parent.Right = up
 	}
+}
+
+func (b *Branch) SetParent(parent *Branch) {
+	b.Parent = parent
+}
+
+func (p *PNode) SetParent(parent *Branch) {
+	p.Parent = parent
+}
+
+func (t *TNode) SetParent(parent *Branch) {
+	t.Parent = parent
 }
