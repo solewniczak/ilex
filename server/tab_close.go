@@ -14,9 +14,7 @@ func tabClose(request *IlexMessage, ws *websocket.Conn) error {
 
 	client_tab_float, ok := request.Parameters[TAB].(float64)
 	if !ok {
-		response.Action = RETRIEVAL_FAILED
-		response.Parameters[ERROR] = "No tab id supplied!"
-		return respond(ws, response)
+		respond_with_nak(ws, response, "No tab id supplied!")
 	}
 
 	client_tab := int(client_tab_float)
