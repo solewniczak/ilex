@@ -88,7 +88,7 @@ If you try to fill the database (using option -f) after this operation, your dat
 	now_as_string := now.Format(time.RFC3339)
 	document := Document{bson.NewObjectId(), "utf-8 encoded text file", "plain text", now_as_string, now_as_string, 1}
 
-	version := Version{bson.NewObjectId(), document.Id, 1, document_name, now_as_string, now_as_string, text_length_runes, [][2]int{[2]int{0, document_address}}}
+	version := Version{bson.NewObjectId(), document.Id, 1, document_name, now_as_string, now_as_string, text_length_runes, AddressTable{[2]int{0, document_address}}}
 
 	docs := database.C("docs")
 	if err = docs.Insert(document); err != nil {

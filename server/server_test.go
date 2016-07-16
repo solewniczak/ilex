@@ -12,25 +12,21 @@ const interval time.Duration = 40 * time.Microsecond
 var REQUEST_ID int = 1
 
 type AllTextsResponse struct {
-	Action     string                 `json:"action"`
-	Parameters AllTextsParametersData `json:"parameters"`
-	Id         int                    `json:"id"`
-}
-
-type AllTextsParametersData struct {
-	Texts []DocumentWithName `json:"texts"`
+	Action     string `json:"action"`
+	Parameters struct {
+		Texts []DocumentWithName `json:"texts"`
+	} `json:"parameters"`
+	Id int `json:"id"`
 }
 
 type TextDumpResponse struct {
-	Action     string                 `json:"action"`
-	Parameters TextDumpParametersData `json:"parameters"`
-	Id         int                    `json:"id"`
-}
-
-type TextDumpParametersData struct {
-	Links SimpleLink `json:"links"`
-	Text  string     `json:"text"`
-	Tab   int        `json:"tab"`
+	Action     string `json:"action"`
+	Parameters struct {
+		Links SimpleLink `json:"links"`
+		Text  string     `json:"text"`
+		Tab   int        `json:"tab"`
+	} `json:"parameters"`
+	Id int `json:"id"`
 }
 
 func clientRequestsText(t *testing.T, ws *websocket.Conn, tab_id int, doc_id string) {
