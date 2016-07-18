@@ -104,13 +104,35 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
                                 //width is set by applyWindowPosition
                                 .data('ilex-height', height);
       newWindow.contentWidget = undefined;
+      newWindow.remove = function () {
+        var winInd = newWindow.element.data('ilex-window');
+        that.windows.splice(winInd, 1);
+        //update indexes of windows
+        for (let i = winInd; i < that.windows.length; i++) {
+          let win = that.windows[i];
+          win.element.data('ilex-window', i);
+          win.rightSideHandler.data('ilex-window', i);
+        }
+
+        newWindow.element.remove();
+        newWindow.rightSideHandler.remove();
+
+        //send close message to widget
+        newWindow.contentWidget.close();
+
+        updateInnerWidth(width);
+        setEqualWindowPositions();
+        applyWindowPosition();
+
+        ilex.applySize();
+      }
       newWindow.setContentWidget = function(contentWidget) {
         this.contentWidget = contentWidget;
         this.toolbar = ilex.widgetsCollection.toolbar(contentWidget.dock);
         var curWindow = this;
 
-        //add close window button
-        this.toolbar.addButton('<span class="ilex-awesome">&#xf068;</span>',
+        //Close document and hide its window.
+        this.toolbar.addButton('Close tab', //<span class="ilex-awesome">&#xf068;</span>
             function(event) {
               var windowHeight = $(window).height();
 
@@ -118,29 +140,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
               curWindow.contentWidget.container.css('background', '#fff')
                                                .css('position', 'relative');
               curWindow.contentWidget.container.animate({'top': windowHeight}, function() {
-                var removeWindow = function () {
-                  var winInd = curWindow.element.data('ilex-window');
-                  that.windows.splice(winInd, 1);
-                  //update indexes of windows
-                  for (let i = winInd; i < that.windows.length; i++) {
-                    let win = that.windows[i];
-                    win.element.data('ilex-window', i);
-                    win.rightSideHandler.data('ilex-window', i);
-                  }
-
-                  curWindow.element.remove();
-                  curWindow.rightSideHandler.remove();
-
-                  //send close message to widget
-                  curWindow.contentWidget.close();
-
-                  updateInnerWidth(width);
-                  setEqualWindowPositions();
-                  applyWindowPosition();
-
-                  ilex.applySize();
-                }
-
                 that.visibleWindows -= 1;
 
                 if (that.visibleWindows === 0) {
@@ -153,17 +152,19 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
                   //we don't have right side document but we have left side one
                   } else if (that.windowPointer === that.windows.length - 1) {
                     that.slideRight(function () {
-                      removeWindow();
+                      curWindow.remove();
                     });
                   } else {
-                    removeWindow();
+                    curWindow.remove();
                   }
                 } else {
-                  removeWindow();
+                  curWindow.remove();
                 }
               });
             });
-        this.toolbar.addButton('<span class="ilex-awesome">&#xf00d;</span>',
+        //Close document and move first document from left.
+        //If there is no document on the left create new document.
+        this.toolbar.addButton('Close document', //<span class="ilex-awesome">&#xf00d;</span>
             function(event) {
               var windowHeight = $(window).height();
 
@@ -174,7 +175,15 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
               function() {
                 //send close message to widget
                 curWindow.contentWidget.close();
-                curWindow.setContentWidget(newWindowWidgetCallback(curWindow));
+                
+                console.log(curWindow.id, that.windows.length);
+                //there is no window to the right
+                if (curWindow.id+1 >= that.windows.length) {
+                  curWindow.setContentWidget(newWindowWidgetCallback(curWindow));
+                //move windows to the right
+                } else {
+                  curWindow.remove();
+                }
               });
             });
       };
