@@ -83,8 +83,14 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
   var applyWindowPosition = function () {
     for (let i = 0; i < that.visibleWindows; i++) {
       let ratio = that.position[i],
-        win = that.windows[that.windowPointer + i];
-        win.element.data('ilex-width', innerWidth * ratio);
+          win = that.windows[that.windowPointer + i],
+          width = innerWidth * ratio;
+        win.element.data('ilex-width', width);
+        win.droppableRegion.top.width(width);
+      
+      win.droppableRegion.left.width(width*0.5);
+      
+      win.droppableRegion.right.width(width*0.5);
     }
   },
   setEqualWindowPositions = function() {
@@ -95,97 +101,128 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
     }
   },
   addWindow = function() {
-      var newWindow = {},
-        winInd = that.windows.length;
-      newWindow.id = winInd;
-      newWindow.element = $('<div class="ilex-sliderWindow">').appendTo(that.table)
-                                .data('ilex-window', winInd)
-                                .css('display', 'table-cell')
-                                //width is set by applyWindowPosition
-                                .data('ilex-height', height);
-      newWindow.contentWidget = undefined;
-      newWindow.remove = function () {
-        var winInd = newWindow.element.data('ilex-window');
-        that.windows.splice(winInd, 1);
-        //update indexes of windows
-        for (let i = winInd; i < that.windows.length; i++) {
-          let win = that.windows[i];
-          win.element.data('ilex-window', i);
-          win.rightSideHandler.data('ilex-window', i);
-        }
+    var newWindow = {},
+      winInd = that.windows.length;
+    
+    newWindow.id = winInd;
+    newWindow.element = $('<div class="ilex-sliderWindow">').appendTo(that.table)
+                              .data('ilex-window', winInd)
+                              .css('display', 'table-cell')
+                              .css('position', 'relative')
+                              //width is set by applyWindowPosition
+                              .data('ilex-height', height);
 
-        newWindow.element.remove();
-        newWindow.rightSideHandler.remove();
+    //dropable regions for opening new documents
+    newWindow.droppableRegion = {};
+    newWindow.droppableRegion.top = $('<div class="ilex-droppableRegion">')
+                              .appendTo(newWindow.element)
+                              .css('position', 'absolute');
+                              //width is set by applyWindowPosition
+                              //height set by window resize
+    
+    newWindow.droppableRegion.left = $('<div class="ilex-droppableRegion">')
+                              .appendTo(newWindow.element)
+                              .css('position', 'absolute');
+                              //width is set by applyWindowPosition
+                              //height and top set by window resize
+    
+    newWindow.droppableRegion.right = $('<div class="ilex-droppableRegion">')
+                              .appendTo(newWindow.element)
+                              .css('position', 'absolute')
+                              //width is set by applyWindowPosition
+                              //height set by window resize
+                              .css('right', 0);
+    newWindow.element.on('dragenter', '.ilex-droppableRegion', function (event) {
+      $(this).css('background', 'rgba(40, 215, 40, 0.2)');
+    });
+    newWindow.element.on('dragleave', '.ilex-droppableRegion', function (event) {
+      $(this).css('background', 'transparent');
+    });
 
-        //send close message to widget
-        newWindow.contentWidget.close();
 
-        updateInnerWidth(width);
-        setEqualWindowPositions();
-        applyWindowPosition();
-
-        ilex.applySize();
+    newWindow.contentWidget = undefined;
+    newWindow.remove = function () {
+      var winInd = newWindow.element.data('ilex-window');
+      that.windows.splice(winInd, 1);
+      //update indexes of windows
+      for (let i = winInd; i < that.windows.length; i++) {
+        let win = that.windows[i];
+        win.element.data('ilex-window', i);
+        win.rightSideHandler.data('ilex-window', i);
       }
-      newWindow.setContentWidget = function(contentWidget) {
-        this.contentWidget = contentWidget;
-        this.toolbar = ilex.widgetsCollection.toolbar(contentWidget.dock);
-        var curWindow = this;
 
-        //Close document and hide its window.
-        this.toolbar.addButton('Close tab', //<span class="ilex-awesome">&#xf068;</span>
-            function(event) {
-              var windowHeight = $(window).height();
+      newWindow.element.remove();
+      newWindow.rightSideHandler.remove();
 
-              //bakground for animanito purposes
-              curWindow.contentWidget.container.css('background', '#fff')
-                                               .css('position', 'relative');
-              curWindow.contentWidget.container.animate({'top': windowHeight}, function() {
-                that.visibleWindows -= 1;
+      //send close message to widget
+      newWindow.contentWidget.close();
 
-                if (that.visibleWindows === 0) {
-                  that.visibleWindows = 1;
-                  //if last window was closed, create new window
-                  if (that.windows.length === 1) {
-                    let lastWindow = that.windows[0],
-                      newWindowWidget = newWindowWidgetCallback(lastWindow);
-                    lastWindow.setContentWidget(newWindowWidget);
-                  //we don't have right side document but we have left side one
-                  } else if (that.windowPointer === that.windows.length - 1) {
-                    that.slideRight(function () {
-                      curWindow.remove();
-                    });
-                  } else {
+      updateInnerWidth(width);
+      setEqualWindowPositions();
+      applyWindowPosition();
+
+      ilex.applySize();
+    }
+    newWindow.setContentWidget = function(contentWidget) {
+      this.contentWidget = contentWidget;
+      this.toolbar = ilex.widgetsCollection.toolbar(contentWidget.dock);
+      var curWindow = this;
+
+      //Close document and hide its window.
+      this.toolbar.addButton('Close tab', //<span class="ilex-awesome">&#xf068;</span>
+          function(event) {
+            var windowHeight = $(window).height();
+
+            //bakground for animanito purposes
+            curWindow.contentWidget.container.css('background', '#fff')
+                                             .css('position', 'relative');
+            curWindow.contentWidget.container.animate({'top': windowHeight}, function() {
+              that.visibleWindows -= 1;
+
+              if (that.visibleWindows === 0) {
+                that.visibleWindows = 1;
+                //if last window was closed, create new window
+                if (that.windows.length === 1) {
+                  let lastWindow = that.windows[0],
+                    newWindowWidget = newWindowWidgetCallback(lastWindow);
+                  lastWindow.setContentWidget(newWindowWidget);
+                //we don't have right side document but we have left side one
+                } else if (that.windowPointer === that.windows.length - 1) {
+                  that.slideRight(function () {
                     curWindow.remove();
-                  }
+                  });
                 } else {
                   curWindow.remove();
                 }
-              });
+              } else {
+                curWindow.remove();
+              }
             });
-        //Close document and move first document from left.
-        //If there is no document on the left create new document.
-        this.toolbar.addButton('Close document', //<span class="ilex-awesome">&#xf00d;</span>
-            function(event) {
-              var windowHeight = $(window).height();
+          });
+      //Close document and move first document from left.
+      //If there is no document on the left create new document.
+      this.toolbar.addButton('Close document', //<span class="ilex-awesome">&#xf00d;</span>
+          function(event) {
+            var windowHeight = $(window).height();
 
-              //bakground for animanito purposes
-              curWindow.contentWidget.container.css('background', '#fff')
-                                               .css('position', 'relative');
-              curWindow.contentWidget.container.animate({'top': windowHeight},
-              function() {
-                //send close message to widget
-                curWindow.contentWidget.close();
-                
-                console.log(curWindow.id, that.windows.length);
-                //there is no window to the right
-                if (curWindow.id+1 >= that.windows.length) {
-                  curWindow.setContentWidget(newWindowWidgetCallback(curWindow));
-                //move windows to the right
-                } else {
-                  curWindow.remove();
-                }
-              });
+            //bakground for animanito purposes
+            curWindow.contentWidget.container.css('background', '#fff')
+                                             .css('position', 'relative');
+            curWindow.contentWidget.container.animate({'top': windowHeight},
+            function() {
+              //send close message to widget
+              curWindow.contentWidget.close();
+
+              console.log(curWindow.id, that.windows.length);
+              //there is no window to the right
+              if (curWindow.id+1 >= that.windows.length) {
+                curWindow.setContentWidget(newWindowWidgetCallback(curWindow));
+              //move windows to the right
+              } else {
+                curWindow.remove();
+              }
             });
+          });
       };
       newWindow.rightSideHandler = addHandler(winInd);
       //function returns window object of antother window 
@@ -347,6 +384,15 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
     that.table.data('ilex-height', height);
     for (let win of that.windows) {
       win.element.data('ilex-height', height);
+      
+      win.droppableRegion.top.height(height*0.3);
+      
+      win.droppableRegion.left.css('top', height*0.3);
+      win.droppableRegion.left.height(height*0.7);
+      
+      win.droppableRegion.right.css('top', height*0.3);
+      win.droppableRegion.right.height(height*0.7);
+      
       win.rightSideHandler.data('ilex-height', height);
     }
     applyWindowPosition();
