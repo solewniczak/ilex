@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"golang.org/x/net/websocket"
 )
 
@@ -16,19 +14,12 @@ func tabClose(request *IlexMessage, ws *websocket.Conn) error {
 
 	client_tab_float, ok := request.Parameters[TAB].(float64)
 	if !ok {
-		response.Action = RETRIEVAL_FAILED
-		response.Parameters[ERROR] = "No tab id supplied!"
-		goto send
+		respond_with_nak(ws, response, "No tab id supplied!")
 	}
 
-	{
-		client_tab := int(client_tab_float)
-		TabControlMessages <- ClientTabClosed(ws, client_tab)
-		response.Action = ACK
-	}
+	client_tab := int(client_tab_float)
+	TabControlMessages <- ClientTabClosed(ClientTab{ws, client_tab})
+	response.Action = ACK
 
-send:
-	js, _ := json.Marshal(response)
-	fmt.Println("sending response: ", string(js))
-	return websocket.JSON.Send(ws, response)
+	return respond(ws, response)
 }
