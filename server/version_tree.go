@@ -1,33 +1,36 @@
 package main
 
+import (
+	"bytes"
+	"fmt"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
+)
+
 type Node interface {
 	AddRune(r rune, position int)
-	SetParent(*Branch)
+	SetParent(Node)
+	WriteToBuffer(buffer *bytes.Buffer, slices *mgo.Collection) error
+}
+
+type Root struct {
+	Down Node
+}
+
+func (root *Root) AddRune(r rune, position int) {
+	root.Down.AddRune(r, position)
+}
+
+func (r *Root) SetParent(Node) {}
+
+func (r *Root) WriteToBuffer(buffer *bytes.Buffer, slices *mgo.Collection) error {
+	return r.Down.WriteToBuffer(buffer, slices)
 }
 
 type Branch struct {
-	Parent             *Branch
+	Parent             Node
 	LengthLeft, Length int
 	Left, Right        Node
-}
-
-type PNode struct {
-	Parent  *Branch
-	Length  int
-	Address int
-}
-
-type TNode struct {
-	Parent *Branch
-	Length int
-	Text   []rune
-}
-
-func (t *TNode) AddRune(r rune, position int) {
-	t.Text = append(t.Text, '界')
-	copy(t.Text[position+1:], t.Text[position:])
-	t.Text[position] = r
-	t.Length++
 }
 
 func (b *Branch) AddRune(r rune, position int) {
@@ -41,6 +44,24 @@ func (b *Branch) AddRune(r rune, position int) {
 	}
 	b.Length++
 	child.AddRune(r, position)
+}
+
+func (b *Branch) SetParent(parent Node) {
+	b.Parent = parent
+}
+
+func (b *Branch) WriteToBuffer(buffer *bytes.Buffer, slices *mgo.Collection) error {
+	err := b.Left.WriteToBuffer(buffer, slices)
+	if err != nil {
+		err = b.Right.WriteToBuffer(buffer, slices)
+	}
+	return err
+}
+
+type PNode struct {
+	Parent  Node
+	Length  int
+	Address int
 }
 
 func (p *PNode) AddRune(r rune, position int) {
@@ -66,21 +87,119 @@ func (p *PNode) AddRune(r rune, position int) {
 			up.Right = &TNode{up, 1, []rune{r}}
 		}
 	}
-	if p.Parent.Left == p {
-		p.Parent.Left = up
-	} else {
-		p.Parent.Right = up
+	switch parent := p.Parent.(type) {
+	case *Branch:
+		fmt.Println("branch parent")
+		if parent.Left == p {
+			parent.Left = up
+		} else {
+			parent.Right = up
+		}
+	case *Root:
+		fmt.Println("root parent")
+		parent.Down = up
 	}
 }
 
-func (b *Branch) SetParent(parent *Branch) {
-	b.Parent = parent
-}
-
-func (p *PNode) SetParent(parent *Branch) {
+func (p *PNode) SetParent(parent Node) {
 	p.Parent = parent
 }
 
-func (t *TNode) SetParent(parent *Branch) {
+func (p *PNode) WriteToBuffer(buffer *bytes.Buffer, slices *mgo.Collection) error {
+	return read_block_from_permascroll_to_buffer(p.Length, p.Address, buffer, slices)
+}
+
+type TNode struct {
+	Parent Node
+	Length int
+	Text   []rune
+}
+
+func (t *TNode) AddRune(r rune, position int) {
+	t.Text = append(t.Text, '界')
+	copy(t.Text[position+1:], t.Text[position:])
+	t.Text[position] = r
+	t.Length++
+}
+
+func (t *TNode) SetParent(parent Node) {
 	t.Parent = parent
+}
+
+func (t *TNode) WriteToBuffer(buffer *bytes.Buffer, slices *mgo.Collection) error {
+	_, err := buffer.WriteString(string(t.Text))
+	return err
+}
+
+func construct_tree_from_address_table(addresses AddressTable, total_length int) Node {
+	if len(addresses) == 0 {
+		return nil
+	}
+	if len(addresses) == 1 {
+		return &PNode{Length: total_length, Address: addresses[0][1]}
+	}
+
+	var i, length_left int
+	for ; i < len(addresses); i++ {
+		if addresses[i][0] > total_length/2 {
+			length_left = addresses[i][0]
+			break
+		}
+	}
+
+	if i == len(addresses) {
+		i = len(addresses) - 1
+		length_left = addresses[i][0]
+	}
+
+	left := construct_tree_from_address_table(addresses[:i], length_left)
+	right := construct_tree_from_address_table(addresses[i:], total_length-length_left)
+	root := &Branch{Length: total_length, LengthLeft: length_left, Left: left, Right: right}
+	left.SetParent(root)
+	right.SetParent(root)
+	return root
+}
+
+func construct_version_tree(document_id string, version_no int) (root *Root) {
+	db_session, err := mgo.Dial("localhost")
+	if err != nil {
+		fmt.Println("database access error: " + err.Error())
+		return nil
+	}
+	defer db_session.Close()
+
+	database := db_session.DB("default")
+	versions := database.C("versions")
+
+	var version Version
+	err = versions.Find(bson.M{"DocumentId": bson.ObjectIdHex(document_id),
+		"No": version_no}).One(&version)
+	if err != nil {
+		fmt.Println("retrieving version error: " + err.Error())
+		return nil
+	}
+
+	root = &Root{construct_tree_from_address_table(version.Addresses, version.Size)}
+	root.Down.SetParent(root)
+	return root
+}
+
+func get_tree_dump(root *Root) (string, error) {
+	db_session, err := mgo.Dial("localhost")
+	if err != nil {
+		fmt.Println("database access error: " + err.Error())
+		return "", err
+	}
+	defer db_session.Close()
+
+	database := db_session.DB("default")
+	slices := database.C("permascroll")
+
+	var buffer bytes.Buffer
+	err = root.WriteToBuffer(&buffer, slices)
+	if err != nil {
+		fmt.Println("Tree dump error: " + err.Error())
+		return "", err
+	}
+	return buffer.String(), nil
 }

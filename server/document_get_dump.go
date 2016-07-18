@@ -89,7 +89,7 @@ func read_block_from_permascroll_to_buffer(runes_to_read, address int, buffer *b
 	return nil
 }
 
-func get_string_from_addresses(addresses AddressTable, total_runes int, database *mgo.Database) (*string, error) {
+func get_string_from_addresses(addresses AddressTable, total_runes int, database *mgo.Database) (string, error) {
 	// @ TO DO: add support for zero-length files
 
 	slices := database.C("permascroll")
@@ -99,7 +99,7 @@ func get_string_from_addresses(addresses AddressTable, total_runes int, database
 	for i, a := range addresses[0:last_address] {
 		runes_to_read := addresses[i+1][0] - a[0]
 		if err := read_block_from_permascroll_to_buffer(runes_to_read, a[1], &buffer, slices); err != nil {
-			return nil, err
+			return "", err
 		}
 		runes_read += runes_to_read
 	}
@@ -107,11 +107,11 @@ func get_string_from_addresses(addresses AddressTable, total_runes int, database
 	runes_to_read := total_runes - runes_read
 	if err := read_block_from_permascroll_to_buffer(runes_to_read,
 		addresses[last_address][1], &buffer, slices); err != nil {
-		return nil, err
+		return "", err
 	}
 
 	str := buffer.String()
-	return &str, nil
+	return str, nil
 }
 
 func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
@@ -192,7 +192,7 @@ func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
 	client_tab := int(client_tab_float)
 
 	response.Action = DOCUMENT_RETRIEVED
-	response.Parameters[TEXT] = *retrieved
+	response.Parameters[TEXT] = retrieved
 	response.Parameters[TAB] = client_tab
 	response.Parameters[LINKS] = links
 	response.Parameters[IS_EDITABLE] = is_editable
