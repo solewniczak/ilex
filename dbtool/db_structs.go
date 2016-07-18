@@ -12,6 +12,8 @@ type Slice struct {
 	Text string        `bson:"Text"`
 }
 
+type AddressTable [][2]int
+
 type Version struct {
 	Id         bson.ObjectId `bson:"_id,omitempty" json:"-"`
 	DocumentId bson.ObjectId `bson:"DocumentId"`
@@ -20,7 +22,7 @@ type Version struct {
 	Created    string        `bson:"Created"`
 	Finished   string        `bson:"Finished"`
 	Size       int           `bson:"Size"`
-	Addresses  [][2]int      `bson:"Addresses"`
+	Addresses  AddressTable  `bson:"Addresses"`
 }
 
 type Document struct {

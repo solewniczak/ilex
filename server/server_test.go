@@ -12,25 +12,21 @@ const interval time.Duration = 40 * time.Microsecond
 var REQUEST_ID int = 1
 
 type AllTextsResponse struct {
-	Action     string                 `json:"action"`
-	Parameters AllTextsParametersData `json:"parameters"`
-	Id         int                    `json:"id"`
-}
-
-type AllTextsParametersData struct {
-	Texts []DocumentWithName `json:"texts"`
+	Action     string `json:"action"`
+	Parameters struct {
+		Texts []DocumentWithName `json:"texts"`
+	} `json:"parameters"`
+	Id int `json:"id"`
 }
 
 type TextDumpResponse struct {
-	Action     string                 `json:"action"`
-	Parameters TextDumpParametersData `json:"parameters"`
-	Id         int                    `json:"id"`
-}
-
-type TextDumpParametersData struct {
-	Links SimpleLink `json:"links"`
-	Text  string     `json:"text"`
-	Tab   int        `json:"tab"`
+	Action     string `json:"action"`
+	Parameters struct {
+		Links SimpleLink `json:"links"`
+		Text  string     `json:"text"`
+		Tab   int        `json:"tab"`
+	} `json:"parameters"`
+	Id int `json:"id"`
 }
 
 func clientRequestsText(t *testing.T, ws *websocket.Conn, tab_id int, doc_id string) {
@@ -57,15 +53,14 @@ func clientRequestsText(t *testing.T, ws *websocket.Conn, tab_id int, doc_id str
 }
 
 func verify_clients(t *testing.T, expected map[string]int) {
+	actual := make(map[string]int)
+	for _, doc := range client_doc {
+		actual[doc]++
+	}
 	for doc, clients := range expected {
-		actual_clients, ok := doc_clients[doc]
-		if len(actual_clients) != clients || !ok {
-			t.Fatal("Client connections data is incorrect! Too little connections!")
-		}
-		for _, client := range actual_clients {
-			if client_document, ok := client_doc[client]; client_document != doc || !ok {
-				t.Fatal("Client connections data is inconsistent!")
-			}
+		actual_clients := actual[doc]
+		if actual_clients != clients {
+			t.Fatal("Client connections data is incorrect! Too little connections for", doc)
 		}
 	}
 }

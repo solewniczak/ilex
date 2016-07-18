@@ -65,6 +65,6 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		add_doc(buffer, document_name, database)
+		add_doc(buffer, *document_name, database)
 	}
 }
