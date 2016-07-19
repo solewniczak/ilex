@@ -114,40 +114,8 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
 
     //dropable regions for opening new documents
     newWindow.droppableRegion = {};
-    newWindow.droppableRegion.top = $('<div class="ilex-dropableRegion">')
-                              .appendTo(newWindow.element)
-                              .css('position', 'absolute')
-                              .hide();
-                              //width is set by applyWindowPosition
-                              //height set by window resize
     
-    newWindow.droppableRegion.top.on('drop', function (event) {
-      event.preventDefault();
-      var file = JSON.parse(event.originalEvent.dataTransfer.getData('ilex/file')), 
-          windowHeight = $(window).height();
-      
-      newWindow.contentWidget.close();
-      newWindow.removeWidget();
-      newWindow.setContentWidget(newWindowWidgetCallback(newWindow));
-      //by default newest version
-      ilex.server.documentGetDump(winInd, file.id, file.totalVersions,
-        function(params) {
-          newWindow.contentWidget.loadText(params);
-        }
-      );
-      
-      
-      //bakground for animanito purposes
-//      newWindow.contentWidget.container.css('background', '#fff')
-//                                       .css('position', 'absolute');
-//      newWindow.contentWidget.container.animate({'top': windowHeight},
-//      function() {
-//        //send close message to widget
-//        newWindow.contentWidget.close();
-//        newWindow.remove();
-//      });
-    });
-        
+            
     newWindow.droppableRegion.left = $('<div class="ilex-dropableRegion">')
                               .appendTo(newWindow.element)
                               .css('position', 'absolute')
@@ -162,6 +130,45 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
                               //height set by window resize
                               .css('right', 0)
                               .hide();
+    
+    newWindow.droppableRegion.top = $('<div class="ilex-dropableRegion">')
+                              .appendTo(newWindow.element)
+                              .css('position', 'absolute')
+                              .hide();
+                              //width is set by applyWindowPosition
+                              //height set by window resize
+    
+    newWindow.droppableRegion.top.on('drop', function (event) {
+      event.preventDefault();
+      var file = JSON.parse(event.originalEvent.dataTransfer.getData('ilex/file')), 
+          windowHeight = $(window).height();
+
+      //by default newest version
+      //get new document
+      ilex.server.documentGetDump(winInd, file.id, file.totalVersions,
+        function(params) {
+
+          //bakground for animanito purposes
+          newWindow.contentWidget.container.css('background', '#fff')
+                                           .css('position', 'relative');
+          newWindow.contentWidget.container.animate({'top': windowHeight},
+          function() {
+            //send close message to widget
+            newWindow.contentWidget.close();
+            newWindow.removeWidget();
+            
+            //load new text
+            newWindow.setContentWidget(newWindowWidgetCallback(newWindow));
+            newWindow.contentWidget.loadText(params);
+          });
+
+        }
+      );
+      
+      
+
+    });
+
     
     newWindow.element.on('dragenter', '.ilex-dropableRegion', function (event) {
       event.preventDefault();
@@ -428,13 +435,13 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
     for (let win of that.windows) {
       win.element.data('ilex-height', height);
       
-      win.droppableRegion.top.height(height*0.3);
+      win.droppableRegion.top.height(height*0.2);
       
-      win.droppableRegion.left.css('top', height*0.3);
-      win.droppableRegion.left.height(height*0.7);
+//      win.droppableRegion.left.css('top', height*0.3);
+      win.droppableRegion.left.height(height);
       
-      win.droppableRegion.right.css('top', height*0.3);
-      win.droppableRegion.right.height(height*0.7);
+//      win.droppableRegion.right.css('top', height*0.3);
+      win.droppableRegion.right.height(height);
       
       win.rightSideHandler.data('ilex-height', height);
     }
