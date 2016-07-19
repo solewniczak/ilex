@@ -32,7 +32,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
 
   that.scrollWindow = $('<div class="ilex-scrollWindow">')
                   .appendTo(that.container)
-                  .css('overflow', 'auto')
+                  .css('overflow-y', 'auto')
                   .css('overflow-x', 'hidden')
                   .data('ilex-width', width)
                   .data('ilex-height', height - that.dock.container.height());
@@ -40,8 +40,6 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   that.content = $('<div class="ilex-content">').appendTo(that.scrollWindow)
                 //proper new line handling
                 .css('white-space', 'pre-wrap')
-                //proper outline handling
-                .css('margin-top', '5px')
                 .data('ilex-height', height - that.dock.container.height())
                 .attr('contenteditable', 'true')
                 .attr('spellcheck', 'false');
@@ -54,6 +52,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
 
   //add toolbar at the end to give it access to entre text object
   //that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container, that, canvas);
+  that.dock.titleToolbar = ilex.widgetsCollection.toolbar(that.dock);
   that.dock.toolbar = ilex.widgetsCollection.toolbar(that.dock);
   
   //'Group selection' may be supported in futhure releses
@@ -154,7 +153,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   //document on the server
   that.document = null;
   //name input
-  that.name = $('<input type="text">').appendTo(that.dock.toolbar.container)
+  that.name = $('<input type="text">').appendTo(that.dock.titleToolbar.container)
   				.css('width', '250px');
 
   that.name.on('change', function () {
@@ -469,7 +468,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     let addedChars = 0;
     for (let ch of chunk(params.text)) {
       let len = ch.length;
-      ilex.tools.markup.createIlexSpan().appendTo(that.content)
+      ilex.tools.markup.createIlexSpan().insertBefore($custos)
                                         .data('ilex-startoffset', addedChars)
                                         .data('ilex-endoffset', addedChars + len)
                                         .text(ch);

@@ -33,7 +33,7 @@ $(document).ready(function(){
             ilex.view.fileSelector.loadFilesList(texts);
 
             //load example texts
-            ilex.view.slider.createWindowSplitSlider();
+            ilex.view.slider.createWindowSplitSlider(false);
             ilex.view.slider.createWindow();
             var loadToWindow = function (winInd, id, version) {
               ilex.server.sendAndRecieve('documentGetDump', {
