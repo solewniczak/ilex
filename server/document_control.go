@@ -34,6 +34,7 @@ func control_document(document_id string, add_text_messages chan *AddTextMessage
 	if tree == nil {
 		fmt.Println("tree is nil")
 	}
+	tree.Print(0)
 
 loop:
 	for {
@@ -55,6 +56,7 @@ loop:
 				for _, char := range message.String {
 					tree.AddRune(char, message.Position+i+1)
 				}
+				tree.Print(0)
 				fmt.Println(get_tree_dump(tree))
 			}
 
