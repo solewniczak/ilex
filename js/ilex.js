@@ -65,34 +65,38 @@ ilex.views = {};
 ilex.tools = {};
 
 //apply sizes to elements
-ilex.applySize = function(animateWidth, animateHeight) {
-  animateWidth = animateWidth || false,
-  animateHeight = animateHeight || false,
-  $('.ilex-resize').trigger('windowResize');
-  ilex.window.find('*').each(function () {
-    if ($(this).data('ilex-width') && $(this).data('ilex-width') !== $(this).width()) {
-      if (animateWidth) {
-        $(this).animate({'width': $(this).data('ilex-width')}, {
-          'progress': function () {
-            $(document).trigger('canvasRedraw');
-          }
-        });
-      } else {
-        $(this).width($(this).data('ilex-width'));
+ilex.applySize = function(animateWidth, animateHeight, selector) {
+  animateWidth = animateWidth || false;
+  animateHeight = animateHeight || false;
+  selector = selector || '*';
+  
+  $.when($('.ilex-resize').trigger('windowResize'))
+  .done(function () {
+    ilex.window.find(selector).each(function () {
+      if ($(this).data('ilex-width') && $(this).data('ilex-width') !== $(this).width()) {
+        if (animateWidth) {
+          $(this).animate({'width': $(this).data('ilex-width')}, {
+            'progress': function () {
+              $(document).trigger('canvasRedraw');
+            }
+          });
+        } else {
+          $(this).width($(this).data('ilex-width'));
+        }
       }
-    }
-    if ($(this).data('ilex-height') && $(this).data('ilex-height') !== $(this).height()) {
-      if (animateHeight) {
-        $(this).animate({'height': $(this).data('ilex-height')}, {
-          'progress': function () {
-            $(document).trigger('canvasRedraw');
-          }
-        });
-      } else {
-        $(this).height($(this).data('ilex-height'));
+      if ($(this).data('ilex-height') && $(this).data('ilex-height') !== $(this).height()) {
+        if (animateHeight) {
+          $(this).animate({'height': $(this).data('ilex-height')}, {
+            'progress': function () {
+              $(document).trigger('canvasRedraw');
+            }
+          });
+        } else {
+          $(this).height($(this).data('ilex-height'));
+        }
       }
-    }
+    });
+    //redraw all canvas elements
+    $(document).trigger('canvasRedraw');
   });
-  //redraw all canvas elements
-  $(document).trigger('canvasRedraw');
 };

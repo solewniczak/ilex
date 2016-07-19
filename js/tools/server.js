@@ -65,14 +65,32 @@ ilex.tools.server.create = function (host) {
     socket = null;
   };
   
+  //file: allTextInfoRespnonse Object
+  that.documentGetDump = function(tabId, documentId, version,
+                                    documentRecievedCallback, retrievalFailedCallback) {
+    retrievalFailedCallback = retrievalFailedCallback || function() {};
+    that.sendAndRecieve('documentGetDump', {
+                'text': documentId,
+                'version': version,
+                'tab': tabId,
+              },
+              {
+                'documentRetrieved': documentRecievedCallback,
+                'retrievalFailed': retrievalFailedCallback,
+              });
+  };
+  
   that.document = function(tabId, name, documentId) {
     var thatDocument = {}, actionsQueue = [],
+        ackRecieve = function (params) {},
         sendAction = function(method, params) {
           var action = {'method': method, 'params': params};
           if (documentId === undefined) {
             actionsQueue.push(action);
           } else {
-            that.sendAndRecieve(action.method, action.params);
+            that.sendAndRecieve(action.method, action.params, {
+              'ack': ackRecieve
+            });
           }
         };
     //create new document
@@ -85,7 +103,9 @@ ilex.tools.server.create = function (host) {
         'documentCreated': function(params) {
           documentId = params.id;
           for (let action of actionsQueue) {
-            that.sendAndRecieve(action.methos, action.params);
+            that.sendAndRecieve(action.methos, action.params, {
+              'ack': ackRecieve
+            });
           }
           actionsQueue = [];
         }
