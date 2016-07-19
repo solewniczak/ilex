@@ -114,33 +114,77 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
 
     //dropable regions for opening new documents
     newWindow.droppableRegion = {};
-    newWindow.droppableRegion.top = $('<div class="ilex-droppableRegion">')
+    newWindow.droppableRegion.top = $('<div class="ilex-dropableRegion">')
                               .appendTo(newWindow.element)
-                              .css('position', 'absolute');
+                              .css('position', 'absolute')
+                              .hide();
                               //width is set by applyWindowPosition
                               //height set by window resize
     
-    newWindow.droppableRegion.left = $('<div class="ilex-droppableRegion">')
+    newWindow.droppableRegion.top.on('drop', function (event) {
+      event.preventDefault();
+      var file = JSON.parse(event.originalEvent.dataTransfer.getData('ilex/file')), 
+          windowHeight = $(window).height();
+      
+      newWindow.contentWidget.close();
+      newWindow.removeWidget();
+      newWindow.setContentWidget(newWindowWidgetCallback(newWindow));
+      //by default newest version
+      ilex.server.documentGetDump(winInd, file.id, file.totalVersions,
+        function(params) {
+          newWindow.contentWidget.loadText(params);
+        }
+      );
+      
+      
+      //bakground for animanito purposes
+//      newWindow.contentWidget.container.css('background', '#fff')
+//                                       .css('position', 'absolute');
+//      newWindow.contentWidget.container.animate({'top': windowHeight},
+//      function() {
+//        //send close message to widget
+//        newWindow.contentWidget.close();
+//        newWindow.remove();
+//      });
+    });
+        
+    newWindow.droppableRegion.left = $('<div class="ilex-dropableRegion">')
                               .appendTo(newWindow.element)
-                              .css('position', 'absolute');
+                              .css('position', 'absolute')
+                              .hide();
                               //width is set by applyWindowPosition
                               //height and top set by window resize
     
-    newWindow.droppableRegion.right = $('<div class="ilex-droppableRegion">')
+    newWindow.droppableRegion.right = $('<div class="ilex-dropableRegion">')
                               .appendTo(newWindow.element)
                               .css('position', 'absolute')
                               //width is set by applyWindowPosition
                               //height set by window resize
-                              .css('right', 0);
-    newWindow.element.on('dragenter', '.ilex-droppableRegion', function (event) {
+                              .css('right', 0)
+                              .hide();
+    
+    newWindow.element.on('dragenter', '.ilex-dropableRegion', function (event) {
+      event.preventDefault();
+      console.log(this);
       $(this).css('background', 'rgba(40, 215, 40, 0.2)');
     });
-    newWindow.element.on('dragleave', '.ilex-droppableRegion', function (event) {
+    newWindow.element.on('dragleave', '.ilex-dropableRegion', function (event) {
+      event.preventDefault();
       $(this).css('background', 'transparent');
     });
+    newWindow.element.on('dragover', '.ilex-dropableRegion', function (event) {
+      event.preventDefault();
+    });
 
-
+    
+    
+    newWindow.widget = $('<div class="ilex-widget">').appendTo(newWindow.element);
     newWindow.contentWidget = undefined;
+    
+    newWindow.removeWidget = function() {
+      newWindow.widget.html('');
+    };
+    
     newWindow.remove = function () {
       var winInd = newWindow.element.data('ilex-window');
       that.windows.splice(winInd, 1);
@@ -213,7 +257,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
               //send close message to widget
               curWindow.contentWidget.close();
 
-              console.log(curWindow.id, that.windows.length);
               //there is no window to the right
               if (curWindow.id+1 >= that.windows.length) {
                 curWindow.setContentWidget(newWindowWidgetCallback(curWindow));

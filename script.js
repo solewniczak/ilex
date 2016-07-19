@@ -59,7 +59,7 @@ $(document).ready(function(){
                   function (params) {
                     ilex.view.console.log(params.error);
                   },
-              })
+              });
             };
             loadToWindow(0, texts[3].id, 1);
             loadToWindow(1, texts[1].id, 1);
