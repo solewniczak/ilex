@@ -44,6 +44,13 @@ ilex.widgetsCollection.fileSelector = function ($parentWidget) {
       });
     };
   };
+  
+  that.container.on('windowResize', function(event) {
+    width = that.container.parent().data('ilex-width');
+    height = that.container.parent().data('ilex-height');
+    
+    that.container.data('ilex-width', width).data('ilex-height', height);
+  });
 
 
   return that;

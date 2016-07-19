@@ -11,8 +11,10 @@ if (ilex.widgetsCollection.toolbar !== undefined)
 
 ilex.widgetsCollection.toolbar = function (dock) {
   var that = {};
-
-  that.container = $('<div class="ilex-toolbar">').appendTo(dock.container);
+  
+  //toolbar cannot change height!!!
+  that.container = $('<div class="ilex-toolbar">').appendTo(dock.container)
+                    .css('white-space', 'nowrap');
   that.addButton = function (html, callback, alternateCallback) {
     let $button = $('<div class="ilex-button ilex-rect-button">').html(html);
     if (alternateCallback === undefined) {
