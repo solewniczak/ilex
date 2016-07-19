@@ -18,7 +18,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   that.container = $('<div class="ilex-resize ilex-text">')
                   .data('ilex-width', width)
                   .data('ilex-height', height);
-  windowObject.element.append(that.container);
+  windowObject.widget.html(that.container);
 
   that.setAlternateTextWidget = function (widget) {
     that.container.data('ilex-alternate', widget);

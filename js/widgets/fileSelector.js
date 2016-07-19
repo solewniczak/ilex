@@ -35,6 +35,13 @@ ilex.widgetsCollection.fileSelector = function ($parentWidget) {
                 .css('cursor', '-webkit-grab')
                 .css('cursor', 'grab')
                 .css('float', 'left');
+      $div.on('dragstart', function(event) {
+        event.originalEvent.dataTransfer.setData('ilex/file', JSON.stringify(file));
+        $('.ilex-dropableRegion').show();
+      });
+      $div.on('dragend', function(event) {
+        $('.ilex-dropableRegion').css('background', 'transparent').hide();
+      });
     };
   };
 
