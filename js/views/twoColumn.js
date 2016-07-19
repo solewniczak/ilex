@@ -27,6 +27,7 @@ ilex.views.twoColumn = function(canvas) {
       throw 'window: ' + winInd + 'does not exist';
     }
     view.slider.windows[winInd].contentWidget.loadText(params);
+    ilex.applySize();
   };
 
 

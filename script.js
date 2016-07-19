@@ -33,7 +33,7 @@ $(document).ready(function(){
             ilex.view.fileSelector.loadFilesList(texts);
 
             //load example texts
-            ilex.view.slider.createWindowSplitSlider();
+            ilex.view.slider.createWindowSplitSlider(false);
             ilex.view.slider.createWindow();
             var loadToWindow = function (winInd, id, version) {
               ilex.server.sendAndRecieve('documentGetDump', {
@@ -59,7 +59,7 @@ $(document).ready(function(){
                   function (params) {
                     ilex.view.console.log(params.error);
                   },
-              })
+              });
             };
             loadToWindow(0, texts[3].id, 1);
             loadToWindow(1, texts[1].id, 1);

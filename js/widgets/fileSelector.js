@@ -35,8 +35,22 @@ ilex.widgetsCollection.fileSelector = function ($parentWidget) {
                 .css('cursor', '-webkit-grab')
                 .css('cursor', 'grab')
                 .css('float', 'left');
+      $div.on('dragstart', function(event) {
+        event.originalEvent.dataTransfer.setData('ilex/file', JSON.stringify(file));
+        $('.ilex-dropableRegion').show();
+      });
+      $div.on('dragend', function(event) {
+        $('.ilex-dropableRegion').css('background', 'transparent').hide();
+      });
     };
   };
+  
+  that.container.on('windowResize', function(event) {
+    width = that.container.parent().data('ilex-width');
+    height = that.container.parent().data('ilex-height');
+    
+    that.container.data('ilex-width', width).data('ilex-height', height);
+  });
 
 
   return that;
