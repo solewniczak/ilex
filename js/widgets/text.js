@@ -454,7 +454,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
 
   that.loadText = function (params) {
     //Filling algorithm
-    var chunkSize = 100,
+    var chunkSize = 400,
         chunk = function(str) {
           var chunks = [];
           for (var i = 0, charsLength = str.length; i < charsLength; i += chunkSize) {
