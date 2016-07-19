@@ -454,9 +454,28 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
 
   that.loadText = function (params) {
     //Filling algorithm
-    that.content.find('span')
-                  .data('ilex-endoffset', params.text.length)
-                  .text(params.text);
+    var chunkSize = 100,
+        chunk = function(str) {
+          var chunks = [];
+          for (var i = 0, charsLength = str.length; i < charsLength; i += chunkSize) {
+              chunks.push(str.substring(i, i + chunkSize));
+          }
+          return chunks;
+        };
+    
+    //Create new span for evety 100 characters for performance purposes
+    //remove all spanf from content
+    that.content.find('span').remove();
+    let addedChars = 0;
+    for (let ch of chunk(params.text)) {
+      let len = ch.length;
+      ilex.tools.markup.createIlexSpan().appendTo(that.content)
+                                        .data('ilex-startoffset', addedChars)
+                                        .data('ilex-endoffset', addedChars + len)
+                                        .text(ch);
+      addedChars += len;
+    };
+
     that.name.val(params.name);
     that.document = ilex.server.document(windowObject.id, params.name, params.id);
   };
