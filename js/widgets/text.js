@@ -66,9 +66,6 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
       that.groupSelections = false;
     }
   );*/
-  
-  that.changesHistoryWindow = ilex.widgetsCollection.floatingWindow();
-  that.changesHistory = ilex.widgetsCollection.changesHistory(that.changesHistoryWindow);
 
   var cursor = new Proxy({
     'span': null,
@@ -160,6 +157,16 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   
   //document on the server
   that.document = null;
+    
+  that.changesHistoryWindow = ilex.widgetsCollection.floatingWindow();
+  that.changesHistory = ilex.widgetsCollection.changesHistory(that.changesHistoryWindow);
+
+  var fillChangesHistory = function () {
+    that.document.getVersionsInfo(function (params) {
+      console.log(params);
+    });
+  };
+
   //name input
   that.name = $('<input type="text">').appendTo(that.dock.titleToolbar.container)
   				.css('width', '250px');
@@ -168,6 +175,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     //if we input to empty document, create new one
     if (that.document === null) {
       that.document = ilex.server.document(windowObject.id, that.name.val());
+      fillChangesHistory();
     }
     that.document.changeName($(this).val());
   });
@@ -273,6 +281,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     //if we input to empty document, create new one
     if (that.document === null) {
       that.document = ilex.server.document(windowObject.id, that.name.val());
+      fillChangesHistory();
     }
     
     
@@ -489,6 +498,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
 
     that.name.val(params.name);
     that.document = ilex.server.document(windowObject.id, params.name, params.id);
+    fillChangesHistory();
   };
 
   that.close = function () {
