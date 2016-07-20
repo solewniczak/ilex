@@ -561,17 +561,17 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
 
       $('body').css('cursor', 'ew-resize');
       //prevent selectin while resizing
-      $(document).on('selectstart', function(event) {
+      $(document).on('selectstart.ilex.text', function(event) {
         event.preventDefault();
       });
-      $(document).on('mouseup', function () {
-        $(document).off('mouseup');
-        $(document).off('mousemove');
-        $(document).off('selectstart');
+      $(document).on('mouseup.ilex.text', function () {
+        $(document).off('mouseup.ilex.text');
+        $(document).off('mousemove.ilex.text');
+        $(document).off('selectstart.ilex.text');
         $('body').css('cursor', 'initial');
       });
 
-      $(document).on('mousemove', function(event) {
+      $(document).on('mousemove.ilex.text', function(event) {
         //calculate new position
         var delta = event.pageX - startX,
           newLeftWidth = leftWidth + delta,

@@ -66,6 +66,9 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
       that.groupSelections = false;
     }
   );*/
+  
+  that.changesHistoryWindow = ilex.widgetsCollection.floatingWindow();
+  that.changesHistory = ilex.widgetsCollection.changesHistory(that.changesHistoryWindow);
 
   var cursor = new Proxy({
     'span': null,
@@ -148,6 +151,11 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     if (rightWindow !== undefined) {
       that.createLink();
     }
+  });
+  
+  that.dock.toolbar.addButton('Changes history',
+  function(button) {
+    that.changesHistoryWindow.show();
   });
   
   //document on the server
@@ -431,7 +439,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   });
 
   //draw selection
-  $(document).on('selectionchange', function(event) {
+  $(document).on('selectionchange.ilex.text', function(event) {
     var selection = window.getSelection(),
       active = $('.ilex-content:hover');
     if (active.length > 0 && selection.rangeCount >= 1) {
@@ -474,6 +482,10 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
                                         .text(ch);
       addedChars += len;
     };
+    
+    if (params.isEditable === false) {
+      that.content.attr('contenteditable', 'false');
+    }
 
     that.name.val(params.name);
     that.document = ilex.server.document(windowObject.id, params.name, params.id);
@@ -483,6 +495,8 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     if (that.document !== null) {
       that.document.tabClose();
     }
+    that.changesHistoryWindow.remove();
+    
     ilex.view.console.log('tab '+windowObject.id+' closed');
   }
 
