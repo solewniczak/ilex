@@ -59,16 +59,16 @@ ilex.widgetsCollection.verticalSplit = function ($parentWidget, position) {
       innerHeight =  topHeight + bottomHeight;
     $('body').css('cursor', 'ns-resize');
     //prevent selectin while resizing
-    $(document).on('selectstart', function(event) {
+    $(document).on('selectstart.ilex.verticalSplit', function(event) {
       event.preventDefault();
     });
-    $(document).on('mouseup', function () {
-      $(document).off('mouseup');
-      $(document).off('mousemove');
-      $(document).off('selectstart');
+    $(document).on('mouseup.ilex.verticalSplit', function () {
+      $(document).off('mouseup.ilex.verticalSplit');
+      $(document).off('mousemove.ilex.verticalSplit');
+      $(document).off('selectstart.ilex.verticalSplit');
       $('body').css('cursor', 'initial');
     });
-    $(document).on('mousemove', function(event) {
+    $(document).on('mousemove.ilex.verticalSplit', function(event) {
       //calculate new position
       var delta = event.pageY - startY,
         newTopHeight = topHeight + delta,
