@@ -57,8 +57,13 @@ ilex.widgetsCollection.floatingWindow = function (params) {
   that.barDock.container = $('<div class="ilex-barDock">').appendTo(that.bar);
   that.barToolbar = ilex.widgetsCollection.toolbar(that.barDock);
   //close window button
-  that.barToolbar.addButton('<span class="ilex-awesome">&#xf00d;</span>', function() {
+  that.barToolbar.addButton('<span class="ilex-awesome">&#xf00d;</span>', function(event) {
     that.element.hide();
+  });
+
+  //prevent dragging while clicking buttons
+  that.barToolbar.container.on('mousedown', '.ilex-button', function(event) {
+    event.stopPropagation();
   });
   
   that.label = $('<span class="ilex-windowLabel">').appendTo(that.barToolbar.container)
