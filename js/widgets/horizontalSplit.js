@@ -59,16 +59,16 @@ ilex.widgetsCollection.horizontalSplit = function ($parentWidget, position) {
       innerWidth =  leftWidth + rightWidth;
     $('body').css('cursor', 'ew-resize');
     //prevent selectin while resizing
-    $(document).on('selectstart', function(event) {
+    $(document).on('selectstart.ilex.horizontalSplit', function(event) {
       event.preventDefault();
     });
-    $(document).on('mouseup', function () {
-      $(document).off('mouseup');
-      $(document).off('mousemove');
-      $(document).off('selectstart');
+    $(document).on('mouseup.ilex.horizontalSplit', function () {
+      $(document).off('mouseup.ilex.horizontalSplit');
+      $(document).off('mousemove.ilex.horizontalSplit');
+      $(document).off('selectstart.ilex.horizontalSplit');
       $('body').css('cursor', 'initial');
     });
-    $(document).on('mousemove', function(event) {
+    $(document).on('mousemove.ilex.horizontalSplit', function(event) {
       //calculate new position
       var delta = event.pageX - startX,
         newLeftWidth = leftWidth + delta,

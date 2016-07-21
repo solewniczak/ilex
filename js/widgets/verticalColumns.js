@@ -12,53 +12,71 @@ if (ilex.widgetsCollection.verticalColumns !== undefined)
 ilex.widgetsCollection.verticalColumns = function ($parentWidget, columns) {
   var that = {},
     width = $parentWidget.data('ilex-width'),
-    height = $parentWidget.data('ilex-height'),
-    columnsStaticWidth = 0;
-
-  //calculate columns static width to deal with percentage values
-  for (let column of columns) {
-    if (typeof column === 'number') {
-      columnsStaticWidth += column;
-    }
-  }
-  //static columns widths - calculate percentage value basing on clumnsStaticWidth
+    height = $parentWidget.data('ilex-height');
+  
+   //static columns widths - calculate percentage value basing on clumnsStaticWidth
   var staticColumns = [],
-    //space used in percentage calculations
-    avalibleSpace = width - columnsStaticWidth;
-  for (let column of columns) {
-    if (typeof column === 'string') {
-      let value = parseFloat(column) / 100.0;
-      staticColumns.push(avalibleSpace * value);
-    } else {
-      staticColumns.push(column);
-    }
-  }
+    calculateSizes = function() {
+      var columnsStaticWidth = 0;
+      //calculate columns static width to deal with percentage values
+      for (let column of columns) {
+        if (typeof column === 'number') {
+          columnsStaticWidth += column;
+        }
+      }
 
+      staticColumns = [];
+      
+      //space used in percentage calculations
+      var avalibleSpace = width - columnsStaticWidth;
+      for (let column of columns) {
+        if (typeof column === 'string') {
+          let value = parseFloat(column) / 100.0;
+          staticColumns.push(avalibleSpace * value);
+        } else {
+          staticColumns.push(column);
+        }
+      }
+  }, applySizes = function() {
+    for (let i = 0; i < that.columns.length; i++) {
+      let $column = that.columns[i];
+      $column.data('ilex-width', staticColumns[i]).data('ilex-height', height);
+    }
+  };
+
+  
   that.table = $('<div class="ilex-verticalColumns ilex-resize">')
                   .css('display', 'table-row')
                   .data('ilex-width', width)
                   .data('ilex-height', height);
   $parentWidget.html(that.table);
 
+  calculateSizes();
   that.columns = [];
   for (let staticColumn of staticColumns) {
-    let $column = $('<div>').appendTo(that.table)
-                            .css('display', 'table-cell')
-                            .data('ilex-width', staticColumn)
-                            .data('ilex-height', height);
+    let $column = $('<div class="ilex-verticalColumn">').appendTo(that.table)
+                            .css('display', 'table-cell');
     that.columns.push($column);
   }
+  applySizes();
+
+  that.setColumnWidth = function(column, width) {
+    columns[column] = width;
+    calculateSizes();
+    console.log(staticColumns);
+    applySizes();
+  };
+
 
   that.table.on('windowResize', function(event) {
-    var width = that.table.parent().data('ilex-width'),
-      height = that.table.parent().data('ilex-height');
+    width = that.table.parent().data('ilex-width');
+    height = that.table.parent().data('ilex-height');
 
     that.table.data('ilex-width', width);
     that.table.data('ilex-height', height);
 
-    for (let $column of that.columns) {
-      $column.data('ilex-height', height);
-    }
+    applySizes();
+    
   });
 
   return that;
