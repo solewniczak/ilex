@@ -13,6 +13,8 @@ type Node interface {
 	SetParent(Node)
 	WriteToBuffer(buffer *bytes.Buffer, slices *mgo.Collection) error
 	Print(indentation int)
+	GetLength() int
+	Persist(addresses AddressTable, slices *mgo.Collection) error
 }
 
 func Indent(indentation int) {
@@ -39,6 +41,14 @@ func (r *Root) Print(indentation int) {
 	r.Down.Print(indentation + 1)
 }
 
+func (r *Root) GetLength() int {
+	return r.Down.GetLength()
+}
+
+func (r *Root) Persist(addresses AddressTable, slices *mgo.Collection) error {
+	return r.Down.Persist(addresses, slices)
+}
+
 type Branch struct {
 	Parent             Node
 	LengthLeft, Length int
@@ -55,6 +65,7 @@ func (b *Branch) IsLeftmostTNode() bool {
 		return false
 	}
 }
+
 func (b *Branch) IsRightmostTNode() bool {
 	switch right := b.Right.(type) {
 	case *Branch:
@@ -90,6 +101,7 @@ func (b *Branch) AddRune(r rune, position int) {
 func (b *Branch) SetParent(parent Node) {
 	b.Parent = parent
 }
+
 func (b *Branch) WriteToBuffer(buffer *bytes.Buffer, slices *mgo.Collection) error {
 	fmt.Println("going deeper")
 	err := b.Left.WriteToBuffer(buffer, slices)
@@ -113,6 +125,23 @@ func (b *Branch) Print(indentation int) {
 	Indent(indentation)
 	fmt.Println("right :")
 	b.Right.Print(indentation + 1)
+}
+
+func (b *Branch) GetLength() int {
+	return b.Length
+}
+
+func (b *Branch) Persist(addresses AddressTable, slices *mgo.Collection) error {
+	err := b.Left.Persist(addresses, slices)
+	if err != nil {
+		fmt.Println("left child persistence error")
+		return err
+	}
+	err = b.Right.Persist(addresses, slices)
+	if err != nil {
+		fmt.Println("right child persistence error")
+	}
+	return err
 }
 
 type PNode struct {
@@ -173,6 +202,17 @@ func (p *PNode) Print(indentation int) {
 	fmt.Println("PNode:", p.Length, "at address", p.Address)
 }
 
+func (p *PNode) GetLength() int {
+	return p.Length
+}
+
+func (p *PNode) Persist(addresses AddressTable, slices *mgo.Collection) error {
+	last := addresses[len(addresses)-1]
+	addresses[len(addresses)] = [2]int{last[0], p.Address}
+	addresses = append(addresses, [2]int{last[0] + p.Length, 0})
+	return nil
+}
+
 type TNode struct {
 	Parent Node
 	Length int
@@ -199,6 +239,14 @@ func (t *TNode) WriteToBuffer(buffer *bytes.Buffer, slices *mgo.Collection) erro
 func (t *TNode) Print(indentation int) {
 	Indent(indentation)
 	fmt.Println("TNode:", t.Length, "of text", string(t.Text))
+}
+
+func (t *TNode) GetLength() int {
+	return t.Length
+}
+
+func (t *TNode) Persist(addresses AddressTable, slices *mgo.Collection) error {
+	return nil
 }
 
 func construct_tree_from_address_table(addresses AddressTable, total_length int) Node {
@@ -272,4 +320,21 @@ func get_tree_dump(root *Root) (string, error) {
 		return "", err
 	}
 	return buffer.String(), nil
+}
+
+func persist_tree(root *Root) error {
+	db_session, err := mgo.Dial("localhost")
+	if err != nil {
+		fmt.Println("database access error: " + err.Error())
+		return err
+	}
+	defer db_session.Close()
+
+	database := db_session.DB("default")
+	slices := database.C("permascroll")
+
+	addresses := AddressTable{{0, 0}}
+	root.Persist(addresses, slices)
+	return nil
+
 }
