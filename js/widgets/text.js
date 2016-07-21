@@ -150,8 +150,23 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     }
   });
   
+  that.dock.toolbar.addButton('Changes history',
+  function(button) {
+    that.changesHistoryWindow.show();
+  });
+  
   //document on the server
   that.document = null;
+    
+  that.changesHistoryWindow = ilex.widgetsCollection.floatingWindow();
+  that.changesHistory = ilex.widgetsCollection.changesHistory(that.changesHistoryWindow);
+
+  var fillChangesHistory = function () {
+    that.document.getVersionsInfo(function (params) {
+      console.log(params);
+    });
+  };
+
   //name input
   that.name = $('<input type="text">').appendTo(that.dock.titleToolbar.container)
   				.css('width', '250px');
@@ -160,6 +175,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     //if we input to empty document, create new one
     if (that.document === null) {
       that.document = ilex.server.document(windowObject.id, that.name.val());
+      fillChangesHistory();
     }
     that.document.changeName($(this).val());
   });
@@ -265,6 +281,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     //if we input to empty document, create new one
     if (that.document === null) {
       that.document = ilex.server.document(windowObject.id, that.name.val());
+      fillChangesHistory();
     }
     
     
@@ -431,7 +448,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   });
 
   //draw selection
-  $(document).on('selectionchange', function(event) {
+  $(document).on('selectionchange.ilex.text', function(event) {
     var selection = window.getSelection(),
       active = $('.ilex-content:hover');
     if (active.length > 0 && selection.rangeCount >= 1) {
@@ -474,15 +491,22 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
                                         .text(ch);
       addedChars += len;
     };
+    
+    if (params.isEditable === false) {
+      that.content.attr('contenteditable', 'false');
+    }
 
     that.name.val(params.name);
     that.document = ilex.server.document(windowObject.id, params.name, params.id);
+    fillChangesHistory();
   };
 
   that.close = function () {
     if (that.document !== null) {
       that.document.tabClose();
     }
+    that.changesHistoryWindow.remove();
+    
     ilex.view.console.log('tab '+windowObject.id+' closed');
   }
 
