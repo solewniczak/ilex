@@ -35,9 +35,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
   $parentWidget.html(that.superContainer);
 
   that.superTable = ilex.widgetsCollection.verticalColumns(that.superContainer, [0, buttonsWidth, '100%', buttonsWidth]);
-
-
-  //container for frozen content
+  
   that.frozenContainer = that.superTable.columns[0];
 
   that.leftButtons = that.superTable.columns[1];
@@ -68,7 +66,9 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
   that.windows = [];
   //most left window index
   that.windowPointer = 0;
-
+  //if we have frozen window
+  that.windowFrozen = false;
+  
   var createHandlerObject = function(winInd) {
     return $('<div class="ilex-handler">')
                             .css('display', 'table-cell')
@@ -387,6 +387,34 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
     
     return newWindow;
   };
+  
+//  that.moveWindowBefore = function(beforeInd, winInd) {
+//    var win = that.windows[winInd],
+//        element = win.element.detach(),
+//        handler = win.rightSideHandler.detach();
+//    
+//    element.insertBefore(that.windows[beforeInd].element);
+//    handler.insertAfter(element);
+//    
+//    //insert element before
+//    that.windows.splice(beforeInd, 0, that.windows[winInd]);
+//    //remove previous
+//    that.windows.splice(winInd, 1);
+//    updateIlexWindowData();
+//    
+//  };
+  
+  that.detachWindow = function(winInd) {
+    var win = that.windows[winInd],
+        element = win.element.detach(),
+        handler = win.rightSideHandler.detach();
+    that.windows.splice(winInd, 1);
+    return win;
+  };
+  
+  that.attachBefore = function(beforeInd) {
+    
+  };
 
   that.createWindowSplitSlider = function(animate) {
     if (animate === undefined) {
@@ -416,10 +444,13 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
 
     //apply width to window that will be shown
     that.windows[that.windowPointer + that.visibleWindows].element.data('ilex-width', leftWidth);
-
-    that.windowPointer += 1;
-
+    
     ilex.applySize();
+    
+    //move to next window
+    that.windowPointer += 1;
+    
+        
     that.table.animate({'left': slide}, {
       'progress': function () {
         $(document).trigger('canvasRedraw');
@@ -485,15 +516,36 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
       'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf152;</span>',
       'htmlOn': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf191;</span>',
       'callbackOn': function(event) {
-        return;
-        var win = that.windows(windowPointer);
-        that.frozenContainer.append(win.contentWidget.container.detach());
-        that.frozenContainer.data('ilex-width', win.data('ilex-width'));
-        that.removeCurentWindow();
-        ilex.applySizes();
+        var win = that.windows[that.windowPointer],
+            winWidth = win.element.width();
+//            handlerOffset = win.rightSideHandler.offset(),
+//            tableOffset = that.table.offset();
+//        that.leftButtons.css('left', handlerOffset.left - that.leftButtons.width());
+//        that.table.css('left', tableOffset.left - that.leftButtons.width());
+        that.detachWindow(that.windowPointer);
+        
+        that.superTable.setColumnWidth(0, winWidth);
+        
+        //modify element to fit new container
+        win.element.css('display', 'block');
+        
+        that.frozenContainer.append(win.element);
+        
+        
+        that.visibleWindows -= 1;
+        updateInnerWidth(width);
+        setEqualWindowPositions();
+        applyWindowPosition();
+        
+        ilex.applySize();
+        
+        that.windowFrozen = true;
       },
       'callbackOff': function(event) {
-        that.leftButtons.css('left', '0');
+        var win = that.windows[that.windowPointer];
+//        that.leftButtons.css('left', '0');
+//        win.element.css('left', '0');
+        that.windowFrozen = false;
       }
     }
   ]);
