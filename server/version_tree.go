@@ -14,7 +14,7 @@ type Node interface {
 	WriteToBuffer(buffer *bytes.Buffer, slices *mgo.Collection) error
 	Print(indentation int)
 	GetLength() int
-	Persist(addresses AddressTable, slices *mgo.Collection) error
+	Persist(addresses AddressTable, slices *mgo.Collection) (AddressTable, error)
 }
 
 func Indent(indentation int) {
@@ -45,7 +45,7 @@ func (r *Root) GetLength() int {
 	return r.Down.GetLength()
 }
 
-func (r *Root) Persist(addresses AddressTable, slices *mgo.Collection) error {
+func (r *Root) Persist(addresses AddressTable, slices *mgo.Collection) (AddressTable, error) {
 	return r.Down.Persist(addresses, slices)
 }
 
@@ -131,17 +131,17 @@ func (b *Branch) GetLength() int {
 	return b.Length
 }
 
-func (b *Branch) Persist(addresses AddressTable, slices *mgo.Collection) error {
-	err := b.Left.Persist(addresses, slices)
+func (b *Branch) Persist(addresses AddressTable, slices *mgo.Collection) (AddressTable, error) {
+	addresses, err := b.Left.Persist(addresses, slices)
 	if err != nil {
 		fmt.Println("left child persistence error")
-		return err
+		return addresses, err
 	}
-	err = b.Right.Persist(addresses, slices)
+	addresses, err = b.Right.Persist(addresses, slices)
 	if err != nil {
 		fmt.Println("right child persistence error")
 	}
-	return err
+	return addresses, err
 }
 
 type PNode struct {
@@ -206,11 +206,11 @@ func (p *PNode) GetLength() int {
 	return p.Length
 }
 
-func (p *PNode) Persist(addresses AddressTable, slices *mgo.Collection) error {
+func (p *PNode) Persist(addresses AddressTable, slices *mgo.Collection) (AddressTable, error) {
 	last := addresses[len(addresses)-1]
-	addresses[len(addresses)] = [2]int{last[0], p.Address}
+	addresses[len(addresses)-1] = [2]int{last[0], p.Address}
 	addresses = append(addresses, [2]int{last[0] + p.Length, 0})
-	return nil
+	return addresses, nil
 }
 
 type TNode struct {
@@ -245,8 +245,11 @@ func (t *TNode) GetLength() int {
 	return t.Length
 }
 
-func (t *TNode) Persist(addresses AddressTable, slices *mgo.Collection) error {
-	return nil
+func (t *TNode) Persist(addresses AddressTable, slices *mgo.Collection) (AddressTable, error) {
+	last := addresses[len(addresses)-1]
+	addresses[len(addresses)-1] = [2]int{last[0], p.Address}
+	addresses = append(addresses, [2]int{last[0] + p.Length, 0})
+	return addresses, nil
 }
 
 func construct_tree_from_address_table(addresses AddressTable, total_length int) Node {
@@ -334,7 +337,7 @@ func persist_tree(root *Root) error {
 	slices := database.C("permascroll")
 
 	addresses := AddressTable{{0, 0}}
-	root.Persist(addresses, slices)
+	addresses, err = root.Persist(addresses, slices)
 	return nil
 
 }
