@@ -87,9 +87,6 @@ loop:
 					// save work in progress and start a new version
 					editor_just_left = false
 					edition_from_new_editor = false
-					version.Id = bson.NewObjectId()
-					version.No++
-					version.Created = time.Now().Format(time.RFC3339)
 
 				}
 				i := 0
@@ -101,6 +98,8 @@ loop:
 				change_counter++
 				//if change_counter == 10 {
 				//	change_counter = 0
+				//	version.Id = bson.NewObjectId()
+				//	version.No++
 				//	if err = tree.PersistTree(root, &version); err != nil {
 				//		fmt.Println("Could not save changes: " + err.Error() + ". Database may be corrupted!")
 				//	}
@@ -109,6 +108,7 @@ loop:
 				//	}
 				//	root.Print(0)
 				//	fmt.Println(tree.GetTreeDump(root))
+				//	version.Created = time.Now().Format(time.RFC3339)
 				//}
 			}
 
