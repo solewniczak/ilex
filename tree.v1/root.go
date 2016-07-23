@@ -15,8 +15,6 @@ func (root *Root) AddRune(r rune, position int) {
 	root.Down.AddRune(r, position)
 }
 
-func (r *Root) SetParent(Node) {}
-
 func (r *Root) WriteToBuffer(buffer *bytes.Buffer, slices *mgo.Collection) error {
 	return r.Down.WriteToBuffer(buffer, slices)
 }
@@ -33,4 +31,8 @@ func (r *Root) GetLength() int {
 
 func (r *Root) Persist(addresses ilex.AddressTable, slices *mgo.Collection) (ilex.AddressTable, error) {
 	return r.Down.Persist(addresses, slices)
+}
+
+func (r *Root) ReplaceChild(previous, new Node) {
+	r.Down = new
 }

@@ -137,7 +137,7 @@ func ReadBlockFromPermascrollToBuffer(runes_to_read, address int, buffer *bytes.
 func GetStringFromAddresses(addresses AddressTable, total_runes int, database *mgo.Database) (string, error) {
 	// @ TO DO: add support for zero-length files
 
-	slices := database.C("permascroll")
+	slices := database.C(PERMASCROLL)
 	var buffer bytes.Buffer
 	last_address := len(addresses) - 1
 	runes_read := 0
@@ -157,4 +157,15 @@ func GetStringFromAddresses(addresses AddressTable, total_runes int, database *m
 
 	str := buffer.String()
 	return str, nil
+}
+
+func GetLatestVersion(database *mgo.Database, doc *Document, version *Version) error {
+	versions := database.C(VERSIONS)
+	return versions.Find(bson.M{"DocumentId": doc.Id, "No": doc.TotalVersions}).One(&version)
+}
+
+func UpdateDocument(docs *mgo.Collection, doc *Document, version *Version) error {
+	doc.TotalVersions = version.No
+	doc.Modified = version.Finished
+	return docs.UpdateId(doc.Id, bson.M{"$set": bson.M{"Modified": version.Finished, "TotalVersions": version.No}})
 }

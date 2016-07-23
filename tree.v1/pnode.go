@@ -8,7 +8,7 @@ import (
 )
 
 type PNode struct {
-	Parent  Node
+	Parent  Parent
 	Length  int
 	Address int
 }
@@ -38,21 +38,10 @@ func (p *PNode) AddRune(r rune, position int) {
 			up.Left = &TNode{up, 1, []rune{r}}
 		}
 	}
-	switch parent := p.Parent.(type) {
-	case *Branch:
-		fmt.Println("branch parent")
-		if parent.Left == p {
-			parent.Left = up
-		} else {
-			parent.Right = up
-		}
-	case *Root:
-		fmt.Println("root parent")
-		parent.Down = up
-	}
+	p.Parent.ReplaceChild(p, up)
 }
 
-func (p *PNode) SetParent(parent Node) {
+func (p *PNode) SetParent(parent Parent) {
 	p.Parent = parent
 }
 
