@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"golang.org/x/net/websocket"
 	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 	"ilex/ilex"
 )
 
@@ -44,15 +43,13 @@ func getAllDocumentsInfo(request *IlexMessage, ws *websocket.Conn) error {
 		return respond(ws, response)
 	}
 
-	versions := database.C(ilex.VERSIONS)
 	var version ilex.Version
 	texts := make([]DocumentWithName, len(found))
 
 	// Get the latest version's name as the document name.
 	for i, doc := range found {
 		texts[i].Document = doc
-		err = versions.Find(bson.M{"DocumentId": doc.Id,
-			"No": doc.TotalVersions}).One(&version)
+		err = ilex.GetLatestVersion(database, &doc, &version)
 		if err != nil {
 			response.Action = GETTING_INFO_FAILED
 			response.Parameters[ERROR] = "Database error! Could not find latest version for document " + doc.Id.Hex()

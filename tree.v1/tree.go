@@ -2,20 +2,30 @@ package tree
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 	"ilex/ilex"
 	"strings"
+	"time"
 )
 
-type Node interface {
+type TreeBase interface {
 	AddRune(r rune, position int)
-	SetParent(Node)
 	WriteToBuffer(buffer *bytes.Buffer, slices *mgo.Collection) error
 	Print(indentation int)
 	GetLength() int
 	Persist(addresses ilex.AddressTable, slices *mgo.Collection) (ilex.AddressTable, error)
+}
+
+type Parent interface {
+	TreeBase
+	ReplaceChild(previous, new Node)
+}
+
+type Node interface {
+	TreeBase
+	SetParent(Parent)
 }
 
 func indent(indentation int) {
@@ -51,25 +61,7 @@ func construct_tree_from_address_table(addresses ilex.AddressTable, total_length
 	return root
 }
 
-func ConstructVersionTree(document_id string, version_no int) (root *Root) {
-	db_session, err := mgo.Dial("localhost")
-	if err != nil {
-		fmt.Println("database access error: " + err.Error())
-		return nil
-	}
-	defer db_session.Close()
-
-	database := db_session.DB(ilex.DEFAULT_DB)
-	versions := database.C(ilex.VERSIONS)
-
-	var version ilex.Version
-	err = versions.Find(bson.M{"DocumentId": bson.ObjectIdHex(document_id),
-		"No": version_no}).One(&version)
-	if err != nil {
-		fmt.Println("retrieving version error: " + err.Error())
-		return nil
-	}
-
+func ConstructVersionTree(version *ilex.Version) (root *Root) {
 	root = &Root{construct_tree_from_address_table(version.Addresses, version.Size)}
 	root.Down.SetParent(root)
 	return root
@@ -95,7 +87,7 @@ func GetTreeDump(root *Root) (string, error) {
 	return buffer.String(), nil
 }
 
-func PersistTree(root *Root) error {
+func PersistTree(root *Root, version *ilex.Version) error {
 	db_session, err := mgo.Dial("localhost")
 	if err != nil {
 		fmt.Println("database access error: " + err.Error())
@@ -108,5 +100,19 @@ func PersistTree(root *Root) error {
 
 	addresses := ilex.AddressTable{{0, 0}}
 	addresses, err = root.Persist(addresses, slices)
-	return nil
+	if err != nil {
+		return err
+	}
+	len_addresses := len(addresses)
+	if addresses[len_addresses-1][0] != root.GetLength() {
+		return errors.New("The tree's length does not match it's address table!")
+	}
+
+	now := time.Now().Format(time.RFC3339)
+	version.Finished = now
+	version.Addresses = addresses[:len_addresses-1]
+	version.Size = root.GetLength()
+
+	versions := database.C(ilex.VERSIONS)
+	return versions.Insert(version)
 }

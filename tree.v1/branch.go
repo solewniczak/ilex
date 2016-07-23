@@ -8,7 +8,7 @@ import (
 )
 
 type Branch struct {
-	Parent             Node
+	Parent             Parent
 	LengthLeft, Length int
 	Left, Right        Node
 }
@@ -56,10 +56,6 @@ func (b *Branch) AddRune(r rune, position int) {
 	child.AddRune(r, position)
 }
 
-func (b *Branch) SetParent(parent Node) {
-	b.Parent = parent
-}
-
 func (b *Branch) WriteToBuffer(buffer *bytes.Buffer, slices *mgo.Collection) error {
 	fmt.Println("going deeper")
 	err := b.Left.WriteToBuffer(buffer, slices)
@@ -100,4 +96,16 @@ func (b *Branch) Persist(addresses ilex.AddressTable, slices *mgo.Collection) (i
 		fmt.Println("right child persistence error")
 	}
 	return addresses, err
+}
+
+func (b *Branch) SetParent(parent Parent) {
+	b.Parent = parent
+}
+
+func (b *Branch) ReplaceChild(previous, new Node) {
+	if b.Left == previous {
+		b.Left = new
+	} else {
+		b.Right = new
+	}
 }
