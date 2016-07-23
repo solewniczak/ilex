@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"ilex/tree.v1"
 	//	"golang.org/x/net/websocket"
 )
 
@@ -30,11 +31,11 @@ func control_document(document_id string, add_text_messages chan *AddTextMessage
 	editor_just_left := false
 	edition_from_new_editor := false
 	total_clients := 0
-	tree := construct_version_tree(document_id, 1)
-	if tree == nil {
+	root := tree.ConstructVersionTree(document_id, 1)
+	if root == nil {
 		fmt.Println("tree is nil")
 	}
-	tree.Print(0)
+	root.Print(0)
 
 loop:
 	for {
@@ -54,10 +55,10 @@ loop:
 				}
 				i := 0
 				for _, char := range message.String {
-					tree.AddRune(char, message.Position+i+1)
+					root.AddRune(char, message.Position+i+1)
 				}
-				tree.Print(0)
-				fmt.Println(get_tree_dump(tree))
+				root.Print(0)
+				fmt.Println(tree.GetTreeDump(root))
 			}
 
 		case message := <-remove_text_messages:

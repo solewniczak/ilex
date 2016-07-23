@@ -1,10 +1,8 @@
-package main
+package ilex
 
 import (
 	"gopkg.in/mgo.v2/bson"
 )
-
-const SLICE_SIZE = 1000
 
 type Slice struct {
 	Id   bson.ObjectId `bson:"_id,omitempty" json:"-"`
@@ -12,7 +10,8 @@ type Slice struct {
 	Text string        `bson:"Text"`
 }
 
-type AddressTable [][2]int
+type Address [2]int
+type AddressTable []Address
 
 type Version struct {
 	Id         bson.ObjectId `bson:"_id,omitempty" json:"-"`

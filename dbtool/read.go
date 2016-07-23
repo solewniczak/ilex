@@ -3,16 +3,17 @@ package main
 import (
 	"fmt"
 	"gopkg.in/mgo.v2"
+	"ilex/ilex"
 	"log"
 	"unicode/utf8"
 )
 
 func read_database(database *mgo.Database) {
-	slices := database.C("permascroll")
-	docs := database.C("docs")
-	versions := database.C("versions")
+	slices := database.C(ilex.PERMASCROLL)
+	docs := database.C(ilex.DOCS)
+	versions := database.C(ilex.VERSIONS)
 
-	var found []Slice
+	var found []ilex.Slice
 	err := slices.Find(nil).All(&found)
 	if err != nil {
 		log.Fatal(err)
@@ -24,7 +25,7 @@ func read_database(database *mgo.Database) {
 		fmt.Println(i, "rune length: ", utf8.RuneCountInString(slice.Text))
 	}
 
-	var documents []Document
+	var documents []ilex.Document
 	err = docs.Find(nil).All(&documents)
 	if err != nil {
 		log.Fatal(err)
@@ -35,7 +36,7 @@ func read_database(database *mgo.Database) {
 		fmt.Println(i, "versions: ", doc.TotalVersions)
 	}
 
-	var db_versions []Version
+	var db_versions []ilex.Version
 	err = versions.Find(nil).All(&db_versions)
 	if err != nil {
 		log.Fatal(err)
