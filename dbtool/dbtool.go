@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"gopkg.in/mgo.v2"
+	"ilex/ilex"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -24,7 +25,7 @@ func main() {
 	}
 	defer db_session.Close()
 
-	database := db_session.DB("default")
+	database := db_session.DB(ilex.DEFAULT_DB)
 
 	file := (len(*given_path) != 0)
 	flags_given := 0
