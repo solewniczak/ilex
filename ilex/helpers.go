@@ -5,6 +5,7 @@ import (
 	"errors"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"time"
 	"unicode/utf8"
 )
 
@@ -165,7 +166,18 @@ func GetLatestVersion(database *mgo.Database, doc *Document, version *Version) e
 }
 
 func UpdateDocument(docs *mgo.Collection, doc *Document, version *Version) error {
+	if version.No != doc.TotalVersions+1 {
+		return errors.New("Document info and it's new version do not match!")
+	}
 	doc.TotalVersions = version.No
-	doc.Modified = version.Finished
+	if version.Finished > version.Created {
+		doc.Modified = version.Finished
+	} else {
+		doc.Modified = version.Created
+	}
 	return docs.UpdateId(doc.Id, bson.M{"$set": bson.M{"Modified": version.Finished, "TotalVersions": version.No}})
+}
+
+func CurrentTime() string {
+	return time.Now().Format(time.RFC3339)
 }

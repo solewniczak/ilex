@@ -69,6 +69,9 @@ func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
 
 	var is_editable bool = false
 	if requested_version == document.TotalVersions {
+		if controllers[requested_text_id] {
+
+		}
 		is_editable = true
 	}
 

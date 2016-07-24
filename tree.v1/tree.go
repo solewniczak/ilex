@@ -7,7 +7,6 @@ import (
 	"gopkg.in/mgo.v2"
 	"ilex/ilex"
 	"strings"
-	"time"
 )
 
 type TreeBase interface {
@@ -108,8 +107,7 @@ func PersistTree(root *Root, version *ilex.Version) error {
 		return errors.New("The tree's length does not match it's address table!")
 	}
 
-	now := time.Now().Format(time.RFC3339)
-	version.Finished = now
+	version.Finished = ilex.CurrentTime()
 	version.Addresses = addresses[:len_addresses-1]
 	version.Size = root.GetLength()
 
