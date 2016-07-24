@@ -52,6 +52,15 @@ func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
 	}
 
 	// golang : all json numbers are unpacked to float64 values
+
+	client_tab_float, ok := request.Parameters[TAB].(float64)
+	if !ok {
+		response.Action = RETRIEVAL_FAILED
+		response.Parameters[ERROR] = "No tab id supplied!"
+		return respond(ws, response)
+	}
+	client_tab := int(client_tab_float)
+
 	var requested_version int
 	requested_version_float, ok := request.Parameters[VERSION].(float64)
 
@@ -70,7 +79,10 @@ func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
 	var is_editable bool = false
 	if requested_version == document.TotalVersions {
 		if controllers[requested_text_id] {
-
+			// the version is currently being created
+			doc_get_dump_messages[requested_text_id] <- &GetDumpMessage{ClientTab{ws, client_tab}, requested_version, request.Id}
+			TabControlMessages <- ClientTabOpenedDoc(ws, client_tab, requested_text_id)
+			return nil
 		}
 		is_editable = true
 	}
@@ -97,14 +109,6 @@ func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
 	links := SimpleLink{
 		{"1+10", "100+200"},
 	}
-
-	client_tab_float, ok := request.Parameters[TAB].(float64)
-	if !ok {
-		response.Action = RETRIEVAL_FAILED
-		response.Parameters[ERROR] = "No tab id supplied!"
-		return respond(ws, response)
-	}
-	client_tab := int(client_tab_float)
 
 	response.Action = DOCUMENT_RETRIEVED
 	response.Parameters[TEXT] = retrieved

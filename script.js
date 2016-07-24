@@ -61,9 +61,9 @@ $(document).ready(function(){
                   },
               });
             };
-            loadToWindow(0, texts[3].id, 1);
-            loadToWindow(1, texts[1].id, 1);
-            loadToWindow(2, texts[2].id, 1);
+            loadToWindow(0, texts[3].id, texts[3].total_versions);
+            loadToWindow(1, texts[1].id, texts[1].total_versions);
+            loadToWindow(2, texts[2].id, texts[2].total_versions);
           },
     'retrievalFailed':
           function (params) {
