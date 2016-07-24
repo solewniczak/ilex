@@ -5,21 +5,22 @@ import (
 	"fmt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"ilex/ilex"
 	"io/ioutil"
 	"log"
 )
 
 func fill_database(database *mgo.Database) {
-	slices := database.C("permascroll")
-	docs := database.C("docs")
-	versions := database.C("versions")
+	slices := database.C(ilex.PERMASCROLL)
+	docs := database.C(ilex.DOCS)
+	versions := database.C(ilex.VERSIONS)
 
 	// import slices
 	buffer, err := ioutil.ReadFile("ps2.json")
 	if err != nil {
 		log.Fatal(err)
 	}
-	var sample_slices []Slice
+	var sample_slices []ilex.Slice
 	if err = json.Unmarshal(buffer, &sample_slices); err != nil {
 		log.Fatal(err)
 	}
@@ -35,7 +36,7 @@ func fill_database(database *mgo.Database) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var sample_docs []Document
+	var sample_docs []ilex.Document
 	if err = json.Unmarshal(buffer, &sample_docs); err != nil {
 		log.Fatal(err)
 	}
@@ -52,7 +53,7 @@ func fill_database(database *mgo.Database) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var sample_versions []Version
+	var sample_versions []ilex.Version
 	if err = json.Unmarshal(buffer, &sample_versions); err != nil {
 		log.Fatal(err)
 	}
