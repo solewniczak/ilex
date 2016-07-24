@@ -7,7 +7,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"ilex/ilex"
-	"time"
+	//"time"
 )
 
 type AddTextMessage struct {
