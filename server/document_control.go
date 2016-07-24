@@ -23,9 +23,9 @@ type RemoveTextMessage struct {
 }
 
 type GetDumpMessage struct {
-	Client   ClientTab
-	Position int
-	Length   int
+	Client    ClientTab
+	Version   int
+	RequestId int
 }
 
 var doc_add_text_messages map[string](chan *AddTextMessage) = make(map[string](chan *AddTextMessage))
@@ -176,7 +176,22 @@ loop:
 
 		case message := <-doc_dump_messages:
 			{
-
+				if message.Version != version.No {
+					fmt.Println("Received request for version which is not current!")
+				}
+				response := NewIlexMessage()
+				response.Id = message.RequestId
+				response.Action = DOCUMENT_RETRIEVED
+				if response.Parameters[TEXT], err = tree.GetTreeDump(root); err != nil {
+					fmt.Println(err.Error())
+					break
+				}
+				response.Parameters[TAB] = message.Client.TabId
+				response.Parameters[LINKS] = SimpleLink{{"1+10", "100+200"}}
+				response.Parameters[IS_EDITABLE] = true
+				response.Parameters[NAME] = version.Name
+				response.Parameters[ID] = document_id
+				respond(message.Client.WS, response)
 			}
 
 		}
