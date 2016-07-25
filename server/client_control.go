@@ -22,10 +22,11 @@ func ControlClients(stop_client_control chan bool) {
 	for {
 		select {
 		case message := <-TabControlMessages:
-			if !controllers[message.DocumentId] {
-				start_document_controller(message.DocumentId)
-			}
+			fmt.Println("Received message about document", message.DocumentId, ".")
 			if message.Opened {
+				if !controllers[message.DocumentId] {
+					start_document_controller(message.DocumentId)
+				}
 				if previous_doc, ok := client_doc[message.ClientTab]; ok {
 					// the client tab no longer uses the previous document
 					doc_tab_control_messages[previous_doc] <- ClientTabClosed(message.ClientTab)
