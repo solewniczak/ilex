@@ -46,7 +46,7 @@ ilex.widgetsCollection.verticalColumns = function ($parentWidget, columns) {
 
   
   that.table = $('<div class="ilex-verticalColumns ilex-resize">')
-                  .css('display', 'table-row')
+                  .css('display', 'flex')
                   .data('ilex-width', width)
                   .data('ilex-height', height);
   $parentWidget.html(that.table);
@@ -55,7 +55,7 @@ ilex.widgetsCollection.verticalColumns = function ($parentWidget, columns) {
   that.columns = [];
   for (let staticColumn of staticColumns) {
     let $column = $('<div class="ilex-verticalColumn">').appendTo(that.table)
-                            .css('display', 'table-cell');
+                            .css('display', 'block');
     that.columns.push($column);
   }
   applySizes();
@@ -63,7 +63,6 @@ ilex.widgetsCollection.verticalColumns = function ($parentWidget, columns) {
   that.setColumnWidth = function(column, width) {
     columns[column] = width;
     calculateSizes();
-    console.log(staticColumns);
     applySizes();
   };
 
