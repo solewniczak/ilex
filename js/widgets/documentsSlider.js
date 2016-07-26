@@ -52,7 +52,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
 
 
   that.table = $('<div>').appendTo(that.container)
-                    .css('display', 'table-row')
+                    .css('display', 'flex')
                     //some huge value
                   .css('width', '100000px')
                   .data('ilex-height', height)
@@ -72,7 +72,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
   
   var createHandlerObject = function(winInd) {
     return $('<div class="ilex-handler">')
-                            .css('display', 'table-cell')
                             .css('cursor', 'ew-resize')
                             .data('ilex-window', winInd)
                             .data('ilex-width', ilex.widgetsCollection.handlerSize)
@@ -115,7 +114,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
     newWindow.element = $('<div class="ilex-sliderWindow">')
                               .data('ilex-window', winInd)
                               .css('background', '#fff')
-                              .css('display', 'table-cell')
                               .css('position', 'relative')
                               //width is set by applyWindowPosition
                               .data('ilex-height', height);
