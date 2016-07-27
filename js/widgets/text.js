@@ -501,17 +501,6 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     fillChangesHistory();
   };
 
-  that.close = function () {
-    if (that.document !== null) {
-      that.document.tabClose();
-    }
-    that.changesHistoryWindow.remove();
-    
-    ilex.view.console.log('tab '+windowObject.id+' closed');
-  }
-
-
-
   that.container.on('windowResize', function(event) {
     var width = that.container.parent().data('ilex-width'),
       height = that.container.parent().data('ilex-height');
