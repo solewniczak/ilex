@@ -189,6 +189,12 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
 
       //by default newest version
       //get new document
+      
+      //close old document
+      ilex.server.tabClose(newWindow.tabId);
+      newWindow.tabId = tabId;
+      tabId++;
+      
       ilex.server.documentGetDump(newWindow.tabId, file.id, file.totalVersions,
         function(params) {
 
@@ -197,6 +203,8 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
                                            .css('position', 'relative');
           newWindow.contentWidget.container.animate({'top': windowHeight},
           function() {
+
+            
             //send close message to widget
             //newWindow.contentWidget.close();
             newWindow.removeWidget();
@@ -301,12 +309,18 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
       this.toolbar.addButton('Close document', //<span class="ilex-awesome">&#xf00d;</span>
           function(event) {
             var windowHeight = $(window).height();
+        
+            //close tab and "reopen" it with new id
+            ilex.server.tabClose(curWindow.tabId);
+            curWindow.tabId = tabId;
+            tabId++;
 
             //bakground for animanito purposes
             curWindow.contentWidget.container.css('background', '#fff')
                                              .css('position', 'relative');
             curWindow.contentWidget.container.animate({'top': windowHeight},
             function() {
+
               //send close message to widget
               //curWindow.contentWidget.close();
               curWindow.setContentWidget(newWindowWidgetCallback(curWindow));
