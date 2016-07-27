@@ -371,6 +371,8 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
   //it's additional layer
   that.canvas = $('<canvas class="ilex-resize">').appendTo($parentWidget)
                 .css('position', 'absolute')
+                //prevent focus stealing
+                .css('pointer-events', 'none')
                 .css('top', 0).css('left', 0)
                 .css('z-index', zIndex)
                 .attr('width', $(window).width())

@@ -585,7 +585,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
 
       for (let i = 0; i < clientRects.length; i++) {
         let rect = clientRects[i];
-        canvas.drawRect(rect, '#a8d1ff');
+        canvas.drawRect(rect, 'rgba(0, 108, 255, 0.3)');
       }
     }
   });
