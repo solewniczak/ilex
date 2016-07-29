@@ -41,7 +41,7 @@ type TwoWayLink struct {
 	FirstLength      int           `bson:"FirstLength"      json:"firstLength"`
 	SecondDocumentId bson.ObjectId `bson:"SecondDocumentId" json:"secondDocumentId"`
 	SecondVersionNo  int           `bson:"SecondVersionNo"  json:"secondVersionNo"`
-	SecondPosition   int           `bson:"SecondPosition"   json:"secondPositio"`
+	SecondPosition   int           `bson:"SecondPosition"   json:"secondPosition"`
 	SecondLength     int           `bson:"SecondLength"     json:"secondLength"`
 	Type             string        `bson:"Type"             json:"type"`
 }

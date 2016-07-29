@@ -14,6 +14,8 @@ func clear_database(database *mgo.Database) {
 	docs.RemoveAll(nil)
 	versions := database.C(ilex.VERSIONS)
 	versions.RemoveAll(nil)
+	links := database.C(ilex.LINKS)
+	links.RemoveAll(nil)
 
 	fmt.Println("Database cleared.")
 }
