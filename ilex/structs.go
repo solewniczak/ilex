@@ -32,3 +32,16 @@ type Document struct {
 	Modified      string        `bson:"Modified"      json:"modified"`
 	TotalVersions int           `bson:"TotalVersions" json:"totalVersions"`
 }
+
+type TwoWayLink struct {
+	Id               bson.ObjectId `bson:"_id,omitempty"    json:"-"`
+	FirstDocumentId  bson.ObjectId `bson:"FirstDocumentId"  json:"firstDocumentId"`
+	FirstVersionNo   int           `bson:"FirstVersionNo"   json:"firstVersionNo"`
+	FirstPosition    int           `bson:"FirstPosition"    json:"firstPosition"`
+	FirstLength      int           `bson:"FirstLength"      json:"firstLength"`
+	SecondDocumentId bson.ObjectId `bson:"SecondDocumentId" json:"secondDocumentId"`
+	SecondVersionNo  int           `bson:"SecondVersionNo"  json:"secondVersionNo"`
+	SecondPosition   int           `bson:"SecondPosition"   json:"secondPositio"`
+	SecondLength     int           `bson:"SecondLength"     json:"secondLength"`
+	Type             string        `bson:"Type"             json:"type"`
+}
