@@ -502,8 +502,8 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   };
 
   that.container.on('windowResize', function(event) {
-    var width = that.container.parent().data('ilex-width'),
-      height = that.container.parent().data('ilex-height');
+    var width = windowObject.element.data('ilex-width'),
+      height = windowObject.element.data('ilex-height');
 
     that.container.data('ilex-width', width);
     that.scrollWindow.data('ilex-width', width);
