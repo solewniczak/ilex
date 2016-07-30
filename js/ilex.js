@@ -73,7 +73,8 @@ ilex.applySize = function(animateWidth, animateHeight, selector) {
   $.when($('.ilex-resize').trigger('windowResize'))
   .done(function () {
     ilex.window.find(selector).each(function () {
-      if ($(this).data('ilex-width') && $(this).data('ilex-width') !== $(this).width()) {
+      if ($(this).data('ilex-width') !== undefined &&
+          $(this).data('ilex-width') !== $(this).width()) {
         if (animateWidth) {
           $(this).animate({'width': $(this).data('ilex-width')}, {
             'progress': function () {
@@ -84,7 +85,8 @@ ilex.applySize = function(animateWidth, animateHeight, selector) {
           $(this).width($(this).data('ilex-width'));
         }
       }
-      if ($(this).data('ilex-height') && $(this).data('ilex-height') !== $(this).height()) {
+      if ($(this).data('ilex-height') !== undefined &&
+          $(this).data('ilex-height') !== $(this).height()) {
         if (animateHeight) {
           $(this).animate({'height': $(this).data('ilex-height')}, {
             'progress': function () {

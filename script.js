@@ -5,12 +5,12 @@ $(document).ready(function(){
 
   ilex.window = $('<div>').appendTo('body')
                       .css('position', 'relative')
-                      .css('z-index', 3)
+                      .css('z-index', 2)
                       .data('ilex-width', $(window).width())
                       .data('ilex-height', $(window).height());
 
   //create ilex canvas element
-  ilex.canvas = ilex.widgetsCollection.canvas($("body"), 2);
+  ilex.canvas = ilex.widgetsCollection.canvas($("body"), 3);
 
   ilex.popupMenu = ilex.widgetsCollection.popupMenu($("body"), 4);
 
