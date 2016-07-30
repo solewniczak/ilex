@@ -501,20 +501,9 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     fillChangesHistory();
   };
 
-  that.close = function () {
-    if (that.document !== null) {
-      that.document.tabClose();
-    }
-    that.changesHistoryWindow.remove();
-    
-    ilex.view.console.log('tab '+windowObject.id+' closed');
-  }
-
-
-
   that.container.on('windowResize', function(event) {
-    var width = that.container.parent().data('ilex-width'),
-      height = that.container.parent().data('ilex-height');
+    var width = windowObject.element.data('ilex-width'),
+      height = windowObject.element.data('ilex-height');
 
     that.container.data('ilex-width', width);
     that.scrollWindow.data('ilex-width', width);
@@ -585,7 +574,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
 
       for (let i = 0; i < clientRects.length; i++) {
         let rect = clientRects[i];
-        canvas.drawRect(rect, '#a8d1ff');
+        canvas.drawRect(rect, 'rgba(0, 108, 255, 0.3)');
       }
     }
   });

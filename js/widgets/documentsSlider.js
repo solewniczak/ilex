@@ -18,13 +18,15 @@ if (ilex.widgetsCollection.documentsSlider !== undefined)
 
 ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidgetCallback) {
   var that = {},
+    tabId = 0,
     //which window display left most
     width = $parentWidget.data('ilex-width'),
     height = $parentWidget.data('ilex-height'),
     buttonsWidth = 20,
     innerWidth = 0,
-    updateInnerWidth = function(width) {
-      innerWidth = width - (that.visibleWindows-1) * ilex.widgetsCollection.handlerSize - 2*buttonsWidth;
+    updateInnerWidth = function() {
+      var width = that.container.data('ilex-width');
+      innerWidth = width - (that.visibleWindows-1) * ilex.widgetsCollection.handlerSize;
     };
 
 
@@ -37,9 +39,10 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
   that.superTable = ilex.widgetsCollection.verticalColumns(that.superContainer, [0, buttonsWidth, '100%', buttonsWidth]);
   
   that.frozenContainer = that.superTable.columns[0];
+  that.frozenContainer.css('position', 'relative').css('z-index', 15);
 
   that.leftButtons = that.superTable.columns[1];
-  that.leftButtons.css('position', 'relative').css('z-index', 5);
+  that.leftButtons.css('position', 'relative').css('z-index', 15);
 
 
   that.container = that.superTable.columns[2];
@@ -47,11 +50,11 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
 
   that.rightButtons = that.superTable.columns[3];
   //position: absolute fixes strange chrome bug, that misspostion right buttons
-  that.rightButtons.css('position', 'absolute').css('z-index', 5).css('right', 0);
+  that.rightButtons.css('position', 'absolute').css('z-index', 15).css('right', 0);
 
 
   that.table = $('<div>').appendTo(that.container)
-                    .css('display', 'table-row')
+                    .css('display', 'flex')
                     //some huge value
                   .css('width', '100000px')
                   .data('ilex-height', height)
@@ -69,11 +72,9 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
   //if we have frozen window
   that.windowFrozen = false;
   
-  var createHandlerObject = function(winInd) {
+  var createHandlerObject = function() {
     return $('<div class="ilex-handler">')
-                            .css('display', 'table-cell')
                             .css('cursor', 'ew-resize')
-                            .data('ilex-window', winInd)
                             .data('ilex-width', ilex.widgetsCollection.handlerSize)
                             .data('ilex-height', height)
                             .css('background', '#000');
@@ -93,6 +94,17 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
       win.droppableRegion.right.width(width*0.5);
     }
   },
+  updateWindowsPositions = function () {
+    let sum = 0.0;
+    for (let i = 0; i < that.visibleWindows; i++) {
+      let win = that.windows[that.windowPointer + i];
+      sum += win.element.width();
+    }
+    for (let i = 0; i < that.visibleWindows; i++) {
+      let win = that.windows[that.windowPointer + i];
+      that.position[i] = win.element.width()/sum;
+    }
+  },
   setEqualWindowPositions = function() {
     that.position = [];
     let ratio = 1.0/that.visibleWindows;
@@ -104,16 +116,18 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
     for (let i = 0; i < that.windows.length; i++) {
       let win = that.windows[i];
       win.element.data('ilex-window', i);
-      win.rightSideHandler.data('ilex-window', i);
     }
   },
-  createWindowObject = function(winInd) {
+  createWindowObject = function() {
     var newWindow = {};
     
-    newWindow.id = winInd;
+    //winId - determines its postion
+    //tabId - is logical connection between client and server
+    
+    newWindow.tabId = tabId;
+    tabId++;
     newWindow.element = $('<div class="ilex-sliderWindow">')
-                              .data('ilex-window', winInd)
-                              .css('display', 'table-cell')
+                              .css('background', '#fff')
                               .css('position', 'relative')
                               //width is set by applyWindowPosition
                               .data('ilex-height', height);
@@ -135,16 +149,18 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
 
       //by default newest version
       //get new document
-      ilex.server.documentGetDump(winInd, file.id, file.totalVersions,
+
+      ilex.server.documentGetDump(tabId, file.id, file.totalVersions,
         function(params) {
-          var win = that.addWindowBefore(newWindow.id);
+          var win = that.addWindowBefore(newWindow.element.data('ilex-window'));
           //load new text
           win.setContentWidget(newWindowWidgetCallback(win));
           win.contentWidget.loadText(params);
           ilex.applySize();
         }
-      );
+       );
     });
+    
     
     newWindow.droppableRegion.right = $('<div class="ilex-dropableRegion">')
                               .appendTo(newWindow.element)
@@ -160,9 +176,9 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
 
       //by default newest version
       //get new document
-      ilex.server.documentGetDump(winInd, file.id, file.totalVersions,
+      ilex.server.documentGetDump(tabId, file.id, file.totalVersions,
         function(params) {
-          var win = that.addWindowAfter(newWindow.id);
+          var win = that.addWindowAfter(newWindow.element.data('ilex-window'));
           //load new text
           win.setContentWidget(newWindowWidgetCallback(win));
           win.contentWidget.loadText(params);
@@ -185,7 +201,13 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
 
       //by default newest version
       //get new document
-      ilex.server.documentGetDump(winInd, file.id, file.totalVersions,
+      
+      //close old document
+      ilex.server.tabClose(newWindow.tabId);
+      newWindow.tabId = tabId;
+      tabId++;
+      
+      ilex.server.documentGetDump(newWindow.tabId, file.id, file.totalVersions,
         function(params) {
 
           //bakground for animanito purposes
@@ -193,8 +215,10 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
                                            .css('position', 'relative');
           newWindow.contentWidget.container.animate({'top': windowHeight},
           function() {
+
+            
             //send close message to widget
-            newWindow.contentWidget.close();
+            //newWindow.contentWidget.close();
             newWindow.removeWidget();
             
             //load new text
@@ -245,10 +269,12 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
       newWindow.element.remove();
       newWindow.rightSideHandler.remove();
 
+      ilex.server.tabClose(winInd);
+      
       //send close message to widget
-      newWindow.contentWidget.close();
-
-      updateInnerWidth(width);
+      //newWindow.contentWidget.close();
+      
+      updateInnerWidth();
       setEqualWindowPositions();
       applyWindowPosition();
 
@@ -295,14 +321,20 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
       this.toolbar.addButton('Close document', //<span class="ilex-awesome">&#xf00d;</span>
           function(event) {
             var windowHeight = $(window).height();
+        
+            //close tab and "reopen" it with new id
+            ilex.server.tabClose(curWindow.tabId);
+            curWindow.tabId = tabId;
+            tabId++;
 
             //bakground for animanito purposes
             curWindow.contentWidget.container.css('background', '#fff')
                                              .css('position', 'relative');
             curWindow.contentWidget.container.animate({'top': windowHeight},
             function() {
+
               //send close message to widget
-              curWindow.contentWidget.close();
+              //curWindow.contentWidget.close();
               curWindow.setContentWidget(newWindowWidgetCallback(curWindow));
               
 //              //there is no window to the right
@@ -318,7 +350,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
         //resize widget to window size
 //        this.contentWidget.container.trigger('windowResize');
       };
-      newWindow.rightSideHandler = createHandlerObject(winInd);
+      newWindow.rightSideHandler = createHandlerObject();
       //function returns window object of antother window 
       newWindow.getWindow = function(id) {
         return that.windows[id];
@@ -326,14 +358,14 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
       
       return newWindow;
   },
-  addWindow = function() {
-    var winInd = that.windows.length,
-        newWindow = createWindowObject(winInd);
+  addWindow = function(tabId) {
+    var newWindow = createWindowObject();
     
     //append window to the end
     newWindow.element.appendTo(that.table);
     newWindow.rightSideHandler.appendTo(that.table);
     
+    newWindow.element.data('ilex-window', that.windows.length);
     that.windows.push(newWindow);
     
     ilex.applySize();
@@ -350,7 +382,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
   
   that.addWindowAfter = function(afterInd) {
     var winInd = afterInd + 1,
-        newWindow = createWindowObject(winInd);
+        newWindow = createWindowObject();
     
     newWindow.element.insertAfter(that.windows[afterInd].rightSideHandler);
     newWindow.rightSideHandler.insertAfter(newWindow.element);
@@ -359,7 +391,8 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
     updateIlexWindowData();
     
     that.visibleWindows += 1;
-    updateInnerWidth(width);
+    
+    updateInnerWidth();
     
     setEqualWindowPositions();
     applyWindowPosition();
@@ -368,24 +401,37 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
     return newWindow;
   };
   
-  that.addWindowBefore = function(beforeInd) {
-    var winInd = beforeInd,
-        newWindow = createWindowObject(winInd);
+  that.appendWindowBefore = function(beforeInd, windowObj) {
+    var winInd = beforeInd;
     
-    newWindow.element.insertBefore(that.windows[beforeInd].element);
-    newWindow.rightSideHandler.insertAfter(newWindow.element);
+    windowObj.element.insertBefore(that.windows[beforeInd].element);
+    windowObj.rightSideHandler.insertAfter(windowObj.element);
     
-    that.windows.splice(winInd, 0, newWindow);
+    that.windows.splice(winInd, 0, windowObj);
     updateIlexWindowData();
     
+    return windowObj;
+  };
+  
+  that.addWindowBefore = function(beforeInd, animate, windowObj) {
+    var winInd = beforeInd,
+        windowObj = windowObj || createWindowObject();
+    
+    if (animate === undefined) {
+      animate = true;
+    }
+    
+    appendWindowBefore(windowObj);
+    
     that.visibleWindows += 1;
-    updateInnerWidth(width);
+    
+    updateInnerWidth();
     
     setEqualWindowPositions();
     applyWindowPosition();
-    ilex.applySize(true);
+    ilex.applySize(animate);
     
-    return newWindow;
+    return windowObj;
   };
   
 //  that.moveWindowBefore = function(beforeInd, winInd) {
@@ -408,12 +454,11 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
     var win = that.windows[winInd],
         element = win.element.detach(),
         handler = win.rightSideHandler.detach();
-    that.windows.splice(winInd, 1);
-    return win;
-  };
-  
-  that.attachBefore = function(beforeInd) {
     
+    that.windows.splice(winInd, 1);
+    updateIlexWindowData();
+    
+    return win;
   };
 
   that.createWindowSplitSlider = function(animate) {
@@ -422,7 +467,8 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
     }
     
     that.visibleWindows += 1;
-    updateInnerWidth(width);
+    
+    updateInnerWidth();
 
     //create new text widndow
     if (that.windows.length < that.windowPointer + that.visibleWindows) {
@@ -496,7 +542,8 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
 
   //create default window
   that.visibleWindows = 1;
-  updateInnerWidth(width);
+  
+  updateInnerWidth();
 
   that.createWindow();
 
@@ -516,36 +563,53 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
       'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf152;</span>',
       'htmlOn': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf191;</span>',
       'callbackOn': function(event) {
-        var win = that.windows[that.windowPointer],
-            winWidth = win.element.width();
-//            handlerOffset = win.rightSideHandler.offset(),
-//            tableOffset = that.table.offset();
-//        that.leftButtons.css('left', handlerOffset.left - that.leftButtons.width());
-//        that.table.css('left', tableOffset.left - that.leftButtons.width());
-        that.detachWindow(that.windowPointer);
+        var width = that.container.data('ilex-width'),
+            offset = that.table.offset(),
+            win = that.detachWindow(that.windowPointer),
+            winWidth = win.element.data('ilex-width');
         
         that.superTable.setColumnWidth(0, winWidth);
+        win.element.css('z-index', 10);
         
-        //modify element to fit new container
-        win.element.css('display', 'block');
-        
+        //save frozen window object
+        that.froozenWindow = win;
         that.frozenContainer.append(win.element);
         
+        that.container.data('ilex-width', width - winWidth);
+        that.table.css('left', offset.left + winWidth);
         
         that.visibleWindows -= 1;
-        updateInnerWidth(width);
         setEqualWindowPositions();
-        applyWindowPosition();
         
+        updateInnerWidth();
+        
+        applyWindowPosition();
         ilex.applySize();
         
-        that.windowFrozen = true;
       },
       'callbackOff': function(event) {
-        var win = that.windows[that.windowPointer];
-//        that.leftButtons.css('left', '0');
-//        win.element.css('left', '0');
-        that.windowFrozen = false;
+        var winElement = that.frozenContainer.html(),
+            width = that.container.data('ilex-width'),
+            frozenWidth = that.frozenContainer.data('ilex-width'),
+            offset = that.table.offset();
+        
+        that.appendWindowBefore(that.windowPointer, that.froozenWindow);
+        that.froozenWindow = undefined;
+        
+        that.visibleWindows += 1;
+        updateInnerWidth();
+
+        updateWindowsPositions();
+        applyWindowPosition();
+        
+        that.superTable.setColumnWidth(0, 0);
+        
+        that.container.data('ilex-width', width + frozenWidth);
+        that.table.css('left', offset.left - frozenWidth);
+        updateInnerWidth();
+        
+        applyWindowPosition();
+        ilex.applySize();
       }
     }
   ]);
@@ -568,7 +632,9 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
         return;
       }
       that.visibleWindows--;
-      updateInnerWidth(width);
+      
+      updateInnerWidth();
+      
       setEqualWindowPositions();
       applyWindowPosition();
       ilex.applySize(true);
@@ -578,26 +644,33 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
 
 
   that.superContainer.on('windowResize', function(event) {
-    width = that.superContainer.parent().data('ilex-width');
-    height = that.superContainer.parent().data('ilex-height');
-    updateInnerWidth(width);
-
+    var updateWindowSize = function(win) {
+        win.element.data('ilex-height', height);
+        win.widget.data('ilex-height', height);
+      
+        win.droppableRegion.top.height(height*0.2);
+        win.droppableRegion.left.height(height);
+        win.droppableRegion.right.height(height);
+      
+        win.rightSideHandler.data('ilex-height', height);
+      },
+      width = that.superContainer.parent().data('ilex-width'),
+      height = that.superContainer.parent().data('ilex-height');
+    
     that.superContainer.data('ilex-width', width);
+    updateInnerWidth();
     that.container.data('ilex-width', innerWidth);
 
     that.superContainer.data('ilex-height', height);
     that.table.data('ilex-height', height);
     
     for (let win of that.windows) {
-      win.element.data('ilex-height', height);
-      win.widget.data('ilex-height', height);
-      
-      win.droppableRegion.top.height(height*0.2);
-      win.droppableRegion.left.height(height);
-      win.droppableRegion.right.height(height);
-      
-      win.rightSideHandler.data('ilex-height', height);
+     updateWindowSize(win);
     }
+    if (that.froozenWindow !== undefined) {
+      updateWindowSize(that.froozenWindow);
+    }
+    
     //set windows width
     applyWindowPosition();
   });
@@ -606,7 +679,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
 
   that.container.on('mousedown', '.ilex-handler', function(event) {
       var $handler = $(this),
-        winInd = $handler.data('ilex-window'),
+        winInd = $handler.prev().data('ilex-window'),
         leftWidth = that.windows[winInd].element.data('ilex-width'),
         rightWidth = that.windows[winInd + 1].element.data('ilex-width'),
         startX = event.pageX;

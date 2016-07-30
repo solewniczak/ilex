@@ -79,6 +79,15 @@ ilex.tools.server.create = function (host) {
                 'retrievalFailed': retrievalFailedCallback,
               });
   };
+  
+  that.tabClose = function(tabId) {
+    that.sendAndRecieve('tabClose', {
+            'tab': tabId
+          },
+          {
+            'ack': function() {}
+          });
+  };
     
   that.document = function(tabId, name, documentId) {
     var thatDocument = {}, actionsQueue = [],
@@ -136,12 +145,12 @@ ilex.tools.server.create = function (host) {
       });
     };
     
-    thatDocument.tabClose = function() {
-      sendAction('tabClose', {
-          'document': documentId,
-          'tab': tabId
-      });
-    };
+//    thatDocument.tabClose = function() {
+//      sendAction('tabClose', {
+//          'document': documentId,
+//          'tab': tabId
+//      });
+//    };
     
     thatDocument.getVersionsInfo = function(callback) {
       sendAction('documentGetVersionsInfo', {
