@@ -5,48 +5,44 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-var SocketControlMessages chan *websocket.Conn = make(chan *websocket.Conn)
-var TabControlMessages chan *ClientTabMessage = make(chan *ClientTabMessage)
-var client_doc map[ClientTab]string = make(map[ClientTab]string)
-
 func clear_all_data_for_socket(ws *websocket.Conn) {
-	for client_tab, document_id := range client_doc {
+	for client_tab, document_id := range Globals.ClientDoc {
 		if client_tab.WS == ws {
-			doc_tab_control_messages[document_id] <- ClientTabClosed(client_tab)
-			delete(client_doc, client_tab)
+			Globals.DocTabControlMessages[document_id] <- ClientTabClosed(client_tab)
+			delete(Globals.ClientDoc, client_tab)
 		}
 	}
 }
 
-func ControlClients(stop_client_control chan bool) {
+func ControlClients() {
 	for {
 		select {
-		case message := <-TabControlMessages:
+		case message := <-Globals.TabControlMessages:
 			fmt.Println("Received message about document", message.DocumentId, ".")
 			if message.Opened {
-				if !controllers[message.DocumentId] {
+				if !Globals.Controllers[message.DocumentId] {
 					start_document_controller(message.DocumentId)
 				}
-				if previous_doc, ok := client_doc[message.ClientTab]; ok {
+				if previous_doc, ok := Globals.ClientDoc[message.ClientTab]; ok {
 					// the client tab no longer uses the previous document
-					doc_tab_control_messages[previous_doc] <- ClientTabClosed(message.ClientTab)
+					Globals.DocTabControlMessages[previous_doc] <- ClientTabClosed(message.ClientTab)
 				}
-				client_doc[message.ClientTab] = message.DocumentId
-				doc_tab_control_messages[message.DocumentId] <- message
+				Globals.ClientDoc[message.ClientTab] = message.DocumentId
+				Globals.DocTabControlMessages[message.DocumentId] <- message
 			} else if message.Closed {
-				current_doc, ok := client_doc[message.ClientTab]
+				current_doc, ok := Globals.ClientDoc[message.ClientTab]
 				if !ok {
 					fmt.Println("Received an unexpected tab closing message. ")
 					break
 				}
-				doc_tab_control_messages[current_doc] <- ClientTabClosed(message.ClientTab)
-				delete(client_doc, message.ClientTab)
+				Globals.DocTabControlMessages[current_doc] <- ClientTabClosed(message.ClientTab)
+				delete(Globals.ClientDoc, message.ClientTab)
 			}
 
-		case message := <-SocketControlMessages:
+		case message := <-Globals.SocketControlMessages:
 			clear_all_data_for_socket(message)
 
-		case <-stop_client_control:
+		case <-Globals.StopClientControl:
 			fmt.Println("Stop activity")
 			return
 		}

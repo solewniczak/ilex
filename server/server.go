@@ -12,8 +12,6 @@ import (
 	"sync"
 )
 
-var StopServer chan bool = make(chan bool)
-
 func respond_with_nak(ws *websocket.Conn, response *IlexMessage, error_description string) error {
 	response.Action = NAK
 	response.Parameters[ERROR] = error_description
@@ -52,6 +50,8 @@ func ActionServer(ws *websocket.Conn) {
 			case TAB_CLOSE:
 				err = tabClose(&request, ws)
 			default:
+				response := NewIlexResponse(&request)
+				respond_with_nak(ws, response, "Unable to execute action "+request.Action)
 				fmt.Println("Unable to execute action ", request.Action)
 			}
 
@@ -64,13 +64,18 @@ func ActionServer(ws *websocket.Conn) {
 }
 
 func main() {
-	var stop_client_control chan bool = make(chan bool)
-
 	wg := &sync.WaitGroup{}
+
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		ControlClients(stop_client_control)
+		AllDocumentsView()
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		ControlClients()
 	}()
 
 	file_listener, err := net.Listen("tcp", ":8000")
@@ -100,10 +105,11 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		<-StopServer
+		<-Globals.StopServer
 		file_listener.Close()
 		ws_listener.Close()
-		stop_client_control <- true
+		Globals.StopClientControl <- true
+		Globals.StopDocumentsView <- true
 	}()
 
 	wg.Wait()

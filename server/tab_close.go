@@ -18,7 +18,7 @@ func tabClose(request *IlexMessage, ws *websocket.Conn) error {
 	}
 
 	client_tab := int(client_tab_float)
-	TabControlMessages <- ClientTabClosed(ClientTab{ws, client_tab})
+	Globals.TabControlMessages <- ClientTabClosed(ClientTab{ws, client_tab})
 	response.Action = ACK
 
 	return respond(ws, response)

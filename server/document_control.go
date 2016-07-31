@@ -28,12 +28,6 @@ type GetDumpMessage struct {
 	RequestId int
 }
 
-var doc_add_text_messages map[string](chan *AddTextMessage) = make(map[string](chan *AddTextMessage))
-var doc_remove_text_messages map[string](chan *RemoveTextMessage) = make(map[string](chan *RemoveTextMessage))
-var doc_tab_control_messages map[string](chan *ClientTabMessage) = make(map[string](chan *ClientTabMessage))
-var doc_get_dump_messages map[string](chan *GetDumpMessage) = make(map[string](chan *GetDumpMessage))
-var controllers map[string]bool = make(map[string]bool)
-
 func control_document(document_id string, add_text_messages chan *AddTextMessage, remove_text_messages chan *RemoveTextMessage, tab_control_messages chan *ClientTabMessage, doc_dump_messages chan *GetDumpMessage) {
 	fmt.Println("Document controller for ", document_id, " is starting up.")
 
@@ -83,116 +77,111 @@ loop:
 	for {
 		select {
 		case message := <-add_text_messages:
-			{
-				fmt.Println("text added", *message)
-				if !editors[message.Client] {
-					fmt.Println(message.Client, "started editing", document_id)
-					editors[message.Client] = true
-					edition_from_new_editor = true
-				}
-				if editor_just_left || edition_from_new_editor {
-					// save work in progress and start a new version
-					editor_just_left = false
-					edition_from_new_editor = false
+			fmt.Println("text added", *message)
+			if !editors[message.Client] {
+				fmt.Println(message.Client, "started editing", document_id)
+				editors[message.Client] = true
+				edition_from_new_editor = true
+			}
+			if editor_just_left || edition_from_new_editor {
+				// save work in progress and start a new version
+				editor_just_left = false
+				edition_from_new_editor = false
 
-					if is_first_edition {
-						// begin modifying last saved version - nothing to save
-						is_first_edition = false
-						version.Id = bson.NewObjectId()
-						version.No++
-						version.Created = ilex.CurrentTime()
-						fmt.Println("New version number created for "+document_id+": ", version.No)
-						if err = ilex.UpdateDocument(docs, &document, &version); err != nil {
-							fmt.Println("Could not update document: " + err.Error())
-						}
-					} else {
-						// save current work in progress and start a new version
-						if err = tree.PersistTree(root, &version); err != nil {
-							fmt.Println("Could not save changes: " + err.Error() + ". Database may be corrupted!")
-						}
-						if err = ilex.UpdateDocument(docs, &document, &version); err != nil {
-							fmt.Println("Could not update document: " + err.Error())
-						}
-						version.Id = bson.NewObjectId()
-						version.No++
-						version.Created = ilex.CurrentTime()
+				if is_first_edition {
+					// begin modifying last saved version - nothing to save
+					is_first_edition = false
+					version.Id = bson.NewObjectId()
+					version.No++
+					version.Created = ilex.CurrentTime()
+					fmt.Println("New version number created for "+document_id+": ", version.No)
+					if err = ilex.UpdateDocument(docs, &document, &version); err != nil {
+						fmt.Println("Could not update document: " + err.Error())
 					}
-					root.Print(0)
-					fmt.Println(tree.GetTreeDump(root))
-
-				}
-				i := 0
-				for _, char := range message.String {
-					root.AddRune(char, message.Position+i+1)
+					Globals.DocumentUpdatedMessages <- &DocumentUpdate{document_id, version.No, version.Name}
+				} else {
+					version.Finished = ilex.CurrentTime()
+					// save current work in progress and start a new version
+					if err = tree.PersistTree(root, &version); err != nil {
+						fmt.Println("Could not save changes: " + err.Error() + ". Database may be corrupted!")
+					}
+					if err = ilex.UpdateDocument(docs, &document, &version); err != nil {
+						fmt.Println("Could not update document: " + err.Error())
+					}
+					version.Id = bson.NewObjectId()
+					version.No++
+					version.Created = ilex.CurrentTime()
+					Globals.DocumentUpdatedMessages <- &DocumentUpdate{document_id, version.No, version.Name}
 				}
 				root.Print(0)
 				fmt.Println(tree.GetTreeDump(root))
+
 			}
+			i := 0
+			for _, char := range message.String {
+				root.AddRune(char, message.Position+i+1)
+			}
+			root.Print(0)
+			fmt.Println(tree.GetTreeDump(root))
 
 		case message := <-remove_text_messages:
-			{
-				fmt.Println("text removed", *message)
-				if !editors[message.Client] {
-					fmt.Println(message.Client, "started editing", document_id)
-					editors[message.Client] = true
-					edition_from_new_editor = true
-				}
-				if editor_just_left || edition_from_new_editor {
-					// save work in progress and start a new version
-					editor_just_left = false
-					edition_from_new_editor = false
-				}
+			fmt.Println("text removed", *message)
+			if !editors[message.Client] {
+				fmt.Println(message.Client, "started editing", document_id)
+				editors[message.Client] = true
+				edition_from_new_editor = true
+			}
+			if editor_just_left || edition_from_new_editor {
+				// save work in progress and start a new version
+				editor_just_left = false
+				edition_from_new_editor = false
 			}
 
 		case message := <-tab_control_messages:
-			{
-				fmt.Println("A client control message was received.")
-				if message.Opened {
-					if clients[message.ClientTab] {
-						fmt.Println("Received an unexpected document opened message. Document did not have the tab registered as a client.")
-					} else {
-						clients[message.ClientTab] = true
-						total_clients++
-						fmt.Println("Client tab", message.ClientTab, "opened doc", document_id)
+			fmt.Println("A client control message was received.")
+			if message.Opened {
+				if clients[message.ClientTab] {
+					fmt.Println("Received an unexpected document opened message. Document did not have the tab registered as a client.")
+				} else {
+					clients[message.ClientTab] = true
+					total_clients++
+					fmt.Println("Client tab", message.ClientTab, "opened doc", document_id)
+				}
+			} else if message.Closed {
+				if !clients[message.ClientTab] {
+					fmt.Println("Received an unexpected document closing message. Document did not have the tab registered as a client.")
+				} else {
+					clients[message.ClientTab] = false
+					if editors[message.ClientTab] {
+						fmt.Println(message.ClientTab, "started editing", document_id)
+						editors[message.ClientTab] = false
+						editor_just_left = true
 					}
-				} else if message.Closed {
-					if !clients[message.ClientTab] {
-						fmt.Println("Received an unexpected document closing message. Document did not have the tab registered as a client.")
-					} else {
-						clients[message.ClientTab] = false
-						if editors[message.ClientTab] {
-							fmt.Println(message.ClientTab, "started editing", document_id)
-							editors[message.ClientTab] = false
-							editor_just_left = true
-						}
-						fmt.Println("Client tab", message.ClientTab, "closed doc", document_id)
-						total_clients--
-						if total_clients == 0 {
-							break loop
-						}
+					fmt.Println("Client tab", message.ClientTab, "closed doc", document_id)
+					total_clients--
+					if total_clients == 0 {
+						break loop
 					}
 				}
 			}
 
 		case message := <-doc_dump_messages:
-			{
-				if message.Version != version.No {
-					fmt.Println("Received request for version which is not current!")
-				}
-				response := NewIlexMessage()
-				response.Id = message.RequestId
-				response.Action = DOCUMENT_RETRIEVED
-				if response.Parameters[TEXT], err = tree.GetTreeDump(root); err != nil {
-					fmt.Println(err.Error())
-					break
-				}
-				response.Parameters[TAB] = message.Client.TabId
-				response.Parameters[LINKS] = SimpleLink{{"1+10", "100+200"}}
-				response.Parameters[IS_EDITABLE] = true
-				response.Parameters[NAME] = version.Name
-				response.Parameters[ID] = document_id
-				respond(message.Client.WS, response)
+			if message.Version != version.No {
+				fmt.Println("Received request for version which is not current!")
 			}
+			response := NewIlexMessage()
+			response.Id = message.RequestId
+			response.Action = DOCUMENT_RETRIEVED
+			if response.Parameters[TEXT], err = tree.GetTreeDump(root); err != nil {
+				fmt.Println(err.Error())
+				break
+			}
+			response.Parameters[TAB] = message.Client.TabId
+			response.Parameters[LINKS] = SimpleLink{{"1+10", "100+200"}}
+			response.Parameters[IS_EDITABLE] = true
+			response.Parameters[NAME] = version.Name
+			response.Parameters[ID] = document_id
+			respond(message.Client.WS, response)
 
 		}
 	}
@@ -201,7 +190,7 @@ loop:
 }
 
 func start_document_controller(document_id string) {
-	if controllers[document_id] {
+	if Globals.Controllers[document_id] {
 		fmt.Println("Document controller for ", document_id, " already exists")
 		return
 	}
@@ -212,18 +201,18 @@ func start_document_controller(document_id string) {
 
 	go control_document(document_id, add_text_messages, remove_text_messages, tab_control_messages, doc_dump_messages)
 
-	doc_add_text_messages[document_id] = add_text_messages
-	doc_remove_text_messages[document_id] = remove_text_messages
-	doc_tab_control_messages[document_id] = tab_control_messages
-	doc_get_dump_messages[document_id] = doc_dump_messages
-	controllers[document_id] = true
+	Globals.DocAddTextMessages[document_id] = add_text_messages
+	Globals.DocRemoveTextMessages[document_id] = remove_text_messages
+	Globals.DocTabControlMessages[document_id] = tab_control_messages
+	Globals.DocGetDumpMessages[document_id] = doc_dump_messages
+	Globals.Controllers[document_id] = true
 }
 
 func clean_up_after_controller(document_id string) {
 	fmt.Println("Document controller for ", document_id, " is shutting down.")
-	close(doc_add_text_messages[document_id])
-	close(doc_remove_text_messages[document_id])
-	close(doc_tab_control_messages[document_id])
-	close(doc_get_dump_messages[document_id])
-	controllers[document_id] = false
+	close(Globals.DocGetDumpMessages[document_id])
+	close(Globals.DocRemoveTextMessages[document_id])
+	close(Globals.DocTabControlMessages[document_id])
+	close(Globals.DocGetDumpMessages[document_id])
+	Globals.Controllers[document_id] = false
 }
