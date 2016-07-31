@@ -1,10 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"golang.org/x/net/websocket"
-	"gopkg.in/mgo.v2"
-	"ilex/ilex"
 )
 
 const (
@@ -14,52 +11,7 @@ const (
 	GETTING_INFO_FAILED     = "gettingInfoFailed"
 )
 
-type DocumentWithName struct {
-	ilex.Document
-	Name string `json:"name"`
-}
-
 func getAllDocumentsInfo(request *IlexMessage, ws *websocket.Conn) error {
-	response := NewIlexResponse(request)
-
-	db_session, err := mgo.Dial("localhost")
-	if err != nil {
-		fmt.Println("Did not find database!")
-		response.Action = GETTING_INFO_FAILED
-		response.Parameters[ERROR] = err.Error()
-		return respond(ws, response)
-	}
-	defer db_session.Close()
-
-	database := db_session.DB(ilex.DEFAULT_DB)
-	docs := database.C(ilex.DOCS)
-
-	var found []ilex.Document
-	err = docs.Find(nil).All(&found)
-	if err != nil {
-		fmt.Println(err)
-		response.Action = GETTING_INFO_FAILED
-		response.Parameters[ERROR] = err.Error()
-		return respond(ws, response)
-	}
-
-	var version ilex.Version
-	texts := make([]DocumentWithName, len(found))
-
-	// Get the latest version's name as the document name.
-	for i, doc := range found {
-		texts[i].Document = doc
-		err = ilex.GetLatestVersion(database, &doc, &version)
-		if err != nil {
-			response.Action = GETTING_INFO_FAILED
-			response.Parameters[ERROR] = "Database error! Could not find latest version for document " + doc.Id.Hex()
-			return respond(ws, response)
-		}
-		texts[i].Name = version.Name
-	}
-
-	response.Action = ALL_TEXTS_INFO_RESPONSE
-	response.Parameters[TEXTS] = texts
-
-	return respond(ws, response)
+	Globals.AllDocumentRequests <- &AllDocumentsRequest{ws, request.Id}
+	return nil
 }
