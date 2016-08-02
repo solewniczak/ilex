@@ -1,0 +1,132 @@
+[
+{
+"FirstVersionNo": 1,
+"FirstPosition": 348,
+"FirstLength": 15,
+"SecondVersionNo": 1,
+"SecondPosition": 737,
+"SecondLength" : 10,
+"Type" : "HH"
+},
+
+{
+"FirstVersionNo": 1,
+"FirstPosition": 81,
+"FirstLength": 28,
+"SecondVersionNo": 2,
+"SecondPosition": 389,
+"SecondLength" : 34,
+"Type" : "FF"
+},
+
+{
+"FirstVersionNo": 1,
+"FirstPosition": 81,
+"FirstLength": 28,
+"SecondVersionNo": 3,
+"SecondPosition": 389,
+"SecondLength" : 34,
+"Type" : "FF"
+},
+
+{
+"FirstVersionNo": 1,
+"FirstPosition": 200,
+"FirstLength": 14,
+"SecondVersionNo": 2,
+"SecondPosition": 902,
+"SecondLength" : 35,
+"Type" : "FF"
+},
+
+{
+"FirstVersionNo": 2,
+"FirstPosition": 200,
+"FirstLength": 14,
+"SecondVersionNo": 2,
+"SecondPosition": 902,
+"SecondLength" : 35,
+"Type" : "FF"
+},
+
+{
+"FirstVersionNo": 3,
+"FirstPosition": 200,
+"FirstLength": 14,
+"SecondVersionNo": 2,
+"SecondPosition": 902,
+"SecondLength" : 35,
+"Type" : "FF"
+},
+
+{
+"FirstVersionNo": 3,
+"FirstPosition": 200,
+"FirstLength": 14,
+"SecondVersionNo": 1,
+"SecondPosition": 897,
+"SecondLength" : 35,
+"Type" : "FF"
+},
+
+{
+"FirstVersionNo": 1,
+"FirstPosition": 110,
+"FirstLength": 13,
+"SecondVersionNo": 1,
+"SecondPosition": 600,
+"SecondLength" : 9,
+"Type" : "HH"
+},
+
+{
+"FirstVersionNo": 2,
+"FirstPosition": 110,
+"FirstLength": 13,
+"SecondVersionNo": 1,
+"SecondPosition": 600,
+"SecondLength" : 9,
+"Type" : "HH"
+},
+
+{
+"FirstVersionNo": 3,
+"FirstPosition": 110,
+"FirstLength": 13,
+"SecondVersionNo": 1,
+"SecondPosition": 600,
+"SecondLength" : 9,
+"Type" : "HH"
+},
+
+{
+"FirstVersionNo": 1,
+"FirstPosition": 110,
+"FirstLength": 13,
+"SecondVersionNo": 2,
+"SecondPosition": 605,
+"SecondLength" : 9,
+"Type" : "HH"
+},
+
+{
+"FirstVersionNo": 1,
+"FirstPosition": 285,
+"FirstLength": 18,
+"SecondVersionNo": 1,
+"SecondPosition": 334,
+"SecondLength" : 25,
+"Type" : "HH"
+},
+
+{
+"FirstVersionNo": 2,
+"FirstPosition": 290,
+"FirstLength": 18,
+"SecondVersionNo": 1,
+"SecondPosition": 334,
+"SecondLength" : 25,
+"Type" : "HH"
+}
+
+]

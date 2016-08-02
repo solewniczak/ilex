@@ -90,9 +90,18 @@ func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
 		return respond(ws, response)
 	}
 
-	// hard coded test links
-	links := SimpleLink{
-		{"1+10", "100+200"},
+	links := database.C(ilex.LINKS)
+	var doc_links []ilex.TwoWayLink
+	err = links.Find(
+		bson.M{"$or": []bson.M{
+			bson.M{"FirstDocumentId": document.Id, "FirstVersionNo": requested_version},
+			bson.M{"SecondDocumentId": document.Id, "SecondVersionNo": requested_version},
+		}}).All(&doc_links)
+
+	if err != nil {
+		response.Action = RETRIEVAL_FAILED
+		response.Parameters[ERROR] = err.Error()
+		return respond(ws, response)
 	}
 
 	client_tab_float, ok := request.Parameters[TAB].(float64)
@@ -106,7 +115,7 @@ func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
 	response.Action = DOCUMENT_RETRIEVED
 	response.Parameters[TEXT] = retrieved
 	response.Parameters[TAB] = client_tab
-	response.Parameters[LINKS] = links
+	response.Parameters[LINKS] = doc_links
 	response.Parameters[IS_EDITABLE] = is_editable
 	response.Parameters[NAME] = version.Name
 	response.Parameters[ID] = document.Id
