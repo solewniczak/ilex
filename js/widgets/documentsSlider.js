@@ -359,8 +359,10 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
       return newWindow;
   },
   addWindow = function(tabId) {
-    var newWindow = createWindowObject();
+    var newWindow = createWindowObject(),
+        winInd = that.windows.length;
     
+    newWindow.id = winInd;
     //append window to the end
     newWindow.element.appendTo(that.table);
     newWindow.rightSideHandler.appendTo(that.table);
@@ -384,6 +386,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
     var winInd = afterInd + 1,
         newWindow = createWindowObject();
     
+    newWindow.id = winInd;
     newWindow.element.insertAfter(that.windows[afterInd].rightSideHandler);
     newWindow.rightSideHandler.insertAfter(newWindow.element);
     
@@ -404,6 +407,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
   that.appendWindowBefore = function(beforeInd, windowObj) {
     var winInd = beforeInd;
     
+    windowObj.id = winInd;
     windowObj.element.insertBefore(that.windows[beforeInd].element);
     windowObj.rightSideHandler.insertAfter(windowObj.element);
     
