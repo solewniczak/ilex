@@ -174,7 +174,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   that.name.on('change', function () {
     //if we input to empty document, create new one
     if (that.document === null) {
-      that.document = ilex.server.document(windowObject.id, that.name.val());
+      that.document = ilex.server.document(windowObject.tabId, that.name.val());
       fillChangesHistory();
     }
     that.document.changeName($(this).val());
@@ -280,7 +280,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     
     //if we input to empty document, create new one
     if (that.document === null) {
-      that.document = ilex.server.document(windowObject.id, that.name.val());
+      that.document = ilex.server.document(windowObject.tabId, that.name.val());
       fillChangesHistory();
     }
     
@@ -497,7 +497,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     }
 
     that.name.val(params.name);
-    that.document = ilex.server.document(windowObject.id, params.name, params.id);
+    that.document = ilex.server.document(windowObject.tabId, params.name, params.id);
     fillChangesHistory();
   };
 
