@@ -14,6 +14,7 @@ func fill_database(database *mgo.Database) {
 	slices := database.C(ilex.PERMASCROLL)
 	docs := database.C(ilex.DOCS)
 	versions := database.C(ilex.VERSIONS)
+	links := database.C(ilex.LINKS)
 
 	// import slices
 	buffer, err := ioutil.ReadFile("ps2.json")
@@ -71,6 +72,51 @@ func fill_database(database *mgo.Database) {
 
 	for _, version := range sample_versions {
 		if err = versions.Insert(version); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	// import links
+	buffer, err = ioutil.ReadFile("links.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	var sample_links []ilex.TwoWayLink
+	if err = json.Unmarshal(buffer, &sample_links); err != nil {
+		log.Fatal(err)
+	}
+
+	// pair documents with links
+	// (this is a hardcoded mapping)
+	sample_links[0].FirstDocumentId = sample_docs[0].Id
+	sample_links[0].SecondDocumentId = sample_docs[3].Id
+	sample_links[1].FirstDocumentId = sample_docs[1].Id
+	sample_links[1].SecondDocumentId = sample_docs[3].Id
+	sample_links[2].FirstDocumentId = sample_docs[1].Id
+	sample_links[2].SecondDocumentId = sample_docs[3].Id
+	sample_links[3].FirstDocumentId = sample_docs[3].Id
+	sample_links[3].SecondDocumentId = sample_docs[4].Id
+	sample_links[4].FirstDocumentId = sample_docs[3].Id
+	sample_links[4].SecondDocumentId = sample_docs[4].Id
+	sample_links[5].FirstDocumentId = sample_docs[3].Id
+	sample_links[5].SecondDocumentId = sample_docs[4].Id
+	sample_links[6].FirstDocumentId = sample_docs[3].Id
+	sample_links[6].SecondDocumentId = sample_docs[4].Id
+	sample_links[7].FirstDocumentId = sample_docs[3].Id
+	sample_links[7].SecondDocumentId = sample_docs[4].Id
+	sample_links[8].FirstDocumentId = sample_docs[3].Id
+	sample_links[8].SecondDocumentId = sample_docs[4].Id
+	sample_links[9].FirstDocumentId = sample_docs[3].Id
+	sample_links[9].SecondDocumentId = sample_docs[4].Id
+	sample_links[10].FirstDocumentId = sample_docs[3].Id
+	sample_links[10].SecondDocumentId = sample_docs[4].Id
+	sample_links[11].FirstDocumentId = sample_docs[4].Id
+	sample_links[11].SecondDocumentId = sample_docs[2].Id
+	sample_links[12].FirstDocumentId = sample_docs[4].Id
+	sample_links[12].SecondDocumentId = sample_docs[2].Id
+
+	for _, link := range sample_links {
+		if err = links.Insert(link); err != nil {
 			log.Fatal(err)
 		}
 	}
