@@ -2,6 +2,7 @@ package main
 
 import (
 	"golang.org/x/net/websocket"
+	"unicode/utf8"
 )
 
 const (
@@ -41,7 +42,7 @@ func documentAddText(request *IlexMessage, ws *websocket.Conn) error {
 	position := int(position_float)
 	length := int(length_float)
 
-	if len(text) != length {
+	if utf8.RuneCount([]byte(text)) != length {
 		return respond_with_nak(ws, response, "The supplied has wrong length!")
 	}
 

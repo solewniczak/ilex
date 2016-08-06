@@ -165,6 +165,13 @@ func GetLatestVersion(database *mgo.Database, doc *Document, version *Version) e
 	return versions.Find(bson.M{"DocumentId": doc.Id, "No": doc.TotalVersions}).One(&version)
 }
 
+func GetAllVersions(database *mgo.Database, doc *Document) (error, []Version) {
+	versions := database.C(VERSIONS)
+	var found []Version
+	err := versions.Find(bson.M{"DocumentId": doc.Id}).All(&found)
+	return err, found
+}
+
 func UpdateDocument(docs *mgo.Collection, doc *Document, version *Version) error {
 	if version.No != doc.TotalVersions+1 {
 		return errors.New("Document info and it's new version do not match!")

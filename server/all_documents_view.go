@@ -58,8 +58,10 @@ func AllDocumentsView() {
 			fmt.Println("Could not start DocumentsView:", err.Error())
 			return
 		}
-		texts[doc.Id.String()] = DocumentWithName{doc, version.Name}
+		texts[doc.Id.Hex()] = DocumentWithName{doc, version.Name}
 	}
+
+	fmt.Println("DocumnetsView is ready with document map: ", texts)
 
 	for {
 		select {

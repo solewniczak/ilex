@@ -16,6 +16,7 @@ var Globals = struct {
 	DocRemoveTextMessages   map[string](chan *RemoveTextMessage)
 	DocTabControlMessages   map[string](chan *ClientTabMessage)
 	DocGetDumpMessages      map[string](chan *GetDumpMessage)
+	DocGetVersionsMessages  map[string](chan *GetVersionsMessage)
 	Controllers             map[string]bool
 	ClientDoc               map[ClientTab]string
 }{
@@ -30,6 +31,7 @@ var Globals = struct {
 	DocRemoveTextMessages:   make(map[string](chan *RemoveTextMessage)),
 	DocTabControlMessages:   make(map[string](chan *ClientTabMessage)),
 	DocGetDumpMessages:      make(map[string](chan *GetDumpMessage)),
+	DocGetVersionsMessages:  make(map[string](chan *GetVersionsMessage)),
 	Controllers:             make(map[string]bool),
 	ClientDoc:               make(map[ClientTab]string),
 }
