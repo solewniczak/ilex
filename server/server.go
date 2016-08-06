@@ -49,6 +49,8 @@ func ActionServer(ws *websocket.Conn) {
 				err = getAllDocumentsInfo(&request, ws)
 			case TAB_CLOSE:
 				err = tabClose(&request, ws)
+			case DOCUMENT_GET_VERSIONS_INFO:
+				err = documentGetVersionsInfo(&request, ws)
 			default:
 				response := NewIlexResponse(&request)
 				respond_with_nak(ws, response, "Unable to execute action "+request.Action)
