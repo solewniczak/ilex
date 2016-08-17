@@ -27,7 +27,7 @@ const (
 type SimpleLink [][2]string
 
 func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
-	requested_text_id := request.Parameters[TEXT].(string)
+	requestedTextId := request.Parameters[TEXT].(string)
 
 	response := NewIlexResponse(request)
 
@@ -44,7 +44,7 @@ func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
 	docs := database.C(ilex.DOCS)
 
 	var document ilex.Document
-	err = docs.Find(bson.M{"_id": bson.ObjectIdHex(requested_text_id)}).One(&document)
+	err = docs.Find(bson.M{"_id": bson.ObjectIdHex(requestedTextId)}).One(&document)
 	if err != nil {
 		response.Action = RETRIEVAL_FAILED
 		response.Parameters[ERROR] = "Document error: " + err.Error()
@@ -78,10 +78,10 @@ func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
 
 	var is_editable bool = false
 	if requested_version == document.TotalVersions {
-		if Globals.Controllers[requested_text_id] {
+		if Globals.Controllers[requestedTextId] {
 			// the version is currently being created
-			Globals.DocGetDumpMessages[requested_text_id] <- &GetDumpMessage{ClientTab{ws, client_tab}, requested_version, request.Id}
-			Globals.TabControlMessages <- ClientTabOpenedDoc(ws, client_tab, requested_text_id)
+			Globals.DocGetDumpMessages[requestedTextId] <- &GetDumpMessage{ClientTab{ws, client_tab}, requested_version, request.Id}
+			Globals.TabControlMessages <- ClientTabOpenedDoc(ws, client_tab, requestedTextId)
 			return nil
 		}
 		is_editable = true
@@ -105,14 +105,7 @@ func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
 		return respond(ws, response)
 	}
 
-	links := database.C(ilex.LINKS)
-	var doc_links []ilex.TwoWayLink
-	err = links.Find(
-		bson.M{"$or": []bson.M{
-			bson.M{"FirstDocumentId": document.Id, "FirstVersionNo": requested_version},
-			bson.M{"SecondDocumentId": document.Id, "SecondVersionNo": requested_version},
-		}}).All(&doc_links)
-
+	err, doc_links := GetLinksForDoc(database, requestedTextId, requested_version)
 	if err != nil {
 		response.Action = RETRIEVAL_FAILED
 		response.Parameters[ERROR] = err.Error()
@@ -126,7 +119,7 @@ func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
 	response.Parameters[IS_EDITABLE] = is_editable
 	response.Parameters[NAME] = version.Name
 	response.Parameters[ID] = document.Id
-	Globals.TabControlMessages <- ClientTabOpenedDoc(ws, client_tab, requested_text_id)
+	Globals.TabControlMessages <- ClientTabOpenedDoc(ws, client_tab, requestedTextId)
 
 	return respond(ws, response)
 }

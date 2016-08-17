@@ -61,7 +61,7 @@ $(document).ready(function(){
                   },
               });
             };
-            loadToWindow(0, texts[0].id, texts[0].total_versions);
+            loadToWindow(0, texts[0].id, texts[0].totalVersions);
             loadToWindow(1, texts[3].id, 1); //texts[2].total_versions);
             loadToWindow(2, texts[4].id, 1); //texts[1].total_versions);
           },

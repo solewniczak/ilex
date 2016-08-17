@@ -33,6 +33,7 @@ func ActionServer(ws *websocket.Conn) {
 
 		if err != nil {
 			log.Print(err)
+			Globals.SocketControlMessages <- ws
 			break
 		} else {
 			js, _ := json.Marshal(request)
@@ -66,6 +67,8 @@ func ActionServer(ws *websocket.Conn) {
 }
 
 func main() {
+	go handle_signals()
+
 	wg := &sync.WaitGroup{}
 
 	wg.Add(1)
