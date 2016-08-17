@@ -160,31 +160,6 @@ func GetStringFromAddresses(addresses AddressTable, total_runes int, database *m
 	return str, nil
 }
 
-func GetLatestVersion(database *mgo.Database, doc *Document, version *Version) error {
-	versions := database.C(VERSIONS)
-	return versions.Find(bson.M{"DocumentId": doc.Id, "No": doc.TotalVersions}).One(&version)
-}
-
-func GetAllVersions(database *mgo.Database, doc *Document) (error, []Version) {
-	versions := database.C(VERSIONS)
-	var found []Version
-	err := versions.Find(bson.M{"DocumentId": doc.Id}).All(&found)
-	return err, found
-}
-
-func UpdateDocument(docs *mgo.Collection, doc *Document, version *Version) error {
-	if version.No != doc.TotalVersions+1 {
-		return errors.New("Document info and it's new version do not match!")
-	}
-	doc.TotalVersions = version.No
-	if version.Finished > version.Created {
-		doc.Modified = version.Finished
-	} else {
-		doc.Modified = version.Created
-	}
-	return docs.UpdateId(doc.Id, bson.M{"$set": bson.M{"Modified": version.Finished, "TotalVersions": version.No}})
-}
-
 func CurrentTime() string {
 	return time.Now().Format(time.RFC3339)
 }

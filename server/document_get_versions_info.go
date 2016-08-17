@@ -39,10 +39,11 @@ func documentGetVersionsInfo(request *IlexMessage, ws *websocket.Conn) error {
 	if Globals.Controllers[documentId] {
 		// the document is currently being edited. It's controller will respond
 		// with the most accurate data
+		Globals.DocGetVersionsMessages[documentId] <- &GetVersionsMessage{ws, request.Id}
 		return nil
 	}
 
-	err, versions := ilex.GetAllVersions(database, &found)
+	err, versions := GetAllVersions(database, &found)
 	if err != nil {
 		return respond_with_nak(ws, response, "Could not find versions"+err.Error())
 	}

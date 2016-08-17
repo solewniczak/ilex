@@ -53,7 +53,7 @@ func AllDocumentsView() {
 
 	// Get the latest version's name as the document name.
 	for _, doc := range found {
-		err = ilex.GetLatestVersion(database, &doc, &version)
+		err = GetLatestVersion(database, &doc, &version)
 		if err != nil {
 			fmt.Println("Could not start DocumentsView:", err.Error())
 			return
