@@ -111,6 +111,7 @@ func main() {
 	go func() {
 		defer wg.Done()
 		<-Globals.StopServer
+		CloseAllControllers()
 		file_listener.Close()
 		ws_listener.Close()
 		Globals.StopClientControl <- true
@@ -119,6 +120,7 @@ func main() {
 		case Globals.StopDocumentsView <- true:
 		default:
 		}
+		Globals.ContollerGroup.Wait()
 	}()
 
 	wg.Wait()
