@@ -18,6 +18,7 @@ type ControllerData struct {
 	IsFirstEdition         bool
 	DidEditorJustLeave     bool
 	IsEditionFromNewEditor bool
+	HasUnsavedChanges      bool
 }
 
 func NewControllerData(documentId string) *ControllerData {
@@ -95,6 +96,7 @@ func (cd *ControllerData) TryUpdateVersion(database *mgo.Database, root *tree.Ro
 			if err := tree.PersistTree(root, &cd.Version); err != nil {
 				fmt.Println("Could not save changes: " + err.Error() + ". Database may be corrupted!")
 			}
+			cd.HasUnsavedChanges = false
 			if err := UpdateDocument(docs, &cd.Document, &cd.Version); err != nil {
 				fmt.Println("Could not update document: " + err.Error())
 			}
@@ -104,5 +106,18 @@ func (cd *ControllerData) TryUpdateVersion(database *mgo.Database, root *tree.Ro
 			Globals.DocumentUpdatedMessages <- &DocumentUpdate{cd.DocumentId, cd.Version.No, cd.Version.Name}
 		}
 	}
+}
 
+func (cd *ControllerData) TryFinalUpdate(database *mgo.Database, root *tree.Root) {
+	docs := database.C(ilex.DOCS)
+	if cd.HasUnsavedChanges {
+		cd.Version.Finished = ilex.CurrentTime()
+		// save current work in progress
+		if err := tree.PersistTree(root, &cd.Version); err != nil {
+			fmt.Println("Could not save changes: " + err.Error() + ". Database may be corrupted!")
+		}
+		if err := UpdateDocument(docs, &cd.Document, &cd.Version); err != nil {
+			fmt.Println("Could not update document: " + err.Error())
+		}
+	}
 }

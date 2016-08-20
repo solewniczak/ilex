@@ -74,6 +74,7 @@ loop:
 				root.AddRune(char, message.Position+i+1)
 				i++
 			}
+			controllerData.HasUnsavedChanges = true
 			root.Print(0)
 			fmt.Println(tree.GetTreeDump(root))
 
@@ -85,6 +86,7 @@ loop:
 			for i := 0; i < message.Length; i++ {
 				root.RemoveRune(message.Position)
 			}
+			controllerData.HasUnsavedChanges = true
 			root.Print(0)
 			fmt.Println(tree.GetTreeDump(root))
 
@@ -138,9 +140,14 @@ loop:
 			}
 			response.Parameters[VERSIONS] = versions
 			respond(message.WS, response)
+
+		case <-subscriptions.StopControllerMessages:
+			// @TODO: notify clients about the server going offline
+			break loop
 		}
 	}
 
+	controllerData.TryFinalUpdate(database, root)
 	CleanUpAfterController(documentId, subscriptions)
 }
 
@@ -155,10 +162,20 @@ func start_document_controller(documentId string) {
 
 	subscriptions.Subscribe(documentId)
 	Globals.Controllers[documentId] = true
+	Globals.ContollerGroup.Add(1)
 }
 
 func CleanUpAfterController(documentId string, subscriptions *ControllerSubscriptions) {
 	fmt.Println("Document controller for ", documentId, " is shutting down.")
-	subscriptions.Close()
 	Globals.Controllers[documentId] = false
+	subscriptions.Close()
+	Globals.ContollerGroup.Done()
+}
+
+func CloseAllControllers() {
+	for documentId, isControlled := range Globals.Controllers {
+		if isControlled {
+			Globals.DocStopContollerMessages[documentId] <- true
+		}
+	}
 }

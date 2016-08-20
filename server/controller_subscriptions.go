@@ -1,11 +1,12 @@
 package main
 
 type ControllerSubscriptions struct {
-	AddTextMessages     chan *AddTextMessage
-	RemoveTextMessages  chan *RemoveTextMessage
-	TabControlMessages  chan *ClientTabMessage
-	DocDumpMessages     chan *GetDumpMessage
-	GetVersionsMessages chan *GetVersionsMessage
+	AddTextMessages        chan *AddTextMessage
+	RemoveTextMessages     chan *RemoveTextMessage
+	TabControlMessages     chan *ClientTabMessage
+	DocDumpMessages        chan *GetDumpMessage
+	GetVersionsMessages    chan *GetVersionsMessage
+	StopControllerMessages chan interface{}
 }
 
 func NewControllerSubscriptions() *ControllerSubscriptions {
@@ -15,6 +16,7 @@ func NewControllerSubscriptions() *ControllerSubscriptions {
 		make(chan *ClientTabMessage),
 		make(chan *GetDumpMessage),
 		make(chan *GetVersionsMessage),
+		make(chan interface{}),
 	}
 }
 
@@ -24,6 +26,7 @@ func (s *ControllerSubscriptions) Subscribe(documentId string) {
 	Globals.DocTabControlMessages[documentId] = s.TabControlMessages
 	Globals.DocGetDumpMessages[documentId] = s.DocDumpMessages
 	Globals.DocGetVersionsMessages[documentId] = s.GetVersionsMessages
+	Globals.DocStopContollerMessages[documentId] = s.StopControllerMessages
 }
 
 func (s *ControllerSubscriptions) Close() {
@@ -33,4 +36,5 @@ func (s *ControllerSubscriptions) Close() {
 	close(s.TabControlMessages)
 	close(s.DocDumpMessages)
 	close(s.GetVersionsMessages)
+	close(s.StopControllerMessages)
 }
