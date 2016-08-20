@@ -41,6 +41,22 @@ func (p *PNode) AddRune(r rune, position int) {
 	p.Parent.ReplaceChild(p, up)
 }
 
+func (p *PNode) RemoveRune(position int) {
+	if p.Length == 1 {
+		p.Parent.ReduceChild(p)
+	} else if position == 0 {
+		p.Address++
+		p.Length--
+	} else if position == p.Length-1 {
+		p.Length--
+	} else {
+		up := &Branch{Parent: p.Parent, Length: p.Length - 1, LengthLeft: position}
+		up.Left = &PNode{up, position, p.Address}
+		up.Right = &PNode{up, p.Length - 1 - position, p.Address + position + 1}
+		p.Parent.ReplaceChild(p, up)
+	}
+}
+
 func (p *PNode) SetParent(parent Parent) {
 	p.Parent = parent
 }

@@ -114,7 +114,11 @@ func main() {
 		file_listener.Close()
 		ws_listener.Close()
 		Globals.StopClientControl <- true
-		Globals.StopDocumentsView <- true
+		select {
+		// try to send signal to documentsView
+		case Globals.StopDocumentsView <- true:
+		default:
+		}
 	}()
 
 	wg.Wait()

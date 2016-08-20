@@ -25,6 +25,7 @@ func NewControllerData(documentId string) *ControllerData {
 	result.DocumentId = documentId
 	result.Clients = make(map[ClientTab]bool)
 	result.Editors = make(map[ClientTab]bool)
+	result.IsFirstEdition = true
 	// the rest of the fields are (by language definition) empty, zero or false
 	return &result
 }

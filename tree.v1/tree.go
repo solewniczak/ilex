@@ -11,6 +11,7 @@ import (
 
 type TreeBase interface {
 	AddRune(r rune, position int)
+	RemoveRune(position int)
 	WriteToBuffer(buffer *bytes.Buffer, slices *mgo.Collection) error
 	Print(indentation int)
 	GetLength() int
@@ -20,6 +21,7 @@ type TreeBase interface {
 type Parent interface {
 	TreeBase
 	ReplaceChild(previous, new Node)
+	ReduceChild(former Node)
 }
 
 type Node interface {

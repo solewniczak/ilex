@@ -61,14 +61,14 @@ func AllDocumentsView() {
 		texts[doc.Id.Hex()] = DocumentWithName{doc, version.Name}
 	}
 
-	fmt.Println("DocumnetsView is ready with document map: ", texts)
+	fmt.Println("DocumentsView is ready with document map: ", texts)
 
 	for {
 		select {
 		case message := <-Globals.DocumentUpdatedMessages:
 			text, ok := texts[message.DocumentId]
 			if !ok {
-				fmt.Println("DocumnetsView received notification about an unknown document: " + message.DocumentId)
+				fmt.Println("DocumentsView received notification about an unknown document: " + message.DocumentId)
 				break
 			}
 			if text.Document.TotalVersions > message.Version || text.Document.TotalVersions+1 < message.Version {
