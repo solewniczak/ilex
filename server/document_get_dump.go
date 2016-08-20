@@ -105,7 +105,7 @@ func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
 		return respond(ws, response)
 	}
 
-	err, doc_links := GetLinksForDoc(database, requestedTextId, requested_version)
+	err, doc_links := GetLinksForDoc(database, &document.Id, requested_version)
 	if err != nil {
 		response.Action = RETRIEVAL_FAILED
 		response.Parameters[ERROR] = err.Error()

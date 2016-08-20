@@ -79,6 +79,14 @@ loop:
 
 		case message := <-subscriptions.RemoveTextMessages:
 			fmt.Println("text removed", *message)
+			controllerData.CheckForNewEditor(&message.Client)
+			controllerData.TryUpdateVersion(database, root)
+
+			for i := 0; i < message.Length; i++ {
+				root.RemoveRune(message.Position)
+			}
+			root.Print(0)
+			fmt.Println(tree.GetTreeDump(root))
 
 		case message := <-subscriptions.TabControlMessages:
 			fmt.Println("A client control message was received.")
@@ -103,7 +111,7 @@ loop:
 				break
 			}
 
-			err, doc_links := GetLinksForDoc(database, documentId, controllerData.Version.No)
+			err, doc_links := GetLinksForDoc(database, &controllerData.Document.Id, controllerData.Version.No)
 			if err != nil {
 				fmt.Println(err.Error())
 				break
