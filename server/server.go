@@ -39,23 +39,10 @@ func ActionServer(ws *websocket.Conn) {
 			js, _ := json.Marshal(request)
 			fmt.Println("received request: ", string(js))
 
-			switch request.Action {
-			case DOCUMENT_ADD_TEXT:
-				err = documentAddText(&request, ws)
-			case DOCUMENT_REMOVE_TEXT:
-				err = documentRemoveText(&request, ws)
-			case DOCUMENT_GET_DUMP:
-				err = documentGetDump(&request, ws)
-			case GET_ALL_DOCUMENTS_INFO:
-				err = getAllDocumentsInfo(&request, ws)
-			case TAB_CLOSE:
-				err = tabClose(&request, ws)
-			case DOCUMENT_GET_VERSIONS_INFO:
-				err = documentGetVersionsInfo(&request, ws)
-			default:
-				response := NewIlexResponse(&request)
-				respond_with_nak(ws, response, "Unable to execute action "+request.Action)
-				fmt.Println("Unable to execute action ", request.Action)
+			if handler := Globals.Handlers[request.Action]; handler != nil {
+				err = handler(&request, ws)
+			} else {
+				respond_with_nak(ws, NewIlexResponse(&request), "Unable to execute action "+request.Action)
 			}
 
 			if err != nil {

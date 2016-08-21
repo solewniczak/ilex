@@ -21,6 +21,11 @@ type RemoveTextMessage struct {
 	Length   int
 }
 
+type ChangeNameMessage struct {
+	Client  ClientTab
+	NewName string
+}
+
 type GetDumpMessage struct {
 	Client    ClientTab
 	Version   int
@@ -89,6 +94,14 @@ loop:
 			controllerData.HasUnsavedChanges = true
 			root.Print(0)
 			fmt.Println(tree.GetTreeDump(root))
+
+		case message := <-subscriptions.ChangeNameMessages:
+			fmt.Println("name changed", *message)
+			controllerData.CheckForNewEditor(&message.Client)
+			controllerData.TryUpdateVersion(database, root)
+
+			controllerData.Version.Name = message.NewName
+			Globals.DocumentUpdatedMessages <- &DocumentUpdate{documentId, controllerData.Version.No, controllerData.Version.Name}
 
 		case message := <-subscriptions.TabControlMessages:
 			fmt.Println("A client control message was received.")
