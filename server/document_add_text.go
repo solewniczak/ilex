@@ -55,5 +55,4 @@ func documentAddText(request *IlexMessage, ws *websocket.Conn) error {
 	response.Action = ACK
 
 	return respond(ws, response)
-
 }
