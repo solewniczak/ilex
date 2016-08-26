@@ -30,6 +30,12 @@ type DocumentUpdate struct {
 	Name       string
 }
 
+type NewDocumentRequest struct {
+	Client    ClientTab
+	Name      string
+	RequestId int
+}
+
 func AllDocumentsView() {
 	db_session, err := mgo.Dial("localhost")
 	if err != nil {
@@ -44,7 +50,7 @@ func AllDocumentsView() {
 	var found []ilex.Document
 	err = docs.Find(nil).All(&found)
 	if err != nil {
-		fmt.Println("Could not start DocumentsView:", err.Error())
+		fmt.Println("Could not start DocumentsView. Getting docs error:", err.Error())
 		return
 	}
 
@@ -55,7 +61,7 @@ func AllDocumentsView() {
 	for _, doc := range found {
 		err = GetLatestVersion(database, &doc, &version)
 		if err != nil {
-			fmt.Println("Could not start DocumentsView:", err.Error())
+			fmt.Println("Could not start DocumentsView because of database inconsistency. Error getting versions for", doc.Id.Hex(), ":", err.Error())
 			return
 		}
 		texts[doc.Id.Hex()] = DocumentWithName{doc, version.Name}
@@ -95,6 +101,26 @@ func AllDocumentsView() {
 			sort.Sort(textsInfo)
 			response.Parameters[TEXTS] = textsInfo
 			respond(message.WS, response)
+
+		case message := <-Globals.NewDocumentRequests:
+			err, doc := CreateNewDocument(docs)
+			if err != nil {
+				break
+			}
+			err = CreateFirstVersion(database, doc, message.Name)
+			if err != nil {
+				break
+			}
+			docId := doc.Id.Hex()
+			texts[docId] = DocumentWithName{*doc, message.Name}
+			fmt.Println("Created document", docId, "with name", message.Name, "and an empty version")
+
+			Globals.TabControlMessages <- ClientTabOpenedDoc(message.Client.WS, message.Client.TabId, docId)
+			response := NewIlexMessage()
+			response.Id = message.RequestId
+			response.Action = DOCUMENT_CREATED
+			response.Parameters[ID] = docId
+			respond(message.Client.WS, response)
 
 		case <-Globals.StopDocumentsView:
 			fmt.Println("Stopping documents view")
