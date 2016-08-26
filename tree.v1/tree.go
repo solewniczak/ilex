@@ -35,7 +35,7 @@ func indent(indentation int) {
 
 func construct_tree_from_address_table(addresses ilex.AddressTable, total_length int) Node {
 	if len(addresses) == 0 {
-		return nil
+		return &TNode{Text: []rune{}}
 	}
 	if len(addresses) == 1 {
 		return &PNode{Length: total_length, Address: addresses[0][1]}

@@ -77,9 +77,11 @@ loop:
 			i := 0
 			for _, char := range message.String {
 				root.AddRune(char, message.Position+i+1)
+				controllerData.Version.Size++
 				i++
 			}
 			controllerData.HasUnsavedChanges = true
+			controllerData.NotifyClientsAddText(message)
 			root.Print(0)
 			fmt.Println(tree.GetTreeDump(root))
 
@@ -90,8 +92,10 @@ loop:
 
 			for i := 0; i < message.Length; i++ {
 				root.RemoveRune(message.Position)
+				controllerData.Version.Size--
 			}
 			controllerData.HasUnsavedChanges = true
+			controllerData.NotifyClientsRemoveText(message)
 			root.Print(0)
 			fmt.Println(tree.GetTreeDump(root))
 
@@ -102,6 +106,7 @@ loop:
 
 			controllerData.Version.Name = message.NewName
 			Globals.DocumentUpdatedMessages <- &DocumentUpdate{documentId, controllerData.Version.No, controllerData.Version.Name}
+			controllerData.NotifyClientsNameChange(message)
 
 		case message := <-subscriptions.TabControlMessages:
 			fmt.Println("A client control message was received.")

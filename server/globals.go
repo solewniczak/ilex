@@ -13,6 +13,7 @@ var Globals = struct {
 	TabControlMessages       chan *ClientTabMessage
 	AllDocumentRequests      chan *AllDocumentsRequest
 	DocumentUpdatedMessages  chan *DocumentUpdate
+	NewDocumentRequests      chan *NewDocumentRequest
 	DocAddTextMessages       map[string](chan *AddTextMessage)
 	DocRemoveTextMessages    map[string](chan *RemoveTextMessage)
 	DocChangeNameMessages    map[string](chan *ChangeNameMessage)
@@ -24,6 +25,7 @@ var Globals = struct {
 	ContollerGroup           *sync.WaitGroup
 	ClientDoc                map[ClientTab]string
 	Handlers                 map[string](func(request *IlexMessage, ws *websocket.Conn) error)
+	Counter                  *NotificationCounter
 }{
 	StopServer:               make(chan interface{}),
 	StopClientControl:        make(chan interface{}),
@@ -32,6 +34,7 @@ var Globals = struct {
 	TabControlMessages:       make(chan *ClientTabMessage),
 	AllDocumentRequests:      make(chan *AllDocumentsRequest),
 	DocumentUpdatedMessages:  make(chan *DocumentUpdate),
+	NewDocumentRequests:      make(chan *NewDocumentRequest),
 	DocAddTextMessages:       make(map[string](chan *AddTextMessage)),
 	DocRemoveTextMessages:    make(map[string](chan *RemoveTextMessage)),
 	DocChangeNameMessages:    make(map[string](chan *ChangeNameMessage)),
@@ -42,6 +45,7 @@ var Globals = struct {
 	Controllers:              make(map[string]bool),
 	ContollerGroup:           &sync.WaitGroup{},
 	ClientDoc:                make(map[ClientTab]string),
+	Counter:                  NewNotificationCounter(),
 }
 
 func init() {
@@ -53,5 +57,6 @@ func init() {
 		DOCUMENT_REMOVE_TEXT:       documentRemoveText,
 		GET_ALL_DOCUMENTS_INFO:     getAllDocumentsInfo,
 		TAB_CLOSE:                  tabClose,
+		CREATE_DOCUMENT:            createDocument,
 	}
 }
