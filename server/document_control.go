@@ -2,12 +2,10 @@ package main
 
 import (
 	"fmt"
-	"ilex/tree.v1"
-	//	"golang.org/x/net/websocket"
+	"golang.org/x/net/websocket"
 	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 	"ilex/ilex"
-	//"time"
+	"ilex/tree.v1"
 )
 
 type AddTextMessage struct {
@@ -23,166 +21,179 @@ type RemoveTextMessage struct {
 	Length   int
 }
 
-var doc_add_text_messages map[string](chan *AddTextMessage) = make(map[string](chan *AddTextMessage))
-var doc_remove_text_messages map[string](chan *RemoveTextMessage) = make(map[string](chan *RemoveTextMessage))
-var doc_tab_control_messages map[string](chan *ClientTabMessage) = make(map[string](chan *ClientTabMessage))
-var controllers map[string]bool = make(map[string]bool)
+type ChangeNameMessage struct {
+	Client  ClientTab
+	NewName string
+}
 
-func control_document(document_id string, add_text_messages chan *AddTextMessage, remove_text_messages chan *RemoveTextMessage, tab_control_messages chan *ClientTabMessage) {
-	fmt.Println("Document controller for ", document_id, " is starting up.")
+type GetDumpMessage struct {
+	Client    ClientTab
+	Version   int
+	RequestId int
+}
+
+type GetVersionsMessage struct {
+	WS        *websocket.Conn
+	RequestId int
+}
+
+func control_document(documentId string, subscriptions *ControllerSubscriptions) {
+	fmt.Println("Document controller for ", documentId, " is starting up.")
 
 	db_session, err := mgo.Dial("localhost")
 	if err != nil {
 		fmt.Println("Document controller could not start, because of database error " + err.Error())
-		clean_up_after_controller(document_id)
+		CleanUpAfterController(documentId, subscriptions)
 		return
 	}
 	defer db_session.Close()
 
 	database := db_session.DB(ilex.DEFAULT_DB)
-	docs := database.C(ilex.DOCS)
 
-	var document ilex.Document
-	err = docs.Find(bson.M{"_id": bson.ObjectIdHex(document_id)}).One(&document)
+	controllerData := NewControllerData(documentId)
+	err = controllerData.GetDocumentData(database)
 	if err != nil {
 		fmt.Println("Document controller could not start, because of database error " + err.Error())
-		clean_up_after_controller(document_id)
+		CleanUpAfterController(documentId, subscriptions)
 		return
 	}
 
-	var version ilex.Version
-	err = ilex.GetLatestVersion(database, &document, &version)
-	if err != nil {
-		fmt.Println("Document controller could not start, because of database error " + err.Error())
-		clean_up_after_controller(document_id)
-		return
-	}
-
-	clients := make(map[ClientTab]bool)
-	editors := make(map[ClientTab]bool)
-	editor_just_left := false
-	edition_from_new_editor := false
-	total_clients := 0
-
-	root := tree.ConstructVersionTree(&version)
+	root := tree.ConstructVersionTree(&controllerData.Version)
 	if root == nil {
 		fmt.Println("tree is nil")
+		CleanUpAfterController(documentId, subscriptions)
+		return
 	}
-	root.Print(0)
-
-	change_counter := 0
+	//root.Print(0)
 
 loop:
 	for {
 		select {
-		case message := <-add_text_messages:
-			{
-				fmt.Println("text added", *message)
-				if !editors[message.Client] {
-					fmt.Println(message.Client, "started editing", document_id)
-					editors[message.Client] = true
-					edition_from_new_editor = true
-				}
-				if editor_just_left || edition_from_new_editor {
-					// save work in progress and start a new version
-					editor_just_left = false
-					edition_from_new_editor = false
+		case message := <-subscriptions.AddTextMessages:
+			fmt.Println("text added", *message)
+			controllerData.CheckForNewEditor(&message.Client)
+			controllerData.TryUpdateVersion(database, root)
 
+			i := 0
+			for _, char := range message.String {
+				root.AddRune(char, message.Position+i+1)
+				controllerData.Version.Size++
+				i++
+			}
+			controllerData.HasUnsavedChanges = true
+			controllerData.NotifyClientsAddText(message)
+			root.Print(0)
+			fmt.Println(tree.GetTreeDump(root))
+
+		case message := <-subscriptions.RemoveTextMessages:
+			fmt.Println("text removed", *message)
+			controllerData.CheckForNewEditor(&message.Client)
+			controllerData.TryUpdateVersion(database, root)
+
+			for i := 0; i < message.Length; i++ {
+				root.RemoveRune(message.Position)
+				controllerData.Version.Size--
+			}
+			controllerData.HasUnsavedChanges = true
+			controllerData.NotifyClientsRemoveText(message)
+			root.Print(0)
+			fmt.Println(tree.GetTreeDump(root))
+
+		case message := <-subscriptions.ChangeNameMessages:
+			fmt.Println("name changed", *message)
+			controllerData.CheckForNewEditor(&message.Client)
+			controllerData.TryUpdateVersion(database, root)
+
+			controllerData.Version.Name = message.NewName
+			Globals.DocumentUpdatedMessages <- &DocumentUpdate{documentId, controllerData.Version.No, controllerData.Version.Name}
+			controllerData.NotifyClientsNameChange(message)
+
+		case message := <-subscriptions.TabControlMessages:
+			fmt.Println("A client control message was received.")
+			if message.Opened {
+				controllerData.RegisterNewClientTab(&message.ClientTab)
+			} else if message.Closed {
+				controllerData.DeregisterClientTab(&message.ClientTab)
+				if controllerData.TotalClients == 0 {
+					break loop
 				}
-				i := 0
-				for _, char := range message.String {
-					root.AddRune(char, message.Position+i+1)
-				}
-				root.Print(0)
-				fmt.Println(tree.GetTreeDump(root))
-				change_counter++
-				//if change_counter == 10 {
-				//	change_counter = 0
-				//	version.Id = bson.NewObjectId()
-				//	version.No++
-				//	if err = tree.PersistTree(root, &version); err != nil {
-				//		fmt.Println("Could not save changes: " + err.Error() + ". Database may be corrupted!")
-				//	}
-				//	if err = ilex.UpdateDocument(docs, &document, &version); err != nil {
-				//		fmt.Println("Could not update document: " + err.Error())
-				//	}
-				//	root.Print(0)
-				//	fmt.Println(tree.GetTreeDump(root))
-				//	version.Created = time.Now().Format(time.RFC3339)
-				//}
 			}
 
-		case message := <-remove_text_messages:
-			{
-				fmt.Println("text removed", *message)
-				if !editors[message.Client] {
-					fmt.Println(message.Client, "started editing", document_id)
-					editors[message.Client] = true
-					edition_from_new_editor = true
-				}
-				if editor_just_left || edition_from_new_editor {
-					// save work in progress and start a new version
-					editor_just_left = false
-					edition_from_new_editor = false
-				}
+		case message := <-subscriptions.DocDumpMessages:
+			if message.Version != controllerData.Version.No {
+				fmt.Println("Received request for version which is not current!")
+			}
+			response := NewIlexMessage()
+			response.Id = message.RequestId
+			response.Action = DOCUMENT_RETRIEVED
+			if response.Parameters[TEXT], err = tree.GetTreeDump(root); err != nil {
+				fmt.Println(err.Error())
+				break
 			}
 
-		case message := <-tab_control_messages:
-			{
-				fmt.Println("A client control message was received.")
-				if message.Opened {
-					if clients[message.ClientTab] {
-						fmt.Println("Received an unexpected document opened message. Document did not have the tab registered as a client.")
-					} else {
-						clients[message.ClientTab] = true
-						total_clients++
-						fmt.Println("Client tab", message.ClientTab, "opened doc", document_id)
-					}
-				} else if message.Closed {
-					if !clients[message.ClientTab] {
-						fmt.Println("Received an unexpected document closing message. Document did not have the tab registered as a client.")
-					} else {
-						clients[message.ClientTab] = false
-						if editors[message.ClientTab] {
-							fmt.Println(message.ClientTab, "started editing", document_id)
-							editors[message.ClientTab] = false
-							editor_just_left = true
-						}
-						fmt.Println("Client tab", message.ClientTab, "closed doc", document_id)
-						total_clients--
-						if total_clients == 0 {
-							break loop
-						}
-					}
-				}
+			err, doc_links := GetLinksForDoc(database, &controllerData.Document.Id, controllerData.Version.No)
+			if err != nil {
+				fmt.Println(err.Error())
+				break
 			}
+			response.Parameters[TAB] = message.Client.TabId
+			response.Parameters[LINKS] = doc_links
+			response.Parameters[IS_EDITABLE] = true
+			response.Parameters[NAME] = controllerData.Version.Name
+			response.Parameters[ID] = documentId
+			respond(message.Client.WS, response)
+
+		case message := <-subscriptions.GetVersionsMessages:
+			response := NewIlexMessage()
+			response.Id = message.RequestId
+			response.Action = DOCUMENT_VERSIONS_INFO_RETRIEVED
+
+			err, versions := GetAllVersions(database, &controllerData.Document)
+			if err != nil {
+				fmt.Println("Could not find versions" + err.Error())
+				break
+			}
+			if len(versions) != controllerData.Version.No {
+				versions = append(versions, controllerData.Version)
+			}
+			response.Parameters[VERSIONS] = versions
+			respond(message.WS, response)
+
+		case <-subscriptions.StopControllerMessages:
+			// @TODO: notify clients about the server going offline
+			break loop
 		}
 	}
 
-	clean_up_after_controller(document_id)
+	controllerData.TryFinalUpdate(database, root)
+	CleanUpAfterController(documentId, subscriptions)
 }
 
-func start_document_controller(document_id string) {
-	if controllers[document_id] {
-		fmt.Println("Document controller for ", document_id, " already exists")
+func start_document_controller(documentId string) {
+	if Globals.Controllers[documentId] {
+		fmt.Println("Document controller for ", documentId, " already exists")
 		return
 	}
-	add_text_messages := make(chan *AddTextMessage)
-	remove_text_messages := make(chan *RemoveTextMessage)
-	tab_control_messages := make(chan *ClientTabMessage)
+	subscriptions := NewControllerSubscriptions()
 
-	go control_document(document_id, add_text_messages, remove_text_messages, tab_control_messages)
+	go control_document(documentId, subscriptions)
 
-	doc_add_text_messages[document_id] = add_text_messages
-	doc_remove_text_messages[document_id] = remove_text_messages
-	doc_tab_control_messages[document_id] = tab_control_messages
-	controllers[document_id] = true
+	subscriptions.Subscribe(documentId)
+	Globals.Controllers[documentId] = true
+	Globals.ContollerGroup.Add(1)
 }
 
-func clean_up_after_controller(document_id string) {
-	fmt.Println("Document controller for ", document_id, " is shutting down.")
-	close(doc_add_text_messages[document_id])
-	close(doc_remove_text_messages[document_id])
-	close(doc_tab_control_messages[document_id])
-	controllers[document_id] = false
+func CleanUpAfterController(documentId string, subscriptions *ControllerSubscriptions) {
+	fmt.Println("Document controller for ", documentId, " is shutting down.")
+	Globals.Controllers[documentId] = false
+	subscriptions.Close()
+	Globals.ContollerGroup.Done()
+}
+
+func CloseAllControllers() {
+	for documentId, isControlled := range Globals.Controllers {
+		if isControlled {
+			Globals.DocStopContollerMessages[documentId] <- true
+		}
+	}
 }

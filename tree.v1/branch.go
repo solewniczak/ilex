@@ -56,6 +56,19 @@ func (b *Branch) AddRune(r rune, position int) {
 	child.AddRune(r, position)
 }
 
+func (b *Branch) RemoveRune(position int) {
+	var child Node
+	if position < b.LengthLeft {
+		child = b.Left
+		b.LengthLeft--
+	} else {
+		child = b.Right
+		position = position - b.LengthLeft
+	}
+	b.Length--
+	child.RemoveRune(position)
+}
+
 func (b *Branch) WriteToBuffer(buffer *bytes.Buffer, slices *mgo.Collection) error {
 	fmt.Println("going deeper")
 	err := b.Left.WriteToBuffer(buffer, slices)
@@ -102,10 +115,34 @@ func (b *Branch) SetParent(parent Parent) {
 	b.Parent = parent
 }
 
+func (b *Branch) TryPrune() {
+	left, ok := b.Left.(*TNode)
+	if !ok {
+		return
+	}
+	right, ok := b.Right.(*TNode)
+	if !ok {
+		return
+	}
+	new := &TNode{b.Parent, left.Length + right.Length, append(left.Text, right.Text...)}
+	b.Parent.ReplaceChild(b, new)
+}
+
 func (b *Branch) ReplaceChild(previous, new Node) {
 	if b.Left == previous {
 		b.Left = new
 	} else {
 		b.Right = new
+	}
+	b.TryPrune()
+}
+
+func (b *Branch) ReduceChild(former Node) {
+	if b.Left == former {
+		b.Parent.ReplaceChild(b, b.Right)
+		b.Right.SetParent(b.Parent)
+	} else {
+		b.Parent.ReplaceChild(b, b.Left)
+		b.Left.SetParent(b.Parent)
 	}
 }

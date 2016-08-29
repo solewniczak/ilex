@@ -21,6 +21,14 @@ func (t *TNode) AddRune(r rune, position int) {
 	t.Length++
 }
 
+func (t *TNode) RemoveRune(position int) {
+	t.Text = append(t.Text[:position], t.Text[position+1:]...)
+	t.Length--
+	if t.Length == 0 {
+		t.Parent.ReduceChild(t)
+	}
+}
+
 func (t *TNode) SetParent(parent Parent) {
 	t.Parent = parent
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"time"
 	"unicode/utf8"
 )
 
@@ -159,13 +160,6 @@ func GetStringFromAddresses(addresses AddressTable, total_runes int, database *m
 	return str, nil
 }
 
-func GetLatestVersion(database *mgo.Database, doc *Document, version *Version) error {
-	versions := database.C(VERSIONS)
-	return versions.Find(bson.M{"DocumentId": doc.Id, "No": doc.TotalVersions}).One(&version)
-}
-
-func UpdateDocument(docs *mgo.Collection, doc *Document, version *Version) error {
-	doc.TotalVersions = version.No
-	doc.Modified = version.Finished
-	return docs.UpdateId(doc.Id, bson.M{"$set": bson.M{"Modified": version.Finished, "TotalVersions": version.No}})
+func CurrentTime() string {
+	return time.Now().Format(time.RFC3339)
 }
