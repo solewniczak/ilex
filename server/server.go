@@ -12,8 +12,6 @@ import (
 	"sync"
 )
 
-var StopServer chan bool = make(chan bool)
-
 func respond_with_nak(ws *websocket.Conn, response *IlexMessage, error_description string) error {
 	response.Action = NAK
 	response.Parameters[ERROR] = error_description
@@ -35,24 +33,16 @@ func ActionServer(ws *websocket.Conn) {
 
 		if err != nil {
 			log.Print(err)
+			Globals.SocketControlMessages <- ws
 			break
 		} else {
 			js, _ := json.Marshal(request)
 			fmt.Println("received request: ", string(js))
 
-			switch request.Action {
-			case DOCUMENT_ADD_TEXT:
-				err = documentAddText(&request, ws)
-			case DOCUMENT_REMOVE_TEXT:
-				err = documentRemoveText(&request, ws)
-			case DOCUMENT_GET_DUMP:
-				err = documentGetDump(&request, ws)
-			case GET_ALL_DOCUMENTS_INFO:
-				err = getAllDocumentsInfo(&request, ws)
-			case TAB_CLOSE:
-				err = tabClose(&request, ws)
-			default:
-				fmt.Println("Unable to execute action ", request.Action)
+			if handler := Globals.Handlers[request.Action]; handler != nil {
+				err = handler(&request, ws)
+			} else {
+				respond_with_nak(ws, NewIlexResponse(&request), "Unable to execute action "+request.Action)
 			}
 
 			if err != nil {
@@ -64,13 +54,20 @@ func ActionServer(ws *websocket.Conn) {
 }
 
 func main() {
-	var stop_client_control chan bool = make(chan bool)
+	go handle_signals()
 
 	wg := &sync.WaitGroup{}
+
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		ControlClients(stop_client_control)
+		AllDocumentsView()
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		ControlClients()
 	}()
 
 	file_listener, err := net.Listen("tcp", ":8000")
@@ -100,10 +97,17 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		<-StopServer
+		<-Globals.StopServer
+		CloseAllControllers()
 		file_listener.Close()
 		ws_listener.Close()
-		stop_client_control <- true
+		Globals.StopClientControl <- true
+		select {
+		// try to send signal to documentsView
+		case Globals.StopDocumentsView <- true:
+		default:
+		}
+		Globals.ContollerGroup.Wait()
 	}()
 
 	wg.Wait()

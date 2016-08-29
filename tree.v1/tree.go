@@ -7,11 +7,11 @@ import (
 	"gopkg.in/mgo.v2"
 	"ilex/ilex"
 	"strings"
-	"time"
 )
 
 type TreeBase interface {
 	AddRune(r rune, position int)
+	RemoveRune(position int)
 	WriteToBuffer(buffer *bytes.Buffer, slices *mgo.Collection) error
 	Print(indentation int)
 	GetLength() int
@@ -21,6 +21,7 @@ type TreeBase interface {
 type Parent interface {
 	TreeBase
 	ReplaceChild(previous, new Node)
+	ReduceChild(former Node)
 }
 
 type Node interface {
@@ -34,7 +35,7 @@ func indent(indentation int) {
 
 func construct_tree_from_address_table(addresses ilex.AddressTable, total_length int) Node {
 	if len(addresses) == 0 {
-		return nil
+		return &TNode{Text: []rune{}}
 	}
 	if len(addresses) == 1 {
 		return &PNode{Length: total_length, Address: addresses[0][1]}
@@ -108,8 +109,7 @@ func PersistTree(root *Root, version *ilex.Version) error {
 		return errors.New("The tree's length does not match it's address table!")
 	}
 
-	now := time.Now().Format(time.RFC3339)
-	version.Finished = now
+	version.Finished = ilex.CurrentTime()
 	version.Addresses = addresses[:len_addresses-1]
 	version.Size = root.GetLength()
 
