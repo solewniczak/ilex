@@ -111,6 +111,7 @@ func AllDocumentsView() {
 			} else if text.Document.TotalVersions+1 == message.Version {
 				text.Document.TotalVersions++
 				fmt.Println("Document", message.DocumentId, "total versions updated to", message.Version)
+				NotifyClientsNewVersion(message)
 			}
 			if text.Name != message.Name {
 				text.Name = message.Name
@@ -149,6 +150,8 @@ func AllDocumentsView() {
 			response.Action = DOCUMENT_CREATED
 			response.Parameters[ID] = docId
 			respond(message.Client.WS, response)
+
+			NotifyClientsNewDocument(message)
 
 		case <-Globals.StopDocumentsView:
 			fmt.Println("Stopping documents view")
