@@ -26,14 +26,25 @@ func respond(ws *websocket.Conn, response *IlexMessage) error {
 	return websocket.JSON.Send(ws, response)
 }
 
+func DisconnectClient(ws *websocket.Conn) {
+	Globals.Clients[ws] = false
+	fmt.Println("A client has been disconnected!")
+	Globals.SocketControlMessages <- ws
+}
+
 func ActionServer(ws *websocket.Conn) {
+	if found := Globals.Clients[ws]; !found {
+		Globals.Clients[ws] = true
+		fmt.Println("A new client has connected!")
+	}
+
 	for {
 		var request IlexMessage
 		err := websocket.JSON.Receive(ws, &request)
 
 		if err != nil {
 			log.Print(err)
-			Globals.SocketControlMessages <- ws
+			DisconnectClient(ws)
 			break
 		} else {
 			js, _ := json.Marshal(request)
@@ -47,6 +58,7 @@ func ActionServer(ws *websocket.Conn) {
 
 			if err != nil {
 				log.Print(err)
+				DisconnectClient(ws)
 				break
 			}
 		}

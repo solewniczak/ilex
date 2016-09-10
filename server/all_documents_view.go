@@ -8,6 +8,11 @@ import (
 	"sort"
 )
 
+const (
+	NEW_DOCUMENT_AVAILABLE = "newDocumentAvailable"
+	NEW_VERSION_AVAILABLE  = "newVersionAvailable"
+)
+
 type DocumentWithName struct {
 	ilex.Document
 	Name string `json:"name"`
@@ -34,6 +39,29 @@ type NewDocumentRequest struct {
 	Client    ClientTab
 	Name      string
 	RequestId int
+}
+
+func NotifyClientsNewVersion(message *DocumentUpdate) {
+	for client, is_present := range Globals.Clients {
+		if is_present {
+			n := NewNotification()
+			n.Notification = NEW_VERSION_AVAILABLE
+			n.Parameters[DOCUMENT] = message.DocumentId
+			n.Parameters[VERSION] = message.Version
+			n.SendTo(client)
+		}
+	}
+}
+
+func NotifyClientsNewDocument(message *NewDocumentRequest) {
+	for client, is_present := range Globals.Clients {
+		if is_present {
+			n := NewNotification()
+			n.Notification = NEW_DOCUMENT_AVAILABLE
+			n.Parameters[NAME] = message.Name
+			n.SendTo(client)
+		}
+	}
 }
 
 func AllDocumentsView() {
