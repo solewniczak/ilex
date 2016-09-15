@@ -109,39 +109,83 @@ ilex.tools.range.getClientRects = function (range, doc) {
     for (let i = 0; i < clientRectsList.length; i++) {
       rects.push(clientRectsList[i]);
     }
+  },
+  getTextSelectionRange = function(container, startOffset, endOffset) {
+    var rects = [],
+        range = document.createRange();
+    
+    range.setStart(container, startOffset);
+    range.setEnd(container, endOffset);
+    return range.getClientRects();
+  },
+  selectSpansFromSingleLine = function(range) {
+    if (range.startContainer === range.endContainer) {
+      return range.getClientRects();
+    } else {
+      var startSpan = range.startContainer.parentElement,
+          endSpan = range.endContainer.parentElement,
+          rects = [];
+
+      pushClientRectsToArray(rects,
+                             getTextSelectionRange(range.startContainer,
+                                                   range.startOffset,
+                                                   range.startContainer.length));
+      pushClientRectsToArray(rects,
+                     getTextSelectionRange(range.endContainer, 0, range.endOffset));
+
+      let span = startSpan.nextElementSibling;
+      while (span !== endSpan) {
+        if (span === null) {
+          throw "ilex.tools.range.getTextSelectionRange: can't reach end span";
+        }
+        pushClientRectsToArray(rects, span.getClientRects());
+        span = span.nextElementSibling;
+      }
+
+      return rects;
+    }
   };
 
   if (range.collapsed === true) {
     return [];
   }
+  var startLine = range.startContainer.parentElement.parentElement,
+      endLine = range.endContainer.parentElement.parentElement,
+      rects = [];
 
-  if (range.startContainer === range.endContainer) {
-    return range.getClientRects();
+  if (startLine === endLine) {
+    pushClientRectsToArray(rects, selectSpansFromSingleLine(range));
   } else {
-    var startElement, endElement;
-    //we assume that <BR> selection is not possible
-    let rects = [];
-    
-    let startRange = document.createRange();
-    startRange.setStart(range.startContainer, range.startOffset);
-    startRange.setEnd(range.startContainer, range.startContainer.length);
-    pushClientRectsToArray(rects, startRange.getClientRects());
-    startElement = range.startContainer.parentNode.nextSibling;
-    
-    let endRange = document.createRange();
-    endRange.setStart(range.endContainer, 0);
-    endRange.setEnd(range.endContainer, range.endOffset);
-    pushClientRectsToArray(rects, endRange.getClientRects());
-    endElement = range.endContainer.parentNode;
-   
+    let startLineRange = document.createRange(),
+        endLineRange = document.createRange();
 
-    let elm = startElement;
-    while (elm !== endElement) {
-      pushClientRectsToArray(rects, elm.getClientRects());
-      elm = elm.nextSibling;
+    startLineRange.setStart(range.startContainer, range.startOffset);
+    startLineRange.setEnd(startLine.lastElementChild.firstChild,
+                          startLine.lastElementChild.firstChild.length);
+    pushClientRectsToArray(rects, selectSpansFromSingleLine(startLineRange));
+    
+    //create rect from the end of first line text to the end of first line <div>
+    let lastRect = rects[rects.length-1],
+        startLineOffset = $(startLine).offset(),
+        startLineRight = startLineOffset.left + $(startLine).width(),
+        finishLineRect =
+          ilex.tools.geometry.createClientRect(lastRect.left,
+                                               lastRect.top,
+                                               startLineRight - lastRect.left,
+                                               lastRect.height);
+    pushClientRectsToArray(rects, [finishLineRect]);
+    
+    endLineRange.setStart(endLine.firstElementChild.firstChild, 0);
+    endLineRange.setEnd(range.endContainer, range.endOffset);
+    pushClientRectsToArray(rects, selectSpansFromSingleLine(endLineRange));
+   
+    let line = startLine.nextElementSibling;
+    while (line !== endLine) {
+      pushClientRectsToArray(rects, line.getClientRects());
+      line = line.nextElementSibling;
     }
-    return rects;
   }
+  return rects;
 };
 
 
@@ -152,12 +196,12 @@ ilex.tools.range.normalize = function (range) {
   };
   
   //remove custos from range
-  if (range.endContainer.className === 'ilex-custos') {
-    let selection = window.getSelection();
-    range.setStart(range.startContainer, range.startOffset);
-    range.setEnd(range.endContainer.previousElementSibling.childNodes[0], 
-                    range.endContainer.previousElementSibling.textContent.length);  
-  }
+//  if (range.endContainer.className === 'ilex-custos') {
+//    let selection = window.getSelection();
+//    range.setStart(range.startContainer, range.startOffset);
+//    range.setEnd(range.endContainer.previousElementSibling.childNodes[0], 
+//                    range.endContainer.previousElementSibling.textContent.length);  
+//  }
 
   //we have selected <div>
   if (!hasSpanParent(range.startContainer)) {
@@ -165,8 +209,9 @@ ilex.tools.range.normalize = function (range) {
   }
 
   if (!hasSpanParent(range.endContainer)) {
-    let span = range.endContainer.childNodes[range.endOffset].previousSibling;
-    range.setEnd(span.childNodes[0], span.textContent.length);
+    range.setEnd(range.endContainer.childNodes[range.endOffset].childNodes[0], 0);
+//    let span = range.endContainer.childNodes[range.endOffset].previousSibling;
+//    range.setEnd(span.childNodes[0], span.textContent.length);
   }
   
   return range;

@@ -19,7 +19,7 @@ ilex.views.twoColumn = function(canvas) {
 
   view.slider = ilex.widgetsCollection.documentsSlider(view.bottomVertical.top,
     function (win) {
-      return ilex.widgetsCollection.text(win, canvas);
+      return ilex.widgetsCollection.textWithLinks(win, canvas);
   });
 
   view.loadText = function(winInd, params) {

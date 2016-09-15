@@ -74,6 +74,7 @@ ilex.widgetsCollection.verticalColumns = function ($parentWidget, columns) {
     that.table.data('ilex-width', width);
     that.table.data('ilex-height', height);
 
+    calculateSizes();
     applySizes();
     
   });
