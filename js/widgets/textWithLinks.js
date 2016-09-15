@@ -30,11 +30,14 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, canvas) {
   
 
   
-  that.textEditor = ilex.widgetsCollection.textEdiotr(that.container, canvas,
-    function () {
-
-    },
-    function () {
+  that.textEditor = ilex.widgetsCollection.textEdiotr(that.container, canvas);
+  
+  that.textEditor.content.on('documentAddText', function(event, data) {
+    that.document.addText(data.absStart - 1, data.value);
+  });
+  
+  that.textEditor.content.on('documentRemoveText', function(event, data) {
+    that.document.removeText(data.absStart, data.length);
   });
   
   that.dock.toolbar.addButton('Link', function () {
@@ -42,7 +45,9 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, canvas) {
     $spans.css('text-decoration', 'underline').css('color', 'blue');
   });
   
+  that.document = null;
   that.loadText = function (params) {
+    that.document = ilex.server.document(windowObject.tabId, params.name, params.id);
     for (let line of params.text.split("\n")) {
       let $line = that.textEditor.textDocument.insertLineAfter();
       that.textEditor.textDocument.insertText($line.find("span"), 0, line + "\n");
