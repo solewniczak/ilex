@@ -55,7 +55,7 @@ func (cd *ControllerData) DeregisterClientTab(clientTab *ClientTab) {
 	} else {
 		cd.Clients[*clientTab] = false
 		if cd.Editors[*clientTab] {
-			fmt.Println(*clientTab, "started editing", cd.DocumentId)
+			fmt.Println(*clientTab, "stopped editing", cd.DocumentId)
 			cd.Editors[*clientTab] = false
 			cd.DidEditorJustLeave = true
 		}
@@ -97,12 +97,12 @@ func (cd *ControllerData) TryUpdateVersion(database *mgo.Database, root *tree.Ro
 				fmt.Println("Could not save changes: " + err.Error() + ". Database may be corrupted!")
 			}
 			cd.HasUnsavedChanges = false
-			if err := UpdateDocument(docs, &cd.Document, &cd.Version); err != nil {
-				fmt.Println("Could not update document: " + err.Error())
-			}
 			cd.Version.Id = bson.NewObjectId()
 			cd.Version.No++
 			cd.Version.Created = ilex.CurrentTime()
+			if err := UpdateDocument(docs, &cd.Document, &cd.Version); err != nil {
+				fmt.Println("Could not update document: " + err.Error())
+			}
 			Globals.DocumentUpdatedMessages <- &DocumentUpdate{cd.DocumentId, cd.Version.No, cd.Version.Name}
 		}
 	}

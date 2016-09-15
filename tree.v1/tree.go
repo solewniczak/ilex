@@ -33,7 +33,7 @@ func indent(indentation int) {
 	fmt.Print(strings.Repeat("  ", indentation))
 }
 
-func construct_tree_from_address_table(addresses ilex.AddressTable, total_length int) Node {
+func construct_tree_from_address_table(addresses ilex.AddressTable, total_length, start_position int) Node {
 	if len(addresses) == 0 {
 		return &TNode{Text: []rune{}}
 	}
@@ -43,7 +43,7 @@ func construct_tree_from_address_table(addresses ilex.AddressTable, total_length
 
 	var i, length_left int
 	for ; i < len(addresses); i++ {
-		if addresses[i][0] > total_length/2 {
+		if addresses[i][0]-start_position > total_length/2 {
 			length_left = addresses[i][0]
 			break
 		}
@@ -54,8 +54,8 @@ func construct_tree_from_address_table(addresses ilex.AddressTable, total_length
 		length_left = addresses[i][0]
 	}
 
-	left := construct_tree_from_address_table(addresses[:i], length_left)
-	right := construct_tree_from_address_table(addresses[i:], total_length-length_left)
+	left := construct_tree_from_address_table(addresses[:i], length_left, start_position)
+	right := construct_tree_from_address_table(addresses[i:], total_length-length_left, start_position+length_left)
 	root := &Branch{Length: total_length, LengthLeft: length_left, Left: left, Right: right}
 	left.SetParent(root)
 	right.SetParent(root)
@@ -63,7 +63,7 @@ func construct_tree_from_address_table(addresses ilex.AddressTable, total_length
 }
 
 func ConstructVersionTree(version *ilex.Version) (root *Root) {
-	root = &Root{construct_tree_from_address_table(version.Addresses, version.Size)}
+	root = &Root{construct_tree_from_address_table(version.Addresses, version.Size, 0)}
 	root.Down.SetParent(root)
 	return root
 }
