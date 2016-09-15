@@ -8,6 +8,11 @@ import (
 	"sort"
 )
 
+const (
+	NEW_DOCUMENT_AVAILABLE = "newDocumentAvailable"
+	NEW_VERSION_AVAILABLE  = "newVersionAvailable"
+)
+
 type DocumentWithName struct {
 	ilex.Document
 	Name string `json:"name"`
@@ -34,6 +39,29 @@ type NewDocumentRequest struct {
 	Client    ClientTab
 	Name      string
 	RequestId int
+}
+
+func NotifyClientsNewVersion(message *DocumentUpdate) {
+	for client, is_present := range Globals.Clients {
+		if is_present {
+			n := NewNotification()
+			n.Notification = NEW_VERSION_AVAILABLE
+			n.Parameters[DOCUMENT] = message.DocumentId
+			n.Parameters[VERSION] = message.Version
+			n.SendTo(client)
+		}
+	}
+}
+
+func NotifyClientsNewDocument(message *NewDocumentRequest) {
+	for client, is_present := range Globals.Clients {
+		if is_present {
+			n := NewNotification()
+			n.Notification = NEW_DOCUMENT_AVAILABLE
+			n.Parameters[NAME] = message.Name
+			n.SendTo(client)
+		}
+	}
 }
 
 func AllDocumentsView() {
@@ -83,6 +111,7 @@ func AllDocumentsView() {
 			} else if text.Document.TotalVersions+1 == message.Version {
 				text.Document.TotalVersions++
 				fmt.Println("Document", message.DocumentId, "total versions updated to", message.Version)
+				NotifyClientsNewVersion(message)
 			}
 			if text.Name != message.Name {
 				text.Name = message.Name
@@ -121,6 +150,8 @@ func AllDocumentsView() {
 			response.Action = DOCUMENT_CREATED
 			response.Parameters[ID] = docId
 			respond(message.Client.WS, response)
+
+			NotifyClientsNewDocument(message)
 
 		case <-Globals.StopDocumentsView:
 			fmt.Println("Stopping documents view")
