@@ -63,7 +63,8 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
       //$span.data('ilex-absEnd', spanAbsEnd + text.length);
       //this.updateAbsPosDown($span);
     },
-    'breakLine': function ($span, relPos) {
+    
+    'breakLine': function ($span, relPos, insertAfter) {
       let text = $span.text(),
           textBeforePos = text.slice(0, relPos),
           textAfterPos = text.slice(relPos),
@@ -96,14 +97,12 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
       $span.text($span.text().slice(0, relStart) + $span.text().slice(relEnd));
       length = relEnd - relStart;
 
-      console.log($span, $line.children(':last'), $span.text(), $span.text().length);
       if ($span.is($line.children(':last')) && $span.text().length === 0) {
         throw "assert: textDocument.removeTextSingleLine: you can't remove '\n' this way";
       }
 
       //II.3 & II.4
       if ($span.text().length === 0 && $span.prev().length === 0) {
-        console.log('removeTextSingleSpan: II.3 & II.4');
         focus.span = $span.next()[0];
         focus.position = 0;
 
@@ -111,7 +110,6 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
         $span.remove();
       //II.6
       } else if($span.text().length === 0 && $span.prev().length > 0) {
-        console.log('removeTextSingleSpan: II.6');
         focus.span = $span.prev()[0];
         focus.position = focus.span.textContent.length;
 
@@ -119,17 +117,14 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
         $span.remove();
       //II.2
       } else if($span.text().length > 0 && relStart === 0 && $span.prev().length > 0) {
-        console.log('removeTextSingleSpan: II.2');
         focus.span = $span.prev()[0];
         focus.position = focus.span.textContent.length;
       //II.7
       } else if($span.text().length > 0 && relStart === 0 && $span.prev().length === 0) {
-        console.log('removeTextSingleSpan: II.7');
         focus.span = $span[0];
         focus.position = relStart;
       //II.1 && II.5
       } else {
-        console.log('removeTextSingleSpan: II.1 & II.5');
         focus.span = $span[0];
         focus.position = relStart;
       }
@@ -328,14 +323,15 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
       });
       return length;
     },
-    'lineIsEmpty': function ($line) {
-      var isEmpty = true;
-      $line.children().each(function () {
-        if (this.textContent.length > 0) {
-          isEmpty = false;
+    'absPosition': function ($start, relPos) {
+      var length = 0;
+      that.content.find('span').each(function () {
+        if ($(this).is($start)) {
+          return false;
         }
+        length += $(this).text().length;
       });
-      return isEmpty;
+      return length + relPos;
     }
   };
   
@@ -344,7 +340,6 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
   var cursor = {
     'span': null,
     'position': 0,
-    'absPosition': 0,
 
     //update cursor using current Selection
     'needsUpdate': false,
@@ -371,13 +366,6 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
       //set span mark
 //      $(span).css('outline', '1px solid rgba(0, 0, 0, 0.3)');
       $(this.span).parent().css('background', 'rgba(100, 100, 100, 0.1)');
-    },
-    'incPos': function(val) {
-      if (val === undefined) {
-        val = 1;
-      }
-      this.position += val;
-      this.absPosition += val;
     }
   };
   
@@ -526,32 +514,43 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
     
     //cursor helpers
     var insertAfterCursor = function (char) {
-      that.textDocument.insertText($(cursor.span), cursor.position, char);
+      var $startSpan = $(cursor.span),
+          absStart = that.textDocument.absPosition($startSpan, cursor.position);
+      that.textDocument.insertText($startSpan, cursor.position, char);
+      
+      that.content.trigger('documentAddText',[{
+                              'absStart': absStart,
+                              'value': char,
+                              'span': cursor.span
+                            }]);
+      
       cursor.position += 1;
     };
-    //returns {startAbsOffset: 'start position of removal',
-    //         length: '',
-    //         removedSpanClasses: [],
-    //        }
-    //Funkcja wyboru pozycji kursora po usunięciu zaznaczenia:
-    //Jeżeli zaznaczenie kończy się na granicy SPANów dodajemy tekst do SPANA po LEWEJ. 
-    //Jeżeli czyścimy całą linię, zostawiamy klasę SPANu znajdującego się poprzednio
-    //na początku lini.
     var removeSelectedText = function () {
       if (selectionRange.collapsed === false) {
       
         let $startSpan = $(selectionRange.startContainer.parentElement),
             $endSpan = $(selectionRange.endContainer.parentElement),
-            startPosition = selectionRange.startOffset;
+            startPosition = selectionRange.startOffset,
+            absStart = that.textDocument.absPosition($startSpan, startPosition);
+        
+          
 
         let info = that.textDocument.removeText($startSpan, selectionRange.startOffset,
                                     $endSpan, selectionRange.endOffset);
+        
+        that.content.trigger('documentRemoveText',[{
+                              'absStart': absStart,
+                              'length': info.length,
+                              'removedSpanClasses': info.removedSpanClasses
+                            }]);
 
         cursor.span = info.focus.span;
         cursor.position = info.focus.position;
-      }
+        
         //remove selection
         selectionRange = document.createRange();
+      }
     };
     
     //Delete selection
@@ -565,7 +564,15 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
     } else {
       removeSelectedText();
       if (event.key === 'Enter') {
-        var $lineFirstSpan = that.textDocument.breakLine($(cursor.span), cursor.position);
+        var $lineFirstSpan = that.textDocument.breakLine($(cursor.span), cursor.position),
+            absStart = that.textDocument.absPosition($(cursor.span), cursor.position);
+        
+        that.content.trigger('documentAddText',[{
+                        'absStart': absStart,
+                        'value': '\n',
+                        'span': cursor.span
+                      }]);
+
         //update cursor position
         cursor.setSpan($lineFirstSpan[0]);
         cursor.position = 0;
