@@ -48,7 +48,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
                                   .data('ilex-startoffset', 0)
                                   .data('ilex-endoffset', 0);
   //new lines custos
-  var $custos = $('<div class="ilex-custos"><br></div>').appendTo(that.content);
+  //var $custos = $('<div class="ilex-custos"><br></div>').appendTo(that.content);
 
   //add toolbar at the end to give it access to entre text object
   //that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container, that, canvas);
@@ -75,11 +75,14 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
     'needsUpdate': false,
     'update': function () {
       var selection = window.getSelection();
-      if (selection.anchorNode === $custos[0]) {
-        this.span = that.content.find('span:last')[0],
-        selection.collapse(this.span.childNodes[0], this.span.textContent.length);
+//      if (selection.anchorNode === $custos[0]) {
+//        this.span = that.content.find('span:last')[0],
+//        selection.collapse(this.span.childNodes[0], this.span.textContent.length);
+//      //we are in main div
+//      } else
+    
       //we are in main div
-      } else if (selection.anchorNode === that.content[0]) {
+      if (selection.anchorNode === that.content[0]) {
         this.span = that.content.find('span')[0];
         this.position = 0;
       } else {
@@ -116,11 +119,16 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
   function(event) {
     var span = cursor.span;
     if ($(span).hasClass('ilex-connection')) {
-      if (span.nextElementSibling !== $custos[0]) {
-        cursor.span = span.nextElementSibling;
-      } else {
-        cursor.span = ilex.tools.markup.createIlexSpan().insertAfter(span)[0];
-      }
+//      if (span.nextElementSibling !== $custos[0]) {
+//        cursor.span = span.nextElementSibling;
+//      } else {
+//        cursor.span = ilex.tools.markup.createIlexSpan().insertAfter(span)[0];
+//      }
+        if (span.nextElementSibling !== null) {
+            cursor.span = span.nextElementSibling;
+        } else {
+            cursor.span = ilex.tools.markup.createIlexSpan().insertAfter(span)[0];
+        }
       cursor.position = 0;
     }
     
@@ -356,7 +364,7 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
           
           //create new ilex span
           if (that.content.find('span').length === 0) {
-            let newSpan = ilex.tools.markup.createIlexSpan().prependTo(that.content)
+            let newSpan = ilex.tools.markup.createIlexLine().prependTo(that.content)
                                   .data('ilex-startoffset', 0)
                                   .data('ilex-endoffset', 0);
             cursor.span = newSpan[0];
@@ -411,7 +419,8 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
       //we are not at the end of file
       if (
           !(cursor.position === cursor.span.textContent.length &&
-            cursor.span.nextElementSibling === $custos[0]) &&
+//            cursor.span.nextElementSibling === $custos[0]) &&
+            cursor.span.nextElementSibling === null) &&
           !preventDeletion
         ) {
         //we are before new span
@@ -469,28 +478,39 @@ ilex.widgetsCollection.text = function (windowObject, canvas) {
 
 
   that.loadText = function (params) {
-    //Filling algorithm
-    var chunkSize = 400,
-        chunk = function(str) {
-          var chunks = [];
-          for (var i = 0, charsLength = str.length; i < charsLength; i += chunkSize) {
-              chunks.push(str.substring(i, i + chunkSize));
-          }
-          return chunks;
-        };
+//    //Filling algorithm
+//    var chunkSize = 400,
+//        chunk = function(str) {
+//          var chunks = [];
+//          for (var i = 0, charsLength = str.length; i < charsLength; i += chunkSize) {
+//              chunks.push(str.substring(i, i + chunkSize));
+//          }
+//          return chunks;
+//        };
+//    
+//    //Create new span for evety 100 characters for performance purposes
+//    //remove all spanf from content
+//    that.content.find('span').remove();
+//    let addedChars = 0;
+//    for (let ch of chunk(params.text)) {
+//      let len = ch.length;
+//      //ilex.tools.markup.createIlexSpan().insertBefore($custos)
+//      ilex.tools.markup.createIlexSpan().appendTo(that.content)
+//                                        .data('ilex-startoffset', addedChars)
+//                                        .data('ilex-endoffset', addedChars + len)
+//                                        .text(ch);
+//      addedChars += len;
+//    };
     
-    //Create new span for evety 100 characters for performance purposes
-    //remove all spanf from content
-    that.content.find('span').remove();
     let addedChars = 0;
-    for (let ch of chunk(params.text)) {
-      let len = ch.length;
-      ilex.tools.markup.createIlexSpan().insertBefore($custos)
-                                        .data('ilex-startoffset', addedChars)
-                                        .data('ilex-endoffset', addedChars + len)
-                                        .text(ch);
+    for (let line of params.text.split("\n")) {
+      let len = line.length + 1; //+1 for new line character \n
+      ilex.tools.markup.createIlexLine().appendTo(that.content)
+          .data('ilex-startoffset', addedChars)
+          .data('ilex-endoffset', addedChars + len)
+          .text(line);
       addedChars += len;
-    };
+    }
     
     if (params.isEditable === false) {
       that.content.attr('contenteditable', 'false');
