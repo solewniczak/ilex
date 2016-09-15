@@ -125,9 +125,8 @@ func (cd *ControllerData) TryFinalUpdate(database *mgo.Database, root *tree.Root
 func (cd *ControllerData) NotifyClientsAddText(message *AddTextMessage) {
 	for client, is_present := range cd.Clients {
 		if is_present && client != message.Client {
-			n := NewTabNotification()
-			n.Notification = DOCUMENT_ADD_TEXT
-			n.Tab = client.TabId
+			n := NewTabNotification(client.TabId)
+			n.Notification.Notification = DOCUMENT_ADD_TEXT
 			n.Parameters[POSITION] = message.Position
 			n.Parameters[STRING] = message.String
 			n.Parameters[LENGTH] = message.Length
@@ -139,9 +138,8 @@ func (cd *ControllerData) NotifyClientsAddText(message *AddTextMessage) {
 func (cd *ControllerData) NotifyClientsRemoveText(message *RemoveTextMessage) {
 	for client, is_present := range cd.Clients {
 		if is_present && client != message.Client {
-			n := NewTabNotification()
-			n.Notification = DOCUMENT_REMOVE_TEXT
-			n.Tab = client.TabId
+			n := NewTabNotification(client.TabId)
+			n.Notification.Notification = DOCUMENT_REMOVE_TEXT
 			n.Parameters[POSITION] = message.Position
 			n.Parameters[LENGTH] = message.Length
 			n.SendTo(client.WS)
@@ -152,9 +150,8 @@ func (cd *ControllerData) NotifyClientsRemoveText(message *RemoveTextMessage) {
 func (cd *ControllerData) NotifyClientsNameChange(message *ChangeNameMessage) {
 	for client, is_present := range cd.Clients {
 		if is_present && client != message.Client {
-			n := NewTabNotification()
-			n.Notification = DOCUMENT_CHANGE_NAME
-			n.Tab = client.TabId
+			n := NewTabNotification(client.TabId)
+			n.Notification.Notification = DOCUMENT_CHANGE_NAME
 			n.Parameters[NAME] = message.NewName
 			n.SendTo(client.WS)
 		}

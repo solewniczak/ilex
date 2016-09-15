@@ -23,6 +23,7 @@ var Globals = struct {
 	DocStopContollerMessages map[string](chan interface{})
 	Controllers              map[string]bool
 	ContollerGroup           *sync.WaitGroup
+	Clients                  map[*websocket.Conn]bool
 	ClientDoc                map[ClientTab]string
 	Handlers                 map[string](func(request *IlexMessage, ws *websocket.Conn) error)
 	Counter                  *NotificationCounter
@@ -44,6 +45,7 @@ var Globals = struct {
 	DocStopContollerMessages: make(map[string](chan interface{})),
 	Controllers:              make(map[string]bool),
 	ContollerGroup:           &sync.WaitGroup{},
+	Clients:                  make(map[*websocket.Conn]bool),
 	ClientDoc:                make(map[ClientTab]string),
 	Counter:                  NewNotificationCounter(),
 }

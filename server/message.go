@@ -26,22 +26,34 @@ func NewIlexResponse(request *IlexMessage) *IlexMessage {
 	return im
 }
 
-type TabNotification struct {
+type Notification struct {
 	Notification string                 `json:"notification"`
 	Parameters   map[string]interface{} `json:"parameters"`
 	Id           int                    `json:"id"`
-	Tab          int                    `json:"tab"`
 }
 
-func NewTabNotification() *TabNotification {
-	var n TabNotification
+func NewNotification() *Notification {
+	var n Notification
 	n.Parameters = make(map[string]interface{})
 	n.Id = Globals.Counter.GetNew()
 	return &n
 }
 
-func (n *TabNotification) SendTo(ws *websocket.Conn) error {
+func (n *Notification) SendTo(ws *websocket.Conn) error {
 	js, _ := json.Marshal(n)
 	fmt.Println("sending notification", string(js), "to", *ws)
 	return websocket.JSON.Send(ws, n)
+}
+
+type TabNotification struct {
+	Notification
+	Tab int `json:"tab"`
+}
+
+func NewTabNotification(tabId int) *TabNotification {
+	var n TabNotification
+	n.Parameters = make(map[string]interface{})
+	n.Id = Globals.Counter.GetNew()
+	n.Tab = tabId
+	return &n
 }
