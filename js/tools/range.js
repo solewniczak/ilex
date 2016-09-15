@@ -195,14 +195,6 @@ ilex.tools.range.normalize = function (range) {
     return node.parentNode && node.parentNode.nodeName === 'SPAN';
   };
   
-  //remove custos from range
-//  if (range.endContainer.className === 'ilex-custos') {
-//    let selection = window.getSelection();
-//    range.setStart(range.startContainer, range.startOffset);
-//    range.setEnd(range.endContainer.previousElementSibling.childNodes[0], 
-//                    range.endContainer.previousElementSibling.textContent.length);  
-//  }
-
   //we have selected <div>
   if (!hasSpanParent(range.startContainer)) {
     range.setStart(range.startContainer.childNodes[range.startOffset].childNodes[0], 0);
@@ -210,8 +202,6 @@ ilex.tools.range.normalize = function (range) {
 
   if (!hasSpanParent(range.endContainer)) {
     range.setEnd(range.endContainer.childNodes[range.endOffset].childNodes[0], 0);
-//    let span = range.endContainer.childNodes[range.endOffset].previousSibling;
-//    range.setEnd(span.childNodes[0], span.textContent.length);
   }
   
   return range;
