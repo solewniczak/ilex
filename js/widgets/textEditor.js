@@ -42,79 +42,27 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
   //Span := {elm: $jQueryElm, absStart: int, absEnd: int}
   
   that.textDocument = {
-    'createLine': function (absStart) {
-      var $line = $('<div class="ilex-line">')
-                .data('ilex-absStart', absStart)
-                .data('ilex-absEnd', absStart),
-          $span = ilex.tools.markup.createIlexSpan().appendTo($line)
-                .data('ilex-absStart', absStart)
-                .data('ilex-absEnd', absStart);
+    'createLine': function () {
+      var $line = $('<div class="ilex-line">'),
+          $span = ilex.tools.markup.createIlexSpan().appendTo($line);
       return $line;
     },
     'insertLineAfter': function($after) {
-      var $line;
+      var $line = this.createLine();
       if ($after === undefined) {
-        let absPos = 0,
-            $lastLine = that.content.find('.ilex-line').last();
-        if ($lastLine.length === 1) {
-          absPos = $lastLine.data('ilex-absStart');
-        }
-        $line = this.createLine(absPos);
         $line.appendTo(that.content);
       } else {
-        $line = this.createLine($after.data('ilex-absEnd'));
         $line.insertAfter($after);
       }
       return $line;
-
-    },
-
-    //updatetes abs start and end of each element after $span
-    'updateAbsPosDown': function($span) {
-      var textDocument = that.textDocument,
-          absPos = $span.data('ilex-absStart') + $span.text().length;
-      $span.data('ilex-absEnd', absPos);
-      $span.nextAll().each(function () {
-        let len = $(this).text().length;
-        $(this).data('ilex-absStart', absPos);
-        $(this).data('ilex-absEnd', absPos + len);
-        absPos += len;
-      });
-      let $line = $span.parent();
-      $line.data('ilex-absEnd', absPos);
-      
-      $line.nextAll().each(function () {
-        $line.data('ilex-absStart', absPos);
-        $line.children().each(function () {
-          let len = $(this).text().length;
-          $(this).data('ilex-absStart', absPos);
-          $(this).data('ilex-absEnd', absPos + len);
-          absPos += len;
-        });
-        $line.data('ilex-absEnd', absPos);
-      });
     },
     //relPos - position in span
     'insertText': function($span, relPos, text) {
-      let spanAbsEnd = $span.data('ilex-absEnd');
+      //let spanAbsEnd = $span.data('ilex-absEnd');
       $span.text($span.text().slice(0, relPos) + text + $span.text().slice(relPos));
-      $span.data('ilex-absEnd', spanAbsEnd + text.length);
-      this.updateAbsPosDown($span);
+      //$span.data('ilex-absEnd', spanAbsEnd + text.length);
+      //this.updateAbsPosDown($span);
     },
-//    'appendSpans': function ($line, $spans) {
-//      var lineAbsEnd = $line.data('ilex-absEnd'),
-//          absPos = lineAbsEnd;
-//      
-//      $spans.each(function () {
-//        var text = this.textContent;
-//        $(this).data('ilex-absStart', absPos)
-//              .data('ilex-absEnd', absPos + text.length);
-//        absPos += text.length;
-//        $(this).appendTo($line);
-//      });
-//      
-//      $line.data('ilex-absEnd', lineAbsEnd);
-//    },
     'breakLine': function ($span, relPos) {
       let text = $span.text(),
           textBeforePos = text.slice(0, relPos),
@@ -129,30 +77,18 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
       $newLineSpan.text(textAfterPos);
       $newLineSpan.addClass(cursor.span.className);
       $newLineSpan.after($spansAfterCursor);
-      this.updateAbsPosDown($span);
+      //this.updateAbsPosDown($span);
       
       return $newLineSpan;
-      
-      
-      //this.insertText($newLine.find("span"), 0, textAfterPos);
-      //copy span classes
-//      newLine.find("span").addClass(cursor.span.className);
-//      this.appendSpans($newLine, $spansAfterCursor);
-//
-//      $(cursor.span).text(textBeforeCursor);
-//      newLine.spans[0].elm.text(textAfterCursor);
-//      
-//      insertAfterCursor('\n');
     },
     
-    //returns {absStart: 'start position of removal',
+    //returns {
     //         length: '',
     //         removedSpanClasses: [],
     //         focus: {span: js obj, position: int}
     //        }
     'removeTextSingleSpan': function ($span, relStart, relEnd) {
       var $line = $span.parent(),
-          absStart = $span.data('ilex-absStart') + relStart,
           length = 0,
           removedSpanClasses = [],
           focus = {};
@@ -198,7 +134,6 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
         focus.position = relStart;
       }
       return {
-        'absStart': absStart,
         'length': length,
         'removedSpanClasses': removedSpanClasses,
         'focus': focus
@@ -212,7 +147,6 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
     //        }
     'removeTextSingleLine': function ($startSpan, relStart, $endSpan, relEnd) {
       var $line = $startSpan.parent(),
-          absStart = $startSpan.data('ilex-absStart') + relStart,
           length = 0,
           removedSpanClasses = [],
           focus = {};
@@ -300,79 +234,20 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
         }
         
       }
-      
-//      if ($startSpan.is($endSpan)) {
-//        let info = this.removeTextSingleSpan($startSpan, relStart, relEnd);
-//        length = info.length;
-//        removedSpanClasses = info.removedSpanClasses;
-//        focus = info.focus;
-//      } else {
-//        length += $startSpan.text().length - relStart;
-//        
-//        
-//        $startSpan.text($startSpan.text().slice(0, relStart));
-//        let $span = $startSpan.next();
-//        
-//        if ($startSpan.text().length === 0) {
-//          removedSpanClasses.push($startSpan.attr('class'));
-//          $startSpan.remove();
-//        }
-//        
-//        while (!$span.is($endSpan)) {
-//          
-//          length += $span.text().length;
-//          removedSpanClasses.push($span.attr('class'));
-//          
-//          let $nextSpan = $span.next();
-//          $span.remove();
-//          $span = $nextSpan;
-//          if ($span.length === 0) {
-//            throw "textDocument.removeTextSingleLine: can't reach end span";
-//          }
-//        }
-//        
-//        //assert
-//        if (relEnd === 0) {
-//          throw "assert: textDocument.removeTextSingleLine: relEnd cannot be 0";
-//        }
-//        //assert
-//        if (relEnd === $endSpan.text().length) {
-//          throw "assert: textDocument.removeTextSingleLine: end SPAN never could be fully removed by this function.";
-//        }
-//        
-//        length += relEnd;
-//        $endSpan.text($endSpan.text().slice(relEnd, $endSpan.text().length));
-//        
-//        if ($startSpan.length === 0) {
-//          focus.span = $endSpan[0];
-//          focus.position = 0;
-//        } else {
-//          focus.span = $startSpan[0];
-//          focus.position = $startSpan.text().length;
-//        }
-//      }
-//      
-//      //assert
-//      if ($line.children().length === 0) {
-//        throw "assert: textDocument.removeTextSingleLine: shouldn't remove all spans from";
-//      }
-      
       return {
-        'absStart': absStart,
         'length': length,
         'removedSpanClasses': removedSpanClasses,
         'focus': focus
       };
     },
     
-    //returns {absStart: 'start position of removal',
+    //returns {
     //         length: '',
     //         removedSpanClasses: [],
     //         focus: {span: js obj, position: int}
     //        }
     'removeText': function ($startSpan, relStart, $endSpan, relEnd) {
-      var absStart = $startSpan.data('ilex-absStart') + relStart,
-          length = 0,
+      var length = 0,
           removedSpanClasses = [],
           focus = {},
           $startLine = $startSpan.parent(),
@@ -387,7 +262,7 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
         //process lines between
         let $line = $startLine.next();    
         while(!$line.is($endLine)) {
-          length += $line.data('ilex-absEnd') - $line.data('ilex-absStart');
+          length += this.getLineLength($line);
           $line.children().each(function() {
             removedSpanClasses.push(this.className);
           });
@@ -401,7 +276,8 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
         }
         
         //III.1
-        if ($startLine.children(':first').is($startSpan) && relStart === 0) {
+        if ($startLine.children(':first').is($startSpan) && relStart === 0 &&
+            $endLine.children(':first').is($endSpan) && relEnd === 0) {
           length += $startLine.data('ilex-absEnd') - $startLine.data('ilex-absStart');
           $startLine.children().each(function() {
             removedSpanClasses.push(this.className);
@@ -411,10 +287,9 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
           focus.position = 0;
           
         //III.2 & III.4 & III.5 -> nie można zaznaczyć '\n'
-        } else if ($startLine.children(':first').is($startSpan) && relStart === 0 &&
-                  $endLine.children(':last').is($endSpan) && relEnd === $endSpan.text().length - 1) {
+        } else if ($startLine.children(':first').is($startSpan) && relStart === 0) {
           
-          length += $startLine.data('ilex-absEnd') - $startLine.data('ilex-absStart');
+          length += this.getLineLength($startLine);
           $startLine.children().each(function() {
             removedSpanClasses.push(this.className);
           });
@@ -439,80 +314,19 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
           $endLine.remove();
         }
       }
-      //update positions
-      this.updateAbsPosDown($startSpan);
             
       return {
-        'absStart': absStart,
         'length': length,
         'removedSpanClasses': removedSpanClasses,
         'focus': focus
       };
-        
-        
-//        let $startLineLastSpan = $startLine.children(':last'); 
-//        //process start line AND DO NOT SELECT '\n'
-//        let firstLineInfo = this.removeTextSingleLine($startSpan, relStart,
-//                                  $startLineLastSpan,
-//                                  $startLineLastSpan.text().length - 1);
-//        
-//        length += firstLineInfo.length;
-//        removedSpanClasses =
-//                  removedSpanClasses.concat(firstLineInfo.removedSpanClasses);
-//        
-//        //process end line
-//        let lastLineInfo = this.removeTextSingleLine($endLine.find('span:first'), 0, $endSpan, relEnd);
-//        
-//        length += lastLineInfo.length;
-//        removedSpanClasses = removedSpanClasses.concat(lastLineInfo.removedSpanClasses);
-        
-//        let $line = $startLine.next();
-//        if ($startLine.children().length === 0) {
-//          $startLine.remove();
-//        }
-//        
-//        while(!$line.is($endLine)) {
-//          length += $line.data('ilex-absEnd') - $line.data('ilex-absStart');
-//          $line.children().each(function() {
-//            removedSpanClasses.push(this.className);
-//          });
-//          
-//          let $nextLine = $line.next();
-//          $line.remove();
-//          $line = $nextLine;
-//          if ($line.length === 0) {
-//            throw "textDocument.removeText: can't reach end line";
-//          }
-//        }
-        
-        //start line still exists
-//        if ($startLine.length > 0) {
-//          focus.span = $startLine.children(':last')[0];
-//          focus.position = focus.span.textContent.length;
-//          
-//          //join start and end line
-//          $startLine.append($endLine.children());
-//          //remove empty end line
-//          $endLine.remove();
-//          
-//          //update positions
-//          this.updateAbsPosDown($startSpan);
-//        } else {
-//          //if end line is complete empty recreate it's last span with \n
-//          if ($endLine.children().length === 0) {
-//            let classes = removedSpanClasses.pop(),
-//                $newSpan = ilex.tools.markup.createIlexSpan().addClass(classes);
-//            $newSpan.text("\n");
-//            $endLine.append($newSpan);
-//            
-//            focus.span = $newSpan[0];
-//            focus.position = 0;
-//            
-//            this.updateAbsPosDown($newSpan);
-//          }
-//        }
-//      }
-            
+    },
+    'getLineLength': function ($line) {
+      var length = 0;
+      $line.children().each(function () {
+        length += this.textContent.length;
+      });
+      return length;
     },
     'lineIsEmpty': function ($line) {
       var isEmpty = true;
@@ -530,6 +344,7 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
   var cursor = {
     'span': null,
     'position': 0,
+    'absPosition': 0,
 
     //update cursor using current Selection
     'needsUpdate': false,
@@ -549,13 +364,20 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
       var selection = window.getSelection();
       selection.collapse(this.span.childNodes[0], this.position);
     },
-    'setSpan': function(span) {
+    'setSpan': function(span, position) {
 //      $(this.span).css('outline', '0');
       $(this.span).parent().css('background', 'none');
       this.span = span;    
       //set span mark
 //      $(span).css('outline', '1px solid rgba(0, 0, 0, 0.3)');
       $(this.span).parent().css('background', 'rgba(100, 100, 100, 0.1)');
+    },
+    'incPos': function(val) {
+      if (val === undefined) {
+        val = 1;
+      }
+      this.position += val;
+      this.absPosition += val;
     }
   };
   
@@ -728,23 +550,6 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
         cursor.span = info.focus.span;
         cursor.position = info.focus.position;
       }
-
-  //      let $line = $startSpan.parent();
-          //I assume that you cannot select last \n in the document.
-          //It's very important.
-  //        if (that.textDocument.lineIsEmpty($line)) {
-  //          let $next = $line.next();
-  //          $line.remove();
-  //          cursor.setSpan($next.children(':first')[0]);
-  //          cursor.position = 0;  
-  //        } else {
-  //          //move cursor to the begining of range
-  //          cursor.setSpan($startSpan[0]);
-  //          cursor.position = startPosition;
-  //        }
-
-
-        
         //remove selection
         selectionRange = document.createRange();
     };
@@ -754,6 +559,7 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
         (event.key === 'Backspace' || event.key === 'Delete')) {
       removeSelectedText();
     } else if (event.key === 'Backspace') {
+
     } else if (event.key === 'Delete') {
     
     } else {
