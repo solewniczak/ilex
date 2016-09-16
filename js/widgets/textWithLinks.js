@@ -48,9 +48,10 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, canvas) {
   that.document = null;
   that.loadText = function (params) {
     that.document = ilex.server.document(windowObject.tabId, params.name, params.id);
-    for (let line of params.text.split("\n")) {
+    for (let line of params.text.split('\n')) {
       let $line = that.textEditor.textDocument.insertLineAfter();
-      that.textEditor.textDocument.insertText($line.find("span"), 0, line + "\n");
+      //that.textEditor.textDocument.insertText($line.find("span"), 0, line + "\n");
+      $line.find("span").text(line + '\n');
     }
   };
   
