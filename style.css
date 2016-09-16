@@ -16,8 +16,8 @@ div:focus {
 
 /*https://developer.mozilla.org/en-US/docs/Web/CSS/::selection*/
 .ilex-content span::selection {
-  background: rgba(215, 40, 40, 0.2); /* don't draw default selection color */
-  /*background: transparent;*/
+  /*background: rgba(215, 40, 40, 0.2); /* don't draw default selection color */
+  background: transparent;
 }
 
 /*ilex links styling*/
