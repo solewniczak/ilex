@@ -278,7 +278,7 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
         if ($startSpan.prev().length > 0) {
           $startSpan = $endSpan = $startSpan.prev();
           relStart = $startSpan.text().length - 1;
-          relEnd = relStart + 1;
+          relEnd = relStart;
         //join lines
         } else if ($startLine.prev().length > 0) {
           $startLine = $startLine.prev();
@@ -319,7 +319,10 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
           };
         }
       }
-             
+      
+      console.log($startSpan, $endSpan, relStart, relEnd);
+
+      
       if ($startLine.is($endLine)) {
         let lineInfo = this.removeTextSingleLine($startSpan, relStart, $endSpan, relEnd);
         length = lineInfo.length;
@@ -345,7 +348,7 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
         //III.1
         if ($startLine.children(':first').is($startSpan) && relStart === 0 &&
             $endLine.children(':first').is($endSpan) && relEnd === 0) {
-          length += $startLine.data('ilex-absEnd') - $startLine.data('ilex-absStart');
+          length += this.getLineLength($startLine);
           $startLine.children().each(function() {
             removedSpanClasses.push(this.className);
           });
