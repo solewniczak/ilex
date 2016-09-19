@@ -11,7 +11,7 @@ if (ilex.views === undefined)
 ilex.views.slider = function(canvas) {
   var view = {};
 
-  view.mainSplit = ilex.widgetsCollection.horizontalSplit(ilex.window, [0.9, 0.1]);
+  view.mainSplit = ilex.widgetsCollection.horizontalSplit(ilex.window, [0.85, 0.15]);
 
   view.fileSelector = ilex.widgetsCollection.verticalFileSelector(view.mainSplit.right);
 
