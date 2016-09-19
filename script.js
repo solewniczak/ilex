@@ -22,7 +22,7 @@ $(document).ready(function(){
     ilex.applySize();
   });
 
-  ilex.view = ilex.views.twoColumn(ilex.canvas);
+  ilex.view = ilex.views.slider(ilex.canvas);
 
   ilex.server = ilex.tools.server.create('ws://127.0.0.1:9000/echobot');
   //download text list
