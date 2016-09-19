@@ -15,26 +15,82 @@ ilex.widgetsCollection.verticalFileSelector = function ($parentWidget) {
     height = $parentWidget.data('ilex-height');
 
   that.container = $('<div class="ilex-resize ilex-fileSelector">')
-                  .css('overflow', 'auto')
                   .css('background-color', '#fff')
                   .data('ilex-width', width)
                   .data('ilex-height', height);
   $parentWidget.html(that.container);
+  
+  //marting to - fix strange chorme bug
+  $('<div>').height('5px').html('&nbsp;').appendTo(that.container)
+  
+  //http://stackoverflow.com/questions/6831482/contenteditable-single-line-input
+  that.filterInput = $('<div class="ilex-fileFilter">').appendTo(that.container)
+                  .attr('contenteditable', 'true')
+                  .text('Filter documents')
+                  .data('ilex-empty', 1)
+                  .css('overflow', 'hidden')
+                  .css('white-space', 'nowrap')
+                  .css('font-size', '12px')
+                  .css('color', '#aaa')
+                  .css('border', '1px solid #ccc')
+                  .css('margin', '5px')
+                  .css('margin-top', '0')
+                  .css('padding', '2px');
+  
+  that.filterInput.focus(function () {
+    var $this = $(this);
+    if ($this.data('ilex-empty') === 1) {
+      $this.data('ilex-empty', 0);
+      $this.css('color', '#000'); 
+      $this.text('');
+    }
+  });
+  
+  that.filterInput.blur(function () {
+    var $this = $(this);
+    if ($this.text() === '') {
+      $this.text('Filter documents');
+      $this.css('color', '#aaa'); 
+      $this.data('ilex-empty', 1)
+    }
+  });
+  
+  
+  that.filterInput.on('keydown', function(event) {
+    //Disable Ctrl shortcouts
+    if (event.ctrlKey) {
+      return false;
+    }  
+    if (event.key === 'Enter') {
+      return false;
+    }
+  });
+  
+  that.filterInput.on('input', function(event) {
+    var $this = $(this),
+        query = $(this).text();
+    
+    that.container.find('.ilex-file').each(function () {
+      var $div = $(this);
+      if ($div.text().indexOf(query) !== -1) {
+        $div.show();
+      } else {
+        $div.hide();
+      }
+    });
+  });
 
   that.loadFilesList = function(filesList) {
     for (let file of filesList) {
-      let $div = $('<div>').text(file.name).appendTo(that.container)
+      let $div = $('<div class="ilex-file">').text(file.name).appendTo(that.container)
                 .attr('draggable', 'true')
-                .css('overflow', 'hidden')
                 .css('font-size', '10px')
                 .css('padding', '2px')
-                .css('width', '50px')
-                .css('height', '50px')
                 .css('border', '1px solid #000')
-                .css('margin-right', '50px')
+                .css('margin', '5px')
                 .css('cursor', '-webkit-grab')
-                .css('cursor', 'grab')
-                .css('float', 'left');
+                .css('cursor', 'grab');
+      
       $div.on('dragstart', function(event) {
         event.originalEvent.dataTransfer.setData('ilex/file', JSON.stringify(file));
         $('.ilex-dropableRegion').show();
