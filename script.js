@@ -57,7 +57,7 @@ $(document).ready(function(){
                   },
                 'retrievalFailed':
                   function (params) {
-                    ilex.view.console.log(params.error);
+                    console.log(params.error);
                   },
               });
             };
@@ -67,7 +67,7 @@ $(document).ready(function(){
           },
     'retrievalFailed':
           function (params) {
-            ilex.view.console.log(params.error);
+            console.log(params.error);
           },
   });
 });
