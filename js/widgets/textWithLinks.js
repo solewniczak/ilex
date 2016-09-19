@@ -19,23 +19,86 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, canvas) {
   windowObject.widget.html(that.container);
 
   that.dock = {};
-  that.dock.container = $('<div class="ilex-dock">').appendTo(that.container)
-                          .data('ilex-width', width);
+  that.dock.container = $('<div class="ilex-dock">').appendTo(that.container);
+                          //.data('ilex-width', width);
                           //height depends on button's sizes
   
   //add toolbar at the end to give it access to entre text object
   //that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container, that, canvas);
   
-  that.dock.toolbar = ilex.widgetsCollection.toolbar(that.dock);
+  that.dock.toolbarTop = ilex.widgetsCollection.toolbar(that.dock);
+  that.dock.toolbarSeparator = $('<div>').appendTo(that.dock.container)
+                                  .height('5px');
+  that.dock.toolbarBottom = ilex.widgetsCollection.toolbar(that.dock);
   
-  that.dock.toolbar.addButton('Close tab', //<span class="ilex-awesome">&#xf068;</span>
+  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf00d;</span>', //<span class="ilex-awesome">&#xf00d;</span>
     function(event) {
       windowObject.closeTab();
   });
 
-  that.dock.toolbar.addButton('Close document', //<span class="ilex-awesome">&#xf00d;</span>
+  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf016;</span>', //<span class="ilex-awesome">&#xf00d;</span>
     function(event) {
       windowObject.closeDocument();
+  });
+  
+  that.documentNameInput = ilex.widgetsCollection.blockInput(that.dock.toolbarTop.container, 'Untitled document');
+  that.documentNameInput.element
+    .width('200px')
+    .css('display', 'inline-block')
+    .css('vertical-align', 'middle');
+  
+  that.dock.toolbarTop.addSeparator();
+  
+  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf104;</span>', //<
+    function(event) {
+      
+  });
+  
+  var version = $('<span>0</span>').appendTo(that.dock.toolbarTop.container);
+  
+  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf105;</span>', //>
+    function(event) {
+      
+  });
+  
+  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf101;</span>', //>>
+    function(event) {
+      
+  });
+  
+  that.dock.toolbarTop.addSeparator('15px');
+  
+  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf070;</span>', //slash eye
+    function(event) {
+      $(this).find('span').html('&#xf06e;');//slash eye
+      $(this).addClass('ilex-active');
+    },
+    function (event) {
+      $(this).find('span').html('&#xf070;');//eye
+      $(this).removeClass('ilex-active');
+    });
+  
+  
+  that.dock.toolbarBottom.addButton('<span class="ilex-awesome">&#xf032;</span>', //bold
+    function(event) {
+      
+  });
+  
+  that.dock.toolbarBottom.addButton('<span class="ilex-awesome">&#xf033;</span>', //italic
+    function(event) {
+      
+  });
+  
+  that.dock.toolbarBottom.addButton('<span class="ilex-awesome">&#xf0cd;</span>', //underline
+    function(event) {
+      
+  });
+  
+  that.dock.toolbarBottom.addSeparator('15px');
+  
+  that.dock.toolbarBottom.addButton('<span class="ilex-awesome">&#xf127;</span>', function () {
+    let $spans = that.textEditor.getSelectionSpans();
+    $spans.css('text-decoration', 'underline').css('color', 'blue');
   });
   
   that.textEditor = ilex.widgetsCollection.textEdiotr(that.container, canvas);
@@ -48,10 +111,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, canvas) {
     that.document.removeText(data.absStart, data.length);
   });
   
-  that.dock.toolbar.addButton('Link', function () {
-    let $spans = that.textEditor.getSelectionSpans();
-    $spans.css('text-decoration', 'underline').css('color', 'blue');
-  });
+
   
   that.document = null;
   that.loadText = function (params) {
