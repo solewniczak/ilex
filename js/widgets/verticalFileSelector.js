@@ -70,7 +70,7 @@ ilex.widgetsCollection.verticalFileSelector = function ($parentWidget) {
     var $this = $(this),
         query = $(this).text();
     
-    that.container.find('.ilex-file').each(function () {
+    that.fileContainer.find('.ilex-file').each(function () {
       var $div = $(this);
       if ($div.text().indexOf(query) !== -1) {
         $div.show();
@@ -79,10 +79,13 @@ ilex.widgetsCollection.verticalFileSelector = function ($parentWidget) {
       }
     });
   });
+  
+  that.fileContainer = $('<div class="ilex-fileContainer">').appendTo(that.container);
 
   that.loadFilesList = function(filesList) {
     for (let file of filesList) {
-      let $div = $('<div class="ilex-file">').text(file.name).appendTo(that.container)
+      let $div = $('<div class="ilex-file">').appendTo(that.fileContainer)
+                .text(file.name)
                 .attr('draggable', 'true')
                 .css('font-size', '10px')
                 .css('padding', '2px')
@@ -100,6 +103,16 @@ ilex.widgetsCollection.verticalFileSelector = function ($parentWidget) {
       });
     };
   };
+  
+//  var $createNewDocumentLink = 
+//      $('<a href="#">Create new document</a>').appendTo(that.container)
+//                .css('display', 'block')
+//                .css('font-size', '12px')
+//                .css('text-decoration', 'underline')
+//                .css('margin', '5px')
+//                .css('margin-top', '20px');
+  
+  
   
   that.container.on('windowResize', function(event) {
     width = that.container.parent().data('ilex-width');
