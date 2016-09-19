@@ -19,18 +19,16 @@ ilex.widgetsCollection.horizontalSplit = function ($parentWidget, position) {
   that.table = $('<div class="ilex-resize ilex-horizontalSplit">')
                     .data('ilex-width', width)
                     .data('ilex-height', height)
-                    .css('display', 'table-row');
+                    .css('display', 'flex');
 
   $parentWidget.html(that.table);
 
   that.left = $('<div class="ilex-left">').appendTo(that.table)
-                          .css('display', 'table-cell')
                           .data('ilex-width', innerWidth * position[0])
                           .data('ilex-height', height);
   that.position = position;
   that.handler = $('<div class="ilex-handler">').appendTo(that.table)
                           .data("ilex-position", position)
-                          .css('display', 'table-cell')
                           .css('cursor', 'ew-resize')
                           .data('ilex-width', ilex.widgetsCollection.handlerSize)
                           .data('ilex-height', height)
@@ -38,7 +36,6 @@ ilex.widgetsCollection.horizontalSplit = function ($parentWidget, position) {
 
 
   that.right = $('<div class="ilex-right">').appendTo(that.table)
-                          .css('display', 'table-cell')
                           .data('ilex-width', innerWidth * position[1])
                           .data('ilex-height', height);
 

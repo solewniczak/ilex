@@ -65,7 +65,10 @@ ilex.widgetsCollection.verticalColumns = function ($parentWidget, columns) {
     calculateSizes();
     applySizes();
   };
-
+  
+  that.getColumnWidth = function (column) {
+    return staticColumns[column];
+  };
 
   that.table.on('windowResize', function(event) {
     width = that.table.parent().data('ilex-width');

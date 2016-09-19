@@ -27,16 +27,16 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
       var width = that.container.data('ilex-width'),
           innerWidth = width - (that.visibleWindows-1) *
             ilex.widgetsCollection.handlerSize;
+
       return innerWidth;
     };
-
 
   //contains slider and slider navigation buttons
   that.superContainer = $('<div class="ilex-resize ilex-documentsSlider">')
                     .data('ilex-width', width)
                     .data('ilex-height', height);
   $parentWidget.html(that.superContainer);
-
+  
   that.superTable = ilex.widgetsCollection.verticalColumns(that.superContainer, [0, buttonsWidth, '100%', buttonsWidth]);
   
   that.frozenContainer = that.superTable.columns[0];
@@ -50,8 +50,10 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
 
   that.rightButtons = that.superTable.columns[3];
   //position: absolute fixes strange chrome bug, that misspostion right buttons
-  that.rightButtons.css('position', 'absolute').css('z-index', 15).css('right', 0);
-
+  //that.rightButtons.css('position', 'absolute').css('z-index', 15).css('right', 0);
+  
+  //position: relatieve and right - 1 fixes strange chrome bug, that misspostion right buttons
+  that.rightButtons.css('position', 'relative').css('z-index', 15);
 
   that.table = $('<div>').appendTo(that.container)
                     .css('display', 'flex')
@@ -291,9 +293,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
       this.contentWidget = contentWidget;
       this.toolbar = ilex.widgetsCollection.toolbar(contentWidget.dock);
       var curWindow = this;
-      
-      console.log(curWindow.element.data('ilex-width'));
-
+ 
       //Close document and hide its window.
       this.toolbar.addButton('Close tab', //<span class="ilex-awesome">&#xf068;</span>
           function(event) {
@@ -488,8 +488,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
     }
     setEqualWindowPositions();
     applyWindowPosition();
-    
-    console.log(that.windows[0].element.data('ilex-width'), that.windows[1].element.data('ilex-width'));
 
     ilex.applySize(animate);
   }
@@ -664,7 +662,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
       height = that.superContainer.parent().data('ilex-height');
     
     that.superContainer.data('ilex-width', width);
-    that.container.data('ilex-width', getInnerWidth());
+    //that.container.data('ilex-width', getInnerWidth());
 
     that.superContainer.data('ilex-height', height);
     that.table.data('ilex-height', height);
