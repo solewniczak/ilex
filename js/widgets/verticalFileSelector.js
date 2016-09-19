@@ -23,50 +23,10 @@ ilex.widgetsCollection.verticalFileSelector = function ($parentWidget) {
   //marting to - fix strange chorme bug
   $('<div>').height('5px').html('&nbsp;').appendTo(that.container)
   
-  //http://stackoverflow.com/questions/6831482/contenteditable-single-line-input
-  that.filterInput = $('<div class="ilex-fileFilter">').appendTo(that.container)
-                  .attr('contenteditable', 'true')
-                  .text('Filter documents')
-                  .data('ilex-empty', 1)
-                  .css('overflow', 'hidden')
-                  .css('white-space', 'nowrap')
-                  .css('font-size', '12px')
-                  .css('color', '#aaa')
-                  .css('border', '1px solid #ccc')
-                  .css('margin', '5px')
-                  .css('margin-top', '0')
-                  .css('padding', '2px');
+
+  that.filterInput = ilex.widgetsCollection.blockInput(that.container, 'Filter documents');
   
-  that.filterInput.focus(function () {
-    var $this = $(this);
-    if ($this.data('ilex-empty') === 1) {
-      $this.data('ilex-empty', 0);
-      $this.css('color', '#000'); 
-      $this.text('');
-    }
-  });
-  
-  that.filterInput.blur(function () {
-    var $this = $(this);
-    if ($this.text() === '') {
-      $this.text('Filter documents');
-      $this.css('color', '#aaa'); 
-      $this.data('ilex-empty', 1)
-    }
-  });
-  
-  
-  that.filterInput.on('keydown', function(event) {
-    //Disable Ctrl shortcouts
-    if (event.ctrlKey) {
-      return false;
-    }  
-    if (event.key === 'Enter') {
-      return false;
-    }
-  });
-  
-  that.filterInput.on('input', function(event) {
+  that.filterInput.element.on('input', function(event) {
     var $this = $(this),
         query = $(this).text();
     

@@ -5,8 +5,8 @@ if (ilex === undefined)
   throw 'ilex undefined';
 if (ilex.widgetsCollection === undefined)
   throw 'ilex.widgetsCollection undefined';
-if (ilex.widgetsCollection.console !== undefined)
-  throw 'ilex.widgetsCollection.console already defined';
+if (ilex.widgetsCollection.changesHistory !== undefined)
+  throw 'ilex.widgetsCollection.changesHistory already defined';
 
 
 ilex.widgetsCollection.changesHistory

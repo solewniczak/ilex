@@ -34,6 +34,15 @@ ilex.widgetsCollection.toolbar = function (dock) {
     this.container.append($button);
     return $button;
   };
+  
+  that.addSeparator = function(width) {
+    if (width === undefined) {
+      width = '10px';
+    }
+    $('<div>').appendTo(that.container)
+              .css('display', 'inline-block')
+              .width(width);
+  };
 
   return that;
 }
