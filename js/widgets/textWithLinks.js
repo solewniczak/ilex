@@ -25,10 +25,18 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, canvas) {
   
   //add toolbar at the end to give it access to entre text object
   //that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container, that, canvas);
-  that.dock.titleToolbar = ilex.widgetsCollection.toolbar(that.dock);
+  
   that.dock.toolbar = ilex.widgetsCollection.toolbar(that.dock);
   
+  that.dock.toolbar.addButton('Close tab', //<span class="ilex-awesome">&#xf068;</span>
+    function(event) {
+      windowObject.closeTab();
+  });
 
+  that.dock.toolbar.addButton('Close document', //<span class="ilex-awesome">&#xf00d;</span>
+    function(event) {
+      windowObject.closeDocument();
+  });
   
   that.textEditor = ilex.widgetsCollection.textEdiotr(that.container, canvas);
   

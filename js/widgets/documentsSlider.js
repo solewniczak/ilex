@@ -288,64 +288,57 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
       applyWindowPosition();
 
       ilex.applySize();
-    }
-    newWindow.setContentWidget = function(contentWidget) {
-      this.contentWidget = contentWidget;
-      this.toolbar = ilex.widgetsCollection.toolbar(contentWidget.dock);
-      var curWindow = this;
- 
-      //Close document and hide its window.
-      this.toolbar.addButton('Close tab', //<span class="ilex-awesome">&#xf068;</span>
-          function(event) {
-            var windowHeight = $(window).height();
+    };
+    
+    newWindow.closeTab = function(event) {
+      var windowHeight = $(window).height();
 
-            //bakground for animanito purposes
-            curWindow.contentWidget.container.css('background', '#fff')
-                                             .css('position', 'relative');
-            curWindow.contentWidget.container.animate({'top': windowHeight}, function() {
-              that.visibleWindows -= 1;
+      //bakground for animanito purposes
+      newWindow.contentWidget.container.css('background', '#fff')
+                                       .css('position', 'relative');
+      newWindow.contentWidget.container.animate({'top': windowHeight}, function() {
+        that.visibleWindows -= 1;
 
-              if (that.visibleWindows === 0) {
-                that.visibleWindows = 1;
-                //if last window was closed, create new window
-                if (that.windows.length === 1) {
-                  let lastWindow = that.windows[0],
-                    newWindowWidget = newWindowWidgetCallback(lastWindow);
-                  lastWindow.setContentWidget(newWindowWidget);
-                //we don't have right side document but we have left side one
-                } else if (that.windowPointer === that.windows.length - 1) {
-                  that.slideRight(function () {
-                    curWindow.remove();
-                  });
-                } else {
-                  curWindow.remove();
-                }
-              } else {
-                curWindow.remove();
-              }
+        if (that.visibleWindows === 0) {
+          that.visibleWindows = 1;
+          //if last window was closed, create new window
+          if (that.windows.length === 1) {
+            let lastWindow = that.windows[0],
+              newWindowWidget = newWindowWidgetCallback(lastWindow);
+            lastWindow.setContentWidget(newWindowWidget);
+          //we don't have right side document but we have left side one
+          } else if (that.windowPointer === that.windows.length - 1) {
+            newWindow.slideRight(function () {
+              this.remove();
             });
-          });
-      //Close document and move first document from left.
-      //If there is no document on the left create new document.
-      this.toolbar.addButton('Close document', //<span class="ilex-awesome">&#xf00d;</span>
-          function(event) {
-            var windowHeight = $(window).height();
-        
-            //close tab and "reopen" it with new id
-            ilex.server.tabClose(curWindow.tabId);
-            curWindow.tabId = tabId;
-            tabId++;
+          } else {
+            newWindow.remove();
+          }
+        } else {
+          newWindow.remove();
+        }
+      });
+    };
+    
+    //Close document and move first document from left.
+    //If there is no document on the left create new document.
+    newWindow.closeDocument = function(event) {
+      var windowHeight = $(window).height();
 
-            //bakground for animanito purposes
-            curWindow.contentWidget.container.css('background', '#fff')
-                                             .css('position', 'relative');
-            curWindow.contentWidget.container.animate({'top': windowHeight},
-            function() {
+      //close tab and "reopen" it with new id
+      ilex.server.tabClose(newWindow.tabId);
+      newWindow.tabId = tabId;
+      tabId++;
 
-              //send close message to widget
-              //curWindow.contentWidget.close();
-              curWindow.setContentWidget(newWindowWidgetCallback(curWindow));
-              
+      //bakground for animanito purposes
+      newWindow.contentWidget.container.css('background', '#fff')
+                                       .css('position', 'relative');
+      newWindow.contentWidget.container.animate({'top': windowHeight},
+        function() {
+          //send close message to widget
+          //curWindow.contentWidget.close();
+          this.setContentWidget(newWindowWidgetCallback(newWindow));
+
 //              //there is no window to the right
 //              if (curWindow.id+1 >= that.windows.length) {
 //                curWindow.setContentWidget(newWindowWidgetCallback(curWindow));
@@ -353,19 +346,21 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, newWindowWidge
 //              } else {
 //                curWindow.remove();
 //              }
-            });
-          });
-      
-        //resize widget to window size
-//        this.contentWidget.container.trigger('windowResize');
-      };
-      newWindow.rightSideHandler = createHandlerObject();
-      //function returns window object of antother window 
-      newWindow.getWindow = function(id) {
-        return that.windows[id];
-      };
-      
-      return newWindow;
+      });
+    };
+    
+    newWindow.setContentWidget = function(contentWidget) {
+      this.contentWidget = contentWidget;
+    };
+    
+    newWindow.rightSideHandler = createHandlerObject();
+    
+    //function returns window object of antother window 
+    newWindow.getWindow = function(id) {
+      return that.windows[id];
+    };
+
+    return newWindow;
   },
   addWindow = function(tabId) {
     var newWindow = createWindowObject(),
