@@ -35,7 +35,7 @@ ilex.views.slider = function(canvas) {
       throw 'window: ' + winInd + 'does not exist';
     }
     var win = view.slider.windows[winInd];
-    ilex.tools.mime.loadDocument(win, file, canvas);
+    ilex.tools.mime.loadDocument(win, file);
     //.contentWidget.loadText(params);
     ilex.applySize();
   };
