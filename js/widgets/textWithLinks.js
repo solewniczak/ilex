@@ -8,7 +8,10 @@ if (ilex.widgetsCollection === undefined)
 if (ilex.widgetsCollection.text !== undefined)
   throw 'ilex.widgetsCollection.horizontalSplit already defined';
 
-ilex.widgetsCollection.textWithLinks = function(windowObject, canvas) {
+//file is allTextsInfoResponse object
+//document is ilex.tools.server.document object
+
+ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   var that = {},
     width = windowObject.element.data('ilex-width'),
     height = windowObject.element.data('ilex-height');
@@ -17,6 +20,9 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, canvas) {
                   .data('ilex-width', width)
                   .data('ilex-height', height);
   windowObject.widget.html(that.container);
+  
+  that.document = documentObject;
+  var canvas = ilex.canvas;
 
   that.dock = {};
   that.dock.container = $('<div class="ilex-dock">').appendTo(that.container);
@@ -101,27 +107,35 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, canvas) {
     $spans.css('text-decoration', 'underline').css('color', 'blue');
   });
   
+  that.setDocumentName = function(name) {
+    that.documentNameInput.val(name);
+    that.document.changeName(name);
+  };
+  
+  that.documentNameInput.element.on('change', function () {
+    var val = that.documentNameInput.val();
+    that.document.changeName(val);
+  });
+  
   that.textEditor = ilex.widgetsCollection.textEdiotr(that.container, canvas);
   
   that.textEditor.content.on('documentAddText', function(event, data) {
     that.document.addText(data.absStart - 1, data.value);
   });
   
-  that.textEditor.content.on('documentRemoveText', function(event, data) {
+  that.textEditor.content.on('documentRemoveText', function(event, data) {  
     that.document.removeText(data.absStart, data.length);
   });
-  
 
   
-  that.document = null;
-  that.loadText = function (params) {
-    that.document = ilex.server.document(windowObject.tabId, params.name, params.id);
-    for (let line of params.text.split('\n')) {
-      let $line = that.textEditor.textDocument.insertLineAfter();
-      //that.textEditor.textDocument.insertText($line.find("span"), 0, line + "\n");
-      $line.find("span").text(line + '\n');
-    }
-  };
+//  that.loadText = function (params) {
+//    that.document = ilex.server.document(windowObject.tabId, params.name, params.id);
+//    for (let line of params.text.split('\n')) {
+//      let $line = that.textEditor.textDocument.insertLineAfter();
+//      //that.textEditor.textDocument.insertText($line.find("span"), 0, line + "\n");
+//      $line.find("span").text(line + '\n');
+//    }
+//  };
   
   that.container.on('windowResize', function(event) {
     var width = windowObject.element.data('ilex-width'),

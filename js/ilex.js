@@ -64,6 +64,31 @@ ilex.views = {};
 //additional ilex tools
 ilex.tools = {};
 
+//global map of documents
+//docId => ‘class’: ‘klasa utowrzonego dokumentu’,
+//	‘created’: ‘data utworzenia’,
+//	‘format’: ‘format dokumentu’,
+//	‘id’: ‘id nowoutworzonego dokumentu’,
+//	‘modified’: ‘powinna być równa dacie created’,
+//	name: ‘nazwa’,
+//	‘totalVersions’: 1
+ilex.documents = {};
+ilex.documents.map = new Map();
+ilex.documents.set = function(id, file) {
+  ilex.documents.map.set(id, file);
+  $(document).trigger('ilex-documentsChanged');
+};
+ilex.documents.setFileArray = function(files) {
+  for (let f of files) {
+    ilex.documents.map.set(f.id, f);
+  }
+  $(document).trigger('ilex-documentsChanged');
+};
+
+ilex.documents.get = function(id) {
+  return ilex.documents.map.get(id);
+};
+
 //apply sizes to elements
 ilex.applySize = function(animateWidth, animateHeight, selector) {
   animateWidth = animateWidth || false;

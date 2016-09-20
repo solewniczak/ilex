@@ -30,36 +30,38 @@ $(document).ready(function(){
     'allTextsInfoResponse':
           function (params) {
             var texts =  params.texts;
-            ilex.view.fileSelector.loadFilesList(texts);
+            ilex.documents.setFileArray(texts);
 
             //load example texts
             ilex.view.slider.createWindowSplitSlider(false);
             ilex.view.slider.createWindow();
             var loadToWindow = function (winInd, id, version) {
-              ilex.server.sendAndRecieve('documentGetDump', {
-                'text': id,
-                'version': version,
-                'tab': winInd,
-              },
-              {
-                'documentRetrieved':
-                  function (params) {
-                    ilex.view.loadText(winInd, params);
-                    
-                    if (winInd === 2) {
-                      //load links
-                      for (let link of params.links) {
-                        ilex.tools.connections
-                          .createLinkVspanSets(ilex.view.slider.windows[0].contentWidget, link[0],
-                                               ilex.view.slider.windows[1].contentWidget, link[1]);
-                      }
-                    }
-                  },
-                'retrievalFailed':
-                  function (params) {
-                    console.log(params.error);
-                  },
-              });
+              ilex.view.loadDocument(winInd, ilex.documents.get(id));
+              
+//              ilex.server.sendAndRecieve('documentGetDump', {
+//                'text': id,
+//                'version': version,
+//                'tab': winInd,
+//              },
+//              {
+//                'documentRetrieved':
+//                  function (params) {
+//                    ilex.view.loadDocument(winInd, ilex.documents.get(params.id));
+//                    
+//                    if (winInd === 2) {
+//                      //load links
+//                      for (let link of params.links) {
+//                        ilex.tools.connections
+//                          .createLinkVspanSets(ilex.view.slider.windows[0].contentWidget, link[0],
+//                                               ilex.view.slider.windows[1].contentWidget, link[1]);
+//                      }
+//                    }
+//                  },
+//                'retrievalFailed':
+//                  function (params) {
+//                    console.log(params.error);
+//                  },
+//              });
             };
             loadToWindow(0, texts[0].id, texts[0].totalVersions);
             loadToWindow(1, texts[3].id, texts[3].totalVersions);

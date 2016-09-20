@@ -15,11 +15,12 @@ ilex.views.slider = function(canvas) {
 
   view.fileSelector = ilex.widgetsCollection.verticalFileSelector(view.mainSplit.right);
 
-  view.slider = ilex.widgetsCollection.documentsSlider(view.mainSplit.left,
-    function (win) {
-      return ilex.widgetsCollection.textWithLinks(win, canvas);
-  });
+//  view.slider = ilex.widgetsCollection.documentsSlider(view.mainSplit.left,
+//    function (win, file) {
+//      return ilex.widgetsCollection.textWithLinks(win, canvas, file);
+//  });
   
+  view.slider = ilex.widgetsCollection.documentsSlider(view.mainSplit.left, canvas);
   
   view.mainSplit.right
     .css('position', 'relative')
@@ -29,11 +30,13 @@ ilex.views.slider = function(canvas) {
     .css('position', 'relative')
     .css('z-index', '100000');
 
-  view.loadText = function(winInd, params) {
+  view.loadDocument = function(winInd, file) {
     if (winInd >= view.slider.windows.length) {
       throw 'window: ' + winInd + 'does not exist';
     }
-    view.slider.windows[winInd].contentWidget.loadText(params);
+    var win = view.slider.windows[winInd];
+    ilex.tools.mime.loadDocument(win, file, canvas);
+    //.contentWidget.loadText(params);
     ilex.applySize();
   };
 
