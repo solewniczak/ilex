@@ -8,7 +8,7 @@ if (ilex.widgetsCollection === undefined)
 if (ilex.widgetsCollection.text !== undefined)
   throw 'ilex.widgetsCollection.horizontalSplit already defined';
 
-ilex.widgetsCollection.textEdiotr = function($parent, canvas) {
+ilex.widgetsCollection.textEdiotr = function($parent) {
   var that = {},
     width = $parent.data('ilex-width'),
     height = $parent.data('ilex-height');
@@ -718,7 +718,7 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas) {
     //we have to clear entire container to avoid 1 px artifact between
     //toolbar and content
     var containerOffset = that.container.offset(),
-      widgetRect = canvas.createClientRect(containerOffset.left, containerOffset.top,
+      widgetRect = ilex.canvas.createClientRect(containerOffset.left, containerOffset.top,
                                             that.container.data('ilex-width'),
                                             that.container.data('ilex-height'));
 
@@ -731,17 +731,17 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas) {
   $(document).on('canvasRedraw', function(event) {
     //redraw selections
     var scrollWindowOffset = that.scrollWindow.offset(),
-        clipRect = canvas.createClientRect( scrollWindowOffset.left,
+        clipRect = ilex.canvas.createClientRect( scrollWindowOffset.left,
                                             scrollWindowOffset.top,
                                             that.scrollWindow.data('ilex-width'),
                                             that.scrollWindow.data('ilex-height'));
 
     var rects = ilex.tools.range.getClientRects(selectionRange, that),
-        clientRects = canvas.clipClientRectList(clipRect, rects);
+        clientRects = ilex.canvas.clipClientRectList(clipRect, rects);
 
     for (let i = 0; i < clientRects.length; i++) {
       let rect = clientRects[i];
-      canvas.drawRect(rect, 'rgba(0, 108, 255, 0.3)');
+      ilex.canvas.drawRect(rect, 'rgba(0, 108, 255, 0.3)');
     }
 
   });

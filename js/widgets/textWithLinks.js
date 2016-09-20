@@ -22,7 +22,6 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   windowObject.widget.html(that.container);
   
   that.document = documentObject;
-  var canvas = ilex.canvas;
 
   that.dock = {};
   that.dock.container = $('<div class="ilex-dock">').appendTo(that.container);
@@ -117,7 +116,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
     that.document.changeName(val);
   });
   
-  that.textEditor = ilex.widgetsCollection.textEdiotr(that.container, canvas);
+  that.textEditor = ilex.widgetsCollection.textEdiotr(that.container);
   
   that.textEditor.content.on('documentAddText', function(event, data) {
     that.document.addText(data.absStart - 1, data.value);
