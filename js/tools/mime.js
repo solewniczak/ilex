@@ -35,7 +35,7 @@ ilex.tools.mime.formats['plain text'] = {
     });
   },
   'load': function (win, file) {
-    var documentObject = ilex.server.document(win.tabId, name, file.id),
+    var documentObject = ilex.server.document(win.tabId, file),
         widget = ilex.widgetsCollection.textWithLinks(win, documentObject);
     
     ilex.server.documentGetDump(win.tabId, file.id, file.totalVersions,

@@ -46,11 +46,21 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
       windowObject.closeDocument();
   });
   
-  that.documentNameInput = ilex.widgetsCollection.blockInput(that.dock.toolbarTop.container, 'Untitled document');
+  that.documentNameInput =
+    ilex.widgetsCollection.blockInput(that.dock.toolbarTop.container, 'Untitled document');
   that.documentNameInput.element
     .width('200px')
     .css('display', 'inline-block')
     .css('vertical-align', 'middle');
+  
+  //set name
+  that.documentNameInput.val(that.document.getFileInfo()['name']);
+  
+  that.documentNameInput.element.on('blur', function () {
+    var val = that.documentNameInput.val();
+    that.document.changeName(val);
+  });
+  
   
   that.dock.toolbarTop.addSeparator();
   
@@ -105,17 +115,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
     let $spans = that.textEditor.getSelectionSpans();
     $spans.css('text-decoration', 'underline').css('color', 'blue');
   });
-  
-  that.setDocumentName = function(name) {
-    that.documentNameInput.val(name);
-    that.document.changeName(name);
-  };
-  
-  that.documentNameInput.element.on('change', function () {
-    var val = that.documentNameInput.val();
-    that.document.changeName(val);
-  });
-  
+
   that.textEditor = ilex.widgetsCollection.textEdiotr(that.container);
   
   that.textEditor.content.on('documentAddText', function(event, data) {

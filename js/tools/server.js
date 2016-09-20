@@ -142,6 +142,12 @@ ilex.tools.server.create = function (host) {
           'document': file.id,
           'tab': tabId,
           'name': name
+      }, {
+        'ack': function() {
+          file.name = name;
+          //change files structure
+          ilex.documents.set(file.id, file);
+        }
       });
     };
     
