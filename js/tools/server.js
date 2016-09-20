@@ -88,39 +88,39 @@ ilex.tools.server.create = function (host) {
             'ack': function() {}
           });
   };
-    
-  that.document = function(tabId, name, documentId) {
-    var thatDocument = {}, actionsQueue = [],
-        ackRecieve = function (params) {},
-        sendAction = function(method, params, callbacks) {
-          callbacks = callbacks || {'ack': ackRecieve};
-          var action = {'method': method, 'params': params, 'callbacks': callbacks};
-          if (documentId === undefined) {
-            actionsQueue.push(action);
-          } else {
-            that.sendAndRecieve(action.method, action.params, callbacks);
-          }
-        };
-    //create new document
-    if (documentId === undefined) {
+  
+  //createdCallback is launch after document creation
+  //createdCallback (document)
+  that.createDocument = function(tabId, name, createdCallback) {
       that.sendAndRecieve('createDocument', {
         'tab': tabId,
         'name': name
       },
       {
-        'documentCreated': function(params) {
-          documentId = params.id;
-          for (let action of actionsQueue) {
-            that.sendAndRecieve(action.methos, action.params, action.callbacks);
-          }
-          actionsQueue = [];
+        'documentCreated': function(file) {
+          ilex.documents.set(file.id, file);
+          createdCallback(that.document(tabId, file));
         }
       });
-    }
+  };
+    
+  //object that represents document in tab
+  that.document = function(tabId, file) {
+    var thatDocument = {},
+        ackRecieve = function (params) {},
+        sendAction = function(method, params, callbacks) {
+          callbacks = callbacks || {'ack': ackRecieve};
+          var action = {'method': method, 'params': params, 'callbacks': callbacks};
+          that.sendAndRecieve(action.method, action.params, callbacks);
+        };
+    
+    thatDocument.getFileInfo = function() {
+      return file;
+    };
     
     thatDocument.addText = function(position, str) {
       sendAction('documentAddText', {
-          'document': documentId,
+          'document': file.id,
           'tab': tabId,
           'position': position,
           'string': str,
@@ -130,7 +130,7 @@ ilex.tools.server.create = function (host) {
     
     thatDocument.removeText = function(position, length) {
       sendAction('documentRemoveText', {
-          'document': documentId,
+          'document': file.id,
           'tab': tabId,
           'position': position,
           'length': length
@@ -139,7 +139,7 @@ ilex.tools.server.create = function (host) {
     
     thatDocument.changeName = function(name) {
       sendAction('documentChangeName', {
-          'document': documentId,
+          'document': file.id,
           'tab': tabId,
           'name': name
       });
@@ -147,14 +147,14 @@ ilex.tools.server.create = function (host) {
     
 //    thatDocument.tabClose = function() {
 //      sendAction('tabClose', {
-//          'document': documentId,
+//          'document': file.id,
 //          'tab': tabId
 //      });
 //    };
     
     thatDocument.getVersionsInfo = function(callback) {
       sendAction('documentGetVersionsInfo', {
-          'document': documentId
+          'document': file.id
       }, {
         'documentVersionsInfoRetrieved': callback
       });

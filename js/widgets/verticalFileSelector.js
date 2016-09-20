@@ -42,8 +42,9 @@ ilex.widgetsCollection.verticalFileSelector = function ($parentWidget) {
   
   that.fileContainer = $('<div class="ilex-fileContainer">').appendTo(that.container);
 
-  that.loadFilesList = function(filesList) {
-    for (let file of filesList) {
+  $(document).on('ilex-documentsChanged', function() {
+    that.fileContainer.html('');
+    for (let [id, file] of ilex.documents.map) {
       let $div = $('<div class="ilex-file">').appendTo(that.fileContainer)
                 .text(file.name)
                 .attr('draggable', 'true')
@@ -62,7 +63,7 @@ ilex.widgetsCollection.verticalFileSelector = function ($parentWidget) {
         $('.ilex-dropableRegion').css('background', 'transparent').hide();
       });
     };
-  };
+  });
   
 //  var $createNewDocumentLink = 
 //      $('<a href="#">Create new document</a>').appendTo(that.container)

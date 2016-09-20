@@ -8,7 +8,7 @@ if (ilex.widgetsCollection === undefined)
 if (ilex.widgetsCollection.text !== undefined)
   throw 'ilex.widgetsCollection.horizontalSplit already defined';
 
-ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallback, textRemovedCallback) {
+ilex.widgetsCollection.textEdiotr = function($parent, canvas) {
   var that = {},
     width = $parent.data('ilex-width'),
     height = $parent.data('ilex-height');
@@ -18,22 +18,17 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
                   .data('ilex-height', height);
   $parent.append(that.container);
   
-  that.dock = {};
-  that.dock.container = $('<div class="ilex-dock">').appendTo(that.container)
-                          .data('ilex-width', width);
-                          //height depends on button's sizes
-  
   that.scrollWindow = $('<div class="ilex-scrollWindow">')
                 .appendTo(that.container)
                 .css('overflow-y', 'auto')
                 .css('overflow-x', 'hidden')
                 .data('ilex-width', width)
-                .data('ilex-height', height - that.dock.container.height());
+                .data('ilex-height', height);
 
   that.content = $('<div class="ilex-content">').appendTo(that.scrollWindow)
                 //proper new line handling
                 .css('white-space', 'pre-wrap')
-                .data('ilex-height', height - that.dock.container.height())
+                .data('ilex-height', height)
                 .attr('contenteditable', 'true')
                 .attr('spellcheck', 'false');
 
@@ -511,6 +506,8 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
     }
   };
   
+  //public API
+  
   //Returns spans that covers selection or create new ones if needed
   that.getSelectionSpans = function () {
     if (selectionRange.collapsed === true) {
@@ -542,6 +539,26 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
       
       return $spans;
     }
+  };
+  
+  that.setContent = function (text) {
+    for (let line of text.split('\n')) {
+      let $line = that.textDocument.insertLineAfter();
+      //that.textEditor.textDocument.insertText($line.find("span"), 0, line + "\n");
+      $line.find("span").text(line + '\n');
+    }
+  };
+  
+  
+  that.insertText = function(text, absStart) {
+    if (startPos === undefined) {
+      startPos = 0;
+    }
+    
+  };
+  
+  that.removeText = function(absStart, length) {
+    
   };
   
    //There cannot be empty spans in ilex document
@@ -670,7 +687,6 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
 
     that.container.data('ilex-width', width);
     that.scrollWindow.data('ilex-width', width);
-    that.dock.container.data('ilex-width', width);
     
     that.content.find('.ilex-line').data('ilex-width', width);
     
@@ -681,8 +697,8 @@ ilex.widgetsCollection.textEdiotr = function($parent, canvas, textInsertedCallba
     that.container.data('ilex-height', height);
     //dock conatiner height does not choange
     //content height shrinks
-    that.content.data('ilex-height', height - that.dock.container.height());
-    that.scrollWindow.data('ilex-height', height - that.dock.container.height());
+    that.content.data('ilex-height', height);
+    that.scrollWindow.data('ilex-height', height);
 
   });
 

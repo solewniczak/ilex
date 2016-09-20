@@ -58,11 +58,19 @@ ilex.widgetsCollection.blockInput = function($container, defaultText) {
   });
   
   that.val = function(val) {
-    if (that.element.data('ilex-empty') === 1) {
-      that.element.data('ilex-empty', 0);
-      that.element.css('color', '#000'); 
+    if (val === undefined) {
+       if (that.element.data('ilex-empty') === 1) {
+         return '';
+       } else {
+         return that.element.text();
+       }
+    } else {
+      if (that.element.data('ilex-empty') === 1) {
+        that.element.data('ilex-empty', 0);
+        that.element.css('color', '#000'); 
+      }
+      that.element.text(val);
     }
-    that.element.text(val);
   };
   
   return that;
