@@ -64,21 +64,65 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   
   that.dock.toolbarTop.addSeparator();
   
+  var loadVersion = function(v) {
+    let file = that.document.getFileInfo();
+    ilex.server.documentGetDump(windowObject.tabId, file.id, v,
+      function (resp) {
+        that.textEditor.setContent(resp.text);
+      }
+    );
+  };
+  
   that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf104;</span>', //<
     function(event) {
-      
+      var v = version.get();
+      if (v > 1) {
+        v -= 1;
+        version.set(v);
+        //load new version
+        loadVersion(v);  
+      }
   });
   
-  var version = $('<span>0</span>').appendTo(that.dock.toolbarTop.container);
+  var version = {};
+  version.element = $('<span>0</span>').appendTo(that.dock.toolbarTop.container)
+                                    .css('font-size', '14px')
+                                    .css('display', 'inline-block')
+                                    .css('margin', '0 4px');
+  version.set = function (v) {
+    if (v === that.document.getFileInfo()['totalVersions']) {
+      version.element.html(v + ' (cur.)');
+    } else {
+      version.element.text(v);
+    }
+  };
+  
+  version.get = function () {
+    return parseInt(version.element.text());
+  };
+  
+  //set current version
+  version.set(that.document.getFileInfo()['totalVersions']);
   
   that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf105;</span>', //>
     function(event) {
-      
+      var v = version.get();
+      if (v < that.document.getFileInfo()['totalVersions']) {
+        v += 1;
+        version.set(v);
+        //load new version
+        loadVersion(v);  
+      }
   });
   
   that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf101;</span>', //>>
     function(event) {
-      
+      var v = that.document.getFileInfo()['totalVersions'];
+      if (v !== version.get()) {
+        version.set(v);
+        //load new version
+        loadVersion(v);  
+      }
   });
   
   that.dock.toolbarTop.addSeparator('15px');
@@ -125,6 +169,9 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   that.textEditor.content.on('documentRemoveText', function(event, data) {  
     that.document.removeText(data.absStart, data.length);
   });
+  
+  //load text
+  loadVersion(that.document.getFileInfo()['totalVersions']);  
 
   
 //  that.loadText = function (params) {
