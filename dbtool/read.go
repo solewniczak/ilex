@@ -12,6 +12,7 @@ func read_database(database *mgo.Database) {
 	slices := database.C(ilex.PERMASCROLL)
 	docs := database.C(ilex.DOCS)
 	versions := database.C(ilex.VERSIONS)
+	links := database.C(ilex.LINKS)
 
 	var found []ilex.Slice
 	err := slices.Find(nil).All(&found)
@@ -47,5 +48,15 @@ func read_database(database *mgo.Database) {
 		fmt.Println(i, "DocumentId ", version.DocumentId)
 		fmt.Println(i, "No: ", version.No)
 		fmt.Println(i, "Name: ", version.Name)
+	}
+
+	var db_links []ilex.TwoWayLink
+	err = links.Find(nil).All(&db_links)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for i, link := range db_links {
+		fmt.Printf("%d %v\n", i, link)
 	}
 }

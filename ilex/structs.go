@@ -33,15 +33,18 @@ type Document struct {
 	TotalVersions int           `bson:"TotalVersions" json:"totalVersions"`
 }
 
+type Range struct {
+	//	Id         bson.ObjectId `bson:"_id,omitempty" json:"-"`
+	DocumentId bson.ObjectId `bson:"DocumentId"    json:"documentId"`
+	VersionNo  int           `bson:"VersionNo"     json:"versionNo"`
+	Position   int           `bson:"Position"      json:"position"`
+	Length     int           `bson:"Length"        json:"length"`
+}
+
 type TwoWayLink struct {
-	Id               bson.ObjectId `bson:"_id,omitempty"    json:"-"`
-	FirstDocumentId  bson.ObjectId `bson:"FirstDocumentId"  json:"firstDocumentId"`
-	FirstVersionNo   int           `bson:"FirstVersionNo"   json:"firstVersionNo"`
-	FirstPosition    int           `bson:"FirstPosition"    json:"firstPosition"`
-	FirstLength      int           `bson:"FirstLength"      json:"firstLength"`
-	SecondDocumentId bson.ObjectId `bson:"SecondDocumentId" json:"secondDocumentId"`
-	SecondVersionNo  int           `bson:"SecondVersionNo"  json:"secondVersionNo"`
-	SecondPosition   int           `bson:"SecondPosition"   json:"secondPosition"`
-	SecondLength     int           `bson:"SecondLength"     json:"secondLength"`
-	Type             string        `bson:"Type"             json:"type"`
+	Id     bson.ObjectId `bson:"_id,omitempty" json:"-"`
+	LinkId bson.ObjectId `bson:"LinkId"        json:"linkId"`
+	From   Range         `bson:"From"          json:"from"`
+	To     Range         `bson:"To"            json:"to"`
+	Type   string        `bson:"Type"          json:"type"`
 }
