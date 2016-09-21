@@ -86,34 +86,58 @@ func fill_database(database *mgo.Database) {
 		log.Fatal(err)
 	}
 
-	// pair documents with links
+	var linkIds []bson.ObjectId
+	for i := 0; i < 7; i++ {
+		linkIds = append(linkIds, bson.NewObjectId())
+	}
+
+	// pair documents with links and assign linkIds
 	// (this is a hardcoded mapping)
-	sample_links[0].FirstDocumentId = sample_docs[0].Id
-	sample_links[0].SecondDocumentId = sample_docs[3].Id
-	sample_links[1].FirstDocumentId = sample_docs[1].Id
-	sample_links[1].SecondDocumentId = sample_docs[3].Id
-	sample_links[2].FirstDocumentId = sample_docs[1].Id
-	sample_links[2].SecondDocumentId = sample_docs[3].Id
-	sample_links[3].FirstDocumentId = sample_docs[3].Id
-	sample_links[3].SecondDocumentId = sample_docs[4].Id
-	sample_links[4].FirstDocumentId = sample_docs[3].Id
-	sample_links[4].SecondDocumentId = sample_docs[4].Id
-	sample_links[5].FirstDocumentId = sample_docs[3].Id
-	sample_links[5].SecondDocumentId = sample_docs[4].Id
-	sample_links[6].FirstDocumentId = sample_docs[3].Id
-	sample_links[6].SecondDocumentId = sample_docs[4].Id
-	sample_links[7].FirstDocumentId = sample_docs[3].Id
-	sample_links[7].SecondDocumentId = sample_docs[4].Id
-	sample_links[8].FirstDocumentId = sample_docs[3].Id
-	sample_links[8].SecondDocumentId = sample_docs[4].Id
-	sample_links[9].FirstDocumentId = sample_docs[3].Id
-	sample_links[9].SecondDocumentId = sample_docs[4].Id
-	sample_links[10].FirstDocumentId = sample_docs[3].Id
-	sample_links[10].SecondDocumentId = sample_docs[4].Id
-	sample_links[11].FirstDocumentId = sample_docs[4].Id
-	sample_links[11].SecondDocumentId = sample_docs[2].Id
-	sample_links[12].FirstDocumentId = sample_docs[4].Id
-	sample_links[12].SecondDocumentId = sample_docs[2].Id
+	sample_links[0].From.DocumentId = sample_docs[0].Id
+	sample_links[0].To.DocumentId = sample_docs[3].Id
+	sample_links[0].LinkId = linkIds[0]
+	sample_links[1].From.DocumentId = sample_docs[1].Id
+	sample_links[1].To.DocumentId = sample_docs[3].Id
+	sample_links[1].LinkId = linkIds[1]
+	sample_links[2].From.DocumentId = sample_docs[1].Id
+	sample_links[2].To.DocumentId = sample_docs[3].Id
+	sample_links[2].LinkId = linkIds[1]
+	sample_links[3].From.DocumentId = sample_docs[3].Id
+	sample_links[3].To.DocumentId = sample_docs[4].Id
+	sample_links[3].LinkId = linkIds[2]
+	sample_links[4].From.DocumentId = sample_docs[3].Id
+	sample_links[4].To.DocumentId = sample_docs[4].Id
+	sample_links[4].LinkId = linkIds[2]
+	sample_links[5].From.DocumentId = sample_docs[3].Id
+	sample_links[5].To.DocumentId = sample_docs[4].Id
+	sample_links[5].LinkId = linkIds[2]
+	sample_links[6].From.DocumentId = sample_docs[3].Id
+	sample_links[6].To.DocumentId = sample_docs[4].Id
+	sample_links[6].LinkId = linkIds[2]
+	sample_links[7].From.DocumentId = sample_docs[3].Id
+	sample_links[7].To.DocumentId = sample_docs[4].Id
+	sample_links[7].LinkId = linkIds[3]
+	sample_links[8].From.DocumentId = sample_docs[3].Id
+	sample_links[8].To.DocumentId = sample_docs[4].Id
+	sample_links[8].LinkId = linkIds[3]
+	sample_links[9].From.DocumentId = sample_docs[3].Id
+	sample_links[9].To.DocumentId = sample_docs[4].Id
+	sample_links[9].LinkId = linkIds[3]
+	sample_links[10].From.DocumentId = sample_docs[3].Id
+	sample_links[10].To.DocumentId = sample_docs[4].Id
+	sample_links[10].LinkId = linkIds[3]
+	sample_links[11].From.DocumentId = sample_docs[4].Id
+	sample_links[11].To.DocumentId = sample_docs[2].Id
+	sample_links[11].LinkId = linkIds[4]
+	sample_links[12].From.DocumentId = sample_docs[4].Id
+	sample_links[12].To.DocumentId = sample_docs[2].Id
+	sample_links[12].LinkId = linkIds[4]
+	sample_links[13].From.DocumentId = sample_docs[3].Id
+	sample_links[13].To.DocumentId = sample_docs[2].Id
+	sample_links[13].LinkId = linkIds[5]
+	sample_links[14].From.DocumentId = sample_docs[0].Id
+	sample_links[14].To.DocumentId = sample_docs[4].Id
+	sample_links[14].LinkId = linkIds[6]
 
 	for _, link := range sample_links {
 		if err = links.Insert(link); err != nil {
