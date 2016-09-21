@@ -38,11 +38,6 @@ ilex.tools.mime.formats['plain text'] = {
     var documentObject = ilex.server.document(win.tabId, file),
         widget = ilex.widgetsCollection.textWithLinks(win, documentObject);
     
-    ilex.server.documentGetDump(win.tabId, file.id, file.totalVersions,
-      function (resp) {
-        widget.textEditor.setContent(resp.text);
-        win.setContentWidget(widget);
-      }
-    );
+    win.setContentWidget(widget);
   }
 };
