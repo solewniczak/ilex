@@ -104,6 +104,14 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   //set current version
   version.set(that.document.getFileInfo()['totalVersions']);
   
+  //wait for version changes
+  $(document).on('ilex-fileInfoUpdated', function (event, fileId) {
+    var file = that.document.getFileInfo();
+    if (file.id === fileId) {
+      version.set(file.totalVersions);
+    }
+  });
+  
   that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf105;</span>', //>
     function(event) {
       var v = version.get();
