@@ -70,17 +70,10 @@ func main() {
 
 	wg := &sync.WaitGroup{}
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		AllDocumentsView()
-	}()
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		ControlClients()
-	}()
+	gv := NewGlobalView()
+	if gv == nil {
+		return
+	}
 
 	file_listener, err := net.Listen("tcp", ":8000")
 	if err != nil {
@@ -113,12 +106,7 @@ func main() {
 		CloseAllControllers()
 		file_listener.Close()
 		ws_listener.Close()
-		Globals.StopClientControl <- true
-		select {
-		// try to send signal to documentsView
-		case Globals.StopDocumentsView <- true:
-		default:
-		}
+		gv.Stop()
 		Globals.ContollerGroup.Wait()
 	}()
 

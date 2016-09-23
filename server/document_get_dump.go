@@ -81,7 +81,7 @@ func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
 		if Globals.Controllers[requestedTextId] {
 			// the version is currently being created
 			Globals.DocGetDumpMessages[requestedTextId] <- &GetDumpMessage{ClientTab{ws, client_tab}, requested_version, request.Id}
-			Globals.TabControlMessages <- ClientTabOpenedDoc(ws, client_tab, requestedTextId)
+			Globals.TabControlMessages <- ClientTabOpenedDoc(ws, client_tab, requestedTextId, requested_version)
 			return nil
 		}
 		is_editable = true
@@ -119,7 +119,7 @@ func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
 	response.Parameters[IS_EDITABLE] = is_editable
 	response.Parameters[NAME] = version.Name
 	response.Parameters[ID] = document.Id
-	Globals.TabControlMessages <- ClientTabOpenedDoc(ws, client_tab, requestedTextId)
+	Globals.TabControlMessages <- ClientTabOpenedDoc(ws, client_tab, requestedTextId, requested_version)
 
 	return respond(ws, response)
 }
