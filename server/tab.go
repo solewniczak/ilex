@@ -13,14 +13,16 @@ type ClientTabMessage struct {
 	ClientTab
 	Opened     bool
 	DocumentId string
+	Version    int
 	Closed     bool
 }
 
-func ClientTabOpenedDoc(ws *websocket.Conn, tab_id int, doc_id string) *ClientTabMessage {
+func ClientTabOpenedDoc(ws *websocket.Conn, tab_id int, doc_id string, version int) *ClientTabMessage {
 	result := new(ClientTabMessage)
 	result.WS = ws
 	result.TabId = tab_id
 	result.DocumentId = doc_id
+	result.Version = version
 	result.Opened = true
 	result.Closed = false
 	return result
