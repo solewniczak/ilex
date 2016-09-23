@@ -57,8 +57,11 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   that.documentNameInput.val(that.document.getFileInfo()['name']);
   
   that.documentNameInput.element.on('blur', function () {
-    var val = that.documentNameInput.val();
-    that.document.changeName(val);
+    var val = that.documentNameInput.val(),
+        file = that.document.getFileInfo();
+    if (val !==  file.name) {
+      that.document.changeName(val);
+    }
   });
   
   

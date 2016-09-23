@@ -16,7 +16,7 @@ if (ilex.widgetsCollection.toolbar === undefined)
 if (ilex.widgetsCollection.documentsSlider !== undefined)
   throw 'ilex.widgetsCollection.horizontalSplit already defined';
 
-ilex.widgetsCollection.documentsSlider = function ($parentWidget, canvas) {
+ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterWidget) {
   var that = {},
     tabId = 0,
     //which window display left most
@@ -334,6 +334,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, canvas) {
     newWindow.rightSideHandler.appendTo(that.table);
     
     newWindow.element.data('ilex-window', that.windows.length);
+    
     that.windows.push(newWindow);
 
     
@@ -407,18 +408,27 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, canvas) {
     
     return win;
   };
-
+  
   that.createWindowSplitSlider = function(animate) {
     if (animate === undefined) {
       animate = true;
     }
     
-    that.visibleWindows += 1;
-
     //create new text widndow
-    if (that.windows.length < that.windowPointer + that.visibleWindows) {
-      that.createWindow();
+    if (that.windows.length < that.windowPointer + that.visibleWindows + 1) {
+      //check if starter widget visible on the right
+      let starterWiget = that.windows[that.windows.length - 1].widget.children(':first');
+      //block action
+      if (starterWiget.hasClass("ilex-starterWidget")) {
+        return;
+      }
+
+      let newWindow = that.createWindow();
+      let widget = createStarterWidget(newWindow);
+      newWindow.setContentWidget(widget);
     }
+    
+    that.visibleWindows += 1;
     setEqualWindowPositions();
     applyWindowPosition();
 

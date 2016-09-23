@@ -100,6 +100,9 @@ ilex.tools.server.create = function (host) {
       },
       {
         'documentCreated': function(file) {
+          //TEMP CODE
+          file.name = name;
+          file.totalVersions = 1;
           ilex.documents.set(file.id, file);
           createdCallback(that.document(tabId, file));
         }
