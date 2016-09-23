@@ -23,12 +23,12 @@ func documentChangeName(request *IlexMessage, ws *websocket.Conn) error {
 
 	clientTabId := int(clientTabFloat)
 	client := ClientTab{ws, clientTabId}
-	docId, ok := Globals.ClientDoc[client]
+	text, ok := Globals.ClientDoc[client]
 	if !ok {
 		return respond_with_nak(ws, response, "The tab did not have any document opened!")
 	}
 
-	Globals.DocChangeNameMessages[docId] <- &ChangeNameMessage{client, newName}
+	Globals.DocChangeNameMessages[text.Document] <- &ChangeNameMessage{client, newName}
 	response.Action = ACK
 
 	return respond(ws, response)

@@ -6,9 +6,9 @@ import (
 )
 
 var Globals = struct {
-	StopServer               chan interface{}
-	StopClientControl        chan interface{}
-	StopDocumentsView        chan interface{}
+	StopServer chan interface{}
+	//StopClientControl        chan interface{}
+	//StopDocumentsView        chan interface{}
 	SocketControlMessages    chan *websocket.Conn
 	TabControlMessages       chan *ClientTabMessage
 	AllDocumentRequests      chan *AllDocumentsRequest
@@ -24,13 +24,13 @@ var Globals = struct {
 	Controllers              map[string]bool
 	ContollerGroup           *sync.WaitGroup
 	Clients                  map[*websocket.Conn]bool
-	ClientDoc                map[ClientTab]string
+	ClientDoc                map[ClientTab]Text
 	Handlers                 map[string](func(request *IlexMessage, ws *websocket.Conn) error)
 	Counter                  *NotificationCounter
 }{
-	StopServer:               make(chan interface{}),
-	StopClientControl:        make(chan interface{}),
-	StopDocumentsView:        make(chan interface{}),
+	StopServer: make(chan interface{}),
+	//StopClientControl:        make(chan interface{}),
+	//StopDocumentsView:        make(chan interface{}),
 	SocketControlMessages:    make(chan *websocket.Conn),
 	TabControlMessages:       make(chan *ClientTabMessage),
 	AllDocumentRequests:      make(chan *AllDocumentsRequest),
@@ -46,7 +46,7 @@ var Globals = struct {
 	Controllers:              make(map[string]bool),
 	ContollerGroup:           &sync.WaitGroup{},
 	Clients:                  make(map[*websocket.Conn]bool),
-	ClientDoc:                make(map[ClientTab]string),
+	ClientDoc:                make(map[ClientTab]Text),
 	Counter:                  NewNotificationCounter(),
 }
 
