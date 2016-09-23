@@ -11,23 +11,36 @@ if (ilex.widgetsCollection.text !== undefined)
 ilex.widgetsCollection.textEdiotr = function($parent) {
   var that = {},
     width = $parent.data('ilex-width'),
-    height = $parent.data('ilex-height');
+    height = $parent.data('ilex-height'),
+    scrollBarWidth = 15;
+  
+  var countLineWidth = function () {
+    var width = $parent.data('ilex-width');
+    //has scroll bar
+    if (that.content.get(0).scrollHeight > that.content.height()) {
+      return width - scrollBarWidth;
+    } else {
+      return width;
+    }
+  };
 
   that.container = $('<div class="ilex-resize ilex-textEditor">')
                   .data('ilex-width', width)
                   .data('ilex-height', height);
   $parent.append(that.container);
   
-  that.scrollWindow = $('<div class="ilex-scrollWindow">')
-                .appendTo(that.container)
-                .css('overflow-y', 'auto')
-                .css('overflow-x', 'hidden')
-                .data('ilex-width', width)
-                .data('ilex-height', height);
+//  that.scrollWindow = $('<div class="ilex-scrollWindow">')
+//                .appendTo(that.container)
+//                .css('overflow-y', 'auto')
+//                .css('overflow-x', 'hidden')
+//                .data('ilex-width', width)
+//                .data('ilex-height', height);
 
-  that.content = $('<div class="ilex-content">').appendTo(that.scrollWindow)
+  that.content = $('<div class="ilex-content">').appendTo(that.container)
                 //proper new line handling
                 .css('white-space', 'pre-wrap')
+                .css('overflow-y', 'auto')
+                .css('overflow-x', 'hidden')
                 .data('ilex-height', height)
                 .attr('contenteditable', 'true')
                 .attr('spellcheck', 'false');
@@ -38,7 +51,8 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
   
   that.textDocument = {
     'createLine': function () {
-      var $line = $('<div class="ilex-line">'),
+      var $line = $('<div class="ilex-line">')
+                    .width(countLineWidth()),
           $span = ilex.tools.markup.createIlexSpan().appendTo($line);
       return $line;
     },
@@ -98,7 +112,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
       
       //scroll
       let newLineOffset = $newLine.offset();
-      that.scrollWindow.scrollTop(newLineOffset.top);
+      that.content.scrollTop(newLineOffset.top);
       
       return {'focus': focus};
     },
@@ -693,9 +707,9 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
       height = $parent.data('ilex-height');
 
     that.container.data('ilex-width', width);
-    that.scrollWindow.data('ilex-width', width);
+    //that.scrollWindow.data('ilex-width', width);
     
-    that.content.find('.ilex-line').data('ilex-width', width);
+    that.content.find('.ilex-line').data('ilex-width', countLineWidth());
     
     //that.content doesn't have fix width to react on scrollbar
     //show and hide
@@ -705,7 +719,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     //dock conatiner height does not choange
     //content height shrinks
     that.content.data('ilex-height', height);
-    that.scrollWindow.data('ilex-height', height);
+    //that.scrollWindow.data('ilex-height', height);
 
   });
 
@@ -737,11 +751,11 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
 
   $(document).on('canvasRedraw', function(event) {
     //redraw selections
-    var scrollWindowOffset = that.scrollWindow.offset(),
+    var scrollWindowOffset = that.content.offset(),
         clipRect = ilex.canvas.createClientRect( scrollWindowOffset.left,
                                             scrollWindowOffset.top,
-                                            that.scrollWindow.data('ilex-width'),
-                                            that.scrollWindow.data('ilex-height'));
+                                            that.content.data('ilex-width'),
+                                            that.content.data('ilex-height'));
 
     var rects = ilex.tools.range.getClientRects(selectionRange, that),
         clientRects = ilex.canvas.clipClientRectList(clipRect, rects);
@@ -754,7 +768,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
   });
 
   //when user scrolls redraw the canvas
-  that.scrollWindow.on('scroll', function (event) {
+  that.content.on('scroll', function (event) {
     $(document).trigger('canvasRedraw');
   });
 
