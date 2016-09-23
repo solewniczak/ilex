@@ -28,7 +28,6 @@ ilex.widgetsCollection.verticalFileSelector = function ($parentWidget) {
   
   var filterFiles = function (query) {
     var query = that.filterInput.val();
-    console.log(query);
     
     that.fileContainer.find('.ilex-file').each(function () {
       var $div = $(this);

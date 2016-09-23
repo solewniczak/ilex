@@ -112,6 +112,17 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
     }
   });
   
+  //wait for changes of people
+  $(document).on('ilex-documentAddText', function (event, params) {
+    var file = that.document.getFileInfo();
+    console.log(params);
+    if (params.id === file.id && version.get() === file.totalVersions) {
+      console.log(params);
+    }
+  });
+  
+  
+  
   that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf105;</span>', //>
     function(event) {
       var v = version.get();

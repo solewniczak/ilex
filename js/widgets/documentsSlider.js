@@ -429,6 +429,11 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, canvas) {
     if (that.windowPointer + that.visibleWindows >= that.windows.length) {
       return;
     }
+    //break if some animation in progress
+    if (that.table.is(':animated')) {
+      return;
+    }
+    
     var leftWidth = that.windows[that.windowPointer].element.data('ilex-width'),
       tablePos = that.table.position(),
       slide = tablePos.left - (leftWidth + ilex.widgetsCollection.handlerSize);
@@ -456,6 +461,10 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, canvas) {
 
   that.slideRight = function (callback) {
     if (that.windowPointer === 0) {
+      return;
+    }
+    //break if some animation in progress
+    if (that.table.is(':animated')) {
       return;
     }
 
