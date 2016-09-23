@@ -57,3 +57,9 @@ func NewTabNotification(tabId int) *TabNotification {
 	n.Tab = tabId
 	return &n
 }
+
+func (tn *TabNotification) SendTo(ws *websocket.Conn) error {
+	js, _ := json.Marshal(tn)
+	fmt.Println("sending notification", string(js), "to", *ws)
+	return websocket.JSON.Send(ws, tn)
+}

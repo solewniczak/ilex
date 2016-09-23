@@ -30,12 +30,12 @@ func documentRemoveText(request *IlexMessage, ws *websocket.Conn) error {
 	client := ClientTab{ws, client_tab_id}
 	position := int(position_float)
 	length := int(length_float)
-	doc_id, ok := Globals.ClientDoc[client]
+	text, ok := Globals.ClientDoc[client]
 	if !ok {
 		return respond_with_nak(ws, response, "The tab did not have any document opened!")
 	}
 
-	Globals.DocRemoveTextMessages[doc_id] <- &RemoveTextMessage{client, position, length}
+	Globals.DocRemoveTextMessages[text.Document] <- &RemoveTextMessage{client, position, length}
 	response.Action = ACK
 
 	return respond(ws, response)
