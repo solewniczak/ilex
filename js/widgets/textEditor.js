@@ -96,6 +96,10 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
       focus.span = $newLineSpan[0];
       focus.position = 0;
       
+      //scroll
+      let newLineOffset = $newLine.offset();
+      that.scrollWindow.scrollTop(newLineOffset.top);
+      
       return {'focus': focus};
     },
     
