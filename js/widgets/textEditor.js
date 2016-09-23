@@ -333,9 +333,6 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
         }
       }
       
-      console.log($startSpan, $endSpan, relStart, relEnd);
-
-      
       if ($startLine.is($endLine)) {
         let lineInfo = this.removeTextSingleLine($startSpan, relStart, $endSpan, relEnd);
         length = lineInfo.length;
@@ -757,7 +754,6 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
                                             scrollWindowOffset.top,
                                             that.content.data('ilex-width'),
                                             that.content.data('ilex-height'));
-    console.log(clipRect);
 
     var rects = ilex.tools.range.getClientRects(selectionRange, that),
         clientRects = ilex.canvas.clipClientRectList(clipRect, rects);
