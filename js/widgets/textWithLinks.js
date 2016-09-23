@@ -212,7 +212,9 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
       that.container.data('ilex-width', width);
       //that.dock.container.data('ilex-width', width);
     
-      that.container.data('ilex-height', height);
+      //remember about dock!
+      that.container.data('ilex-height', height - that.dock.container.height());
+    
       //dock conatiner height does not choange
       //content height shrinks
       //that.content.data('ilex-height', height - that.dock.container.height());
