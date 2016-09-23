@@ -707,7 +707,8 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
       height = $parent.data('ilex-height');
 
     that.container.data('ilex-width', width);
-    //that.scrollWindow.data('ilex-width', width);
+    that.content.data('ilex-width', width);
+    
     
     that.content.find('.ilex-line').data('ilex-width', countLineWidth());
     
@@ -756,6 +757,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
                                             scrollWindowOffset.top,
                                             that.content.data('ilex-width'),
                                             that.content.data('ilex-height'));
+    console.log(clipRect);
 
     var rects = ilex.tools.range.getClientRects(selectionRange, that),
         clientRects = ilex.canvas.clipClientRectList(clipRect, rects);
