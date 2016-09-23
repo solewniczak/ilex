@@ -91,7 +91,6 @@ ilex.documents.get = function(id) {
 
 //notifications
 $(document).on('ilex-newVersionAvailable', function (event, data) {
-  console.log(data);
   var file = ilex.documents.get(data.document);
   file.totalVersions = data.version;
   ilex.documents.set(file.id, file);
