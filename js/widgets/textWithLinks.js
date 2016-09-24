@@ -20,8 +20,6 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
                   .data('ilex-width', width)
                   .data('ilex-height', height);
   windowObject.widget.html(that.container);
-  
-  that.document = documentObject;
 
   that.dock = {};
   that.dock.container = $('<div class="ilex-dock">').appendTo(that.container);
@@ -46,6 +44,10 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
       windowObject.closeDocument();
   });
   
+  var getFileInfo = function (attr) {
+    return ilex.documents.get(documentObject.getId())[attr];
+  }
+  
   that.documentNameInput =
     ilex.widgetsCollection.blockInput(that.dock.toolbarTop.container, 'Untitled document');
   that.documentNameInput.element
@@ -54,13 +56,12 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
     .css('vertical-align', 'middle');
   
   //set name
-  that.documentNameInput.val(that.document.getFileInfo()['name']);
+  that.documentNameInput.val(getFileInfo('name'));
   
   that.documentNameInput.element.on('blur', function () {
-    var val = that.documentNameInput.val(),
-        file = that.document.getFileInfo();
-    if (val !==  file.name) {
-      that.document.changeName(val);
+    var val = that.documentNameInput.val();
+    if (val !==  getFileInfo('name')) {
+      documentObject.changeName(val);
     }
   });
   
@@ -68,8 +69,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   that.dock.toolbarTop.addSeparator();
   
   var loadVersion = function(v) {
-    let file = that.document.getFileInfo();
-    ilex.server.documentGetDump(windowObject.tabId, file.id, v,
+    ilex.server.documentGetDump(windowObject.tabId, documentObject.getId(), v,
       function (resp) {
         that.textEditor.setContent(resp.text);
       }
@@ -87,16 +87,20 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
       }
   });
   
+  that.textEditor = ilex.widgetsCollection.textEdiotr(that.container);
+  
   var version = {};
   version.element = $('<span>0</span>').appendTo(that.dock.toolbarTop.container)
                                     .css('font-size', '14px')
                                     .css('display', 'inline-block')
                                     .css('margin', '0 4px');
   version.set = function (v) {
-    if (v === that.document.getFileInfo()['totalVersions']) {
+    if (v === getFileInfo('totalVersions')) {
       version.element.html(v + ' (cur.)');
+      that.textEditor.content.attr('contenteditable', 'true');
     } else {
       version.element.text(v);
+      that.textEditor.content.attr('contenteditable', 'false');
     }
   };
   
@@ -105,22 +109,26 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   };
   
   //set current version
-  version.set(that.document.getFileInfo()['totalVersions']);
+  version.set(getFileInfo('totalVersions'));
   
-  //wait for version changes
+  //wait for version and names changes
   $(document).on('ilex-fileInfoUpdated', function (event, fileId) {
-    var file = that.document.getFileInfo();
-    if (file.id === fileId) {
-      version.set(file.totalVersions);
+    if (documentObject.getId() === fileId) {
+      version.set(getFileInfo('totalVersions'));
     }
   });
   
-  //wait for changes of people
-  $(document).on('ilex-documentAddText', function (event, params) {
-    var file = that.document.getFileInfo();
-    console.log(params);
-    if (params.id === file.id && version.get() === file.totalVersions) {
-      console.log(params);
+  $(document).on('ilex-documentChangeName', function (event, params, tabId) {
+    if (tabId === windowObject.tabId) {
+      that.documentNameInput.val(params.name);
+    }
+  });
+  
+  //wait for changes
+  $(document).on('ilex-documentAddText', function (event, params, tabId) {
+    if (tabId === windowObject.tabId &&
+        version.get() === getFileInfo('totalVersions')) {
+      that.textEditor.insertText(params.string, params.position);
     }
   });
   
@@ -129,7 +137,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf105;</span>', //>
     function(event) {
       var v = version.get();
-      if (v < that.document.getFileInfo()['totalVersions']) {
+      if (v < getFileInfo('totalVersions')) {
         v += 1;
         version.set(v);
         //load new version
@@ -139,7 +147,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   
   that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf101;</span>', //>>
     function(event) {
-      var v = that.document.getFileInfo()['totalVersions'];
+      var v = getFileInfo('totalVersions');
       if (v !== version.get()) {
         version.set(v);
         //load new version
@@ -182,18 +190,18 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
     $spans.css('text-decoration', 'underline').css('color', 'blue');
   });
 
-  that.textEditor = ilex.widgetsCollection.textEdiotr(that.container);
+
   
   that.textEditor.content.on('documentAddText', function(event, data) {
-    that.document.addText(data.absStart - 1, data.value);
+    documentObject.addText(data.absStart - 1, data.value);
   });
   
   that.textEditor.content.on('documentRemoveText', function(event, data) {  
-    that.document.removeText(data.absStart, data.length);
+    documentObject.removeText(data.absStart, data.length);
   });
   
   //load text
-  loadVersion(that.document.getFileInfo()['totalVersions']);  
+  loadVersion(getFileInfo('totalVersions'));  
 
   
 //  that.loadText = function (params) {

@@ -28,7 +28,7 @@ ilex.tools.server.create = function (host) {
     var msg = JSON.parse(event.data);
     console.log('Recieve: ', msg);
     if (msg.notification !== undefined) {
-      $(document).trigger('ilex-'+msg.notification, [msg.parameters]);
+      $(document).trigger('ilex-'+msg.notification, [msg.parameters, msg.tab]);
     } else if (typeof callbacks[msg.id] === 'function') {
       callbacks[msg.id](msg);
     } else {
@@ -99,18 +99,21 @@ ilex.tools.server.create = function (host) {
         'name': name
       },
       {
-        'documentCreated': function(file) {
+        'documentCreated': function(params) {
           //TEMP CODE
+          var file = {};
+          file.id = params.id;
           file.name = name;
           file.totalVersions = 1;
-          ilex.documents.set(file.id, file);
-          createdCallback(that.document(tabId, file));
+          ilex.documents.set(params.id, file);
+          
+          createdCallback(that.document(tabId, params.id));
         }
       });
   };
     
   //object that represents document in tab
-  that.document = function(tabId, file) {
+  that.document = function(tabId, documentId) {
     var thatDocument = {},
         ackRecieve = function (params) {},
         sendAction = function(method, params, callbacks) {
@@ -119,13 +122,13 @@ ilex.tools.server.create = function (host) {
           that.sendAndRecieve(action.method, action.params, callbacks);
         };
     
-    thatDocument.getFileInfo = function() {
-      return file;
+    thatDocument.getId = function () {
+      return documentId;
     };
-    
+      
     thatDocument.addText = function(position, str) {
       sendAction('documentAddText', {
-          'document': file.id,
+          'document': documentId,
           'tab': tabId,
           'position': position,
           'string': str,
@@ -135,7 +138,7 @@ ilex.tools.server.create = function (host) {
     
     thatDocument.removeText = function(position, length) {
       sendAction('documentRemoveText', {
-          'document': file.id,
+          'document': documentId,
           'tab': tabId,
           'position': position,
           'length': length
@@ -144,14 +147,15 @@ ilex.tools.server.create = function (host) {
     
     thatDocument.changeName = function(name) {
       sendAction('documentChangeName', {
-          'document': file.id,
+          'document': documentId,
           'tab': tabId,
           'name': name
       }, {
         'ack': function() {
+          var file = ilex.documents.get(documentId);
           file.name = name;
           //change files structure
-          ilex.documents.set(file.id, file);
+          ilex.documents.set(documentId, file);
         }
       });
     };
@@ -165,7 +169,7 @@ ilex.tools.server.create = function (host) {
     
     thatDocument.getVersionsInfo = function(callback) {
       sendAction('documentGetVersionsInfo', {
-          'document': file.id
+          'document': documentId
       }, {
         'documentVersionsInfoRetrieved': callback
       });
