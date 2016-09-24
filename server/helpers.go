@@ -57,17 +57,23 @@ func CreateNewDocument(docs *mgo.Collection, message *NewDocumentRequest) (error
 
 func CreateFirstVersion(database *mgo.Database, doc *ilex.Document, message *NewDocumentRequest) error {
 	versions := database.C(VERSIONS)
-	slices := database.C(ilex.PERMASCROLL)
-	err, address, length := ilex.Persist([]byte(message.Text), slices)
-	if err != nil {
-		return err
-	}
 	var version ilex.Version
 	version.DocumentId = doc.Id
 	version.No = 1
 	version.Name = message.Name
 	version.Created = ilex.CurrentTime()
-	version.Size = length
-	version.Addresses = ilex.AddressTable{ilex.Address{0, address}}
+
+	if len(message.Text) > 0 {
+		slices := database.C(ilex.PERMASCROLL)
+		err, address, length := ilex.Persist([]byte(message.Text), slices)
+		if err != nil {
+			return err
+		}
+		version.Addresses = ilex.AddressTable{ilex.Address{0, address}}
+		version.Size = length
+	} else {
+		version.Addresses = ilex.AddressTable{}
+		version.Size = 0
+	}
 	return versions.Insert(version)
 }
