@@ -569,8 +569,9 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
   
   
   that.insertText = function(text, absStart) {
-    if (startPos === undefined) {
-      startPos = 0;
+    console.log(text, absStart);
+    if (absStart === undefined) {
+      absStart = 0;
     }
     
   };

@@ -157,7 +157,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       //by default newest version
       //get new document
       var win = that.addWindowBefore(newWindow.element.data('ilex-window'));
-      ilex.tools.mime.loadDocument(win, file);
+      ilex.tools.mime.loadDocument(win, file.id);
       ilex.applySize();
     });
     
@@ -177,7 +177,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       //by default newest version
       //get new document
       var win = that.addWindowAfter(newWindow.element.data('ilex-window'));
-      ilex.tools.mime.loadDocument(win, file);
+      ilex.tools.mime.loadDocument(win, file.id);
       ilex.applySize();
       
     });
@@ -204,7 +204,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       tabId++;
       
       newWindow.removeWidget();
-      ilex.tools.mime.loadDocument(newWindow, file);
+      ilex.tools.mime.loadDocument(newWindow, file.id);
       //ilex.applySize();
     });
 
