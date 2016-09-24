@@ -5,10 +5,10 @@ http://ilex.imz.re/
         1. follow the following tutorials:  
 		golang.org/doc/install  
 		golang.org/doc/code.html  
-		2. Install websockets library:  
+		2. Install necessary golang packages:
             * `? go get golang.org/x/net/websocket`
-		3. Install mgo library:  
             * `? go get gopkg.in/mgo.v2`
+            * `? go get github.com/fatih/structs`
 
 	1. Set up MongoDB:
 		1. Install MongoDB 3.2, for example by following the instructions provided at
