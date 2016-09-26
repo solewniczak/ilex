@@ -66,17 +66,22 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
       return $line;
     },
     //relPos - position in span
-    'insertText': function($span, relPos, text) {
-      var focus = {},
-          absStart = this.absPosition($span, relPos);
+    'insertText': function($span, relPos, text, notify) {
+      if (notify === undefined) {
+        notify = true;
+      }
+      var focus = {};         
       
       $span.text($span.text().slice(0, relPos) + text + $span.text().slice(relPos));
       
-      that.content.trigger('documentAddText',[{
-                              'absStart': absStart,
-                              'value': text,
-                              'span': $span[0]
-                            }]);
+      if (notify) {
+        let absStart = this.absPosition($span, relPos);
+        that.content.trigger('documentAddText',[{
+                                'absStart': absStart,
+                                'value': text,
+                                'span': $span[0]
+                              }]);
+      }
       
       focus.span = $span[0];
       focus.position = relPos + 1;
@@ -84,7 +89,10 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
       return {'focus': focus};
     },
     
-    'breakLine': function ($span, relPos, insertAfter) {
+    'breakLine': function ($span, relPos, notify) {
+      if (notify === undefined) {
+        notify = true;
+      }
       var focus = {},
           text = $span.text(),
           textBeforePos = text.slice(0, relPos),
@@ -97,15 +105,18 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
       let $newLine = that.textDocument.insertLineAfter($oldLine),
           $newLineSpan = $newLine.find("span");
       $newLineSpan.text(textAfterPos);
-      $newLineSpan.addClass(cursor.span.className);
+      //cloning should be done another way
+      //$newLineSpan.addClass(cursor.span.className);
       $newLineSpan.after($spansAfterCursor);
       
-      let absStart = this.absPosition($span, relPos);
-      that.content.trigger('documentAddText',[{
-                      'absStart': absStart,
-                      'value': '\n',
-                      'span': $span[0]
-                    }]);
+      if (notify) {
+        let absStart = this.absPosition($span, relPos);
+        that.content.trigger('documentAddText',[{
+                        'absStart': absStart,
+                        'value': '\n',
+                        'span': $span[0]
+                      }]);
+      }
 
       focus.span = $newLineSpan[0];
       focus.position = 0;
@@ -424,6 +435,28 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
         length += $(this).text().length;
       });
       return length + relPos;
+    },
+    'relPosition': function (absPos) {
+      var focus = {};
+      that.content.find('span').each(function () {
+        if (absPos < $(this).text().length) {
+          let text = this.textContent;
+          if (text.charAt(absPos) === '\n') {
+            let line = this.parentElement,
+                nextLine = line.nextElementSibling,
+                span = nextLine.firstElementChild;
+            focus.span = span;
+            focus.position = 0;
+          } else {
+            focus.span = this;
+            focus.position = absPos + 1;
+          }
+          return false;
+        } else {
+          absPos -= $(this).text().length;
+        }
+      });
+      return focus;
     }
   };
   
@@ -567,13 +600,23 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     }
   };
   
-  
   that.insertText = function(text, absStart) {
-    console.log(text, absStart);
     if (absStart === undefined) {
       absStart = 0;
     }
     
+    var focus = that.textDocument.relPosition(absStart);
+    console.log(focus);
+    
+    for (let i = 0; i < text.length; i++) {
+      let ch = text.charAt(i), info;
+      if (ch === '\n') {
+        info = that.textDocument.breakLine($(focus.span), focus.position, false);
+      } else {
+        info = that.textDocument.insertText($(focus.span), focus.position, ch, false);
+      }
+      focus = info.focus;
+    }  
   };
   
   that.removeText = function(absStart, length) {
@@ -587,7 +630,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
       cursor.update();
     }
   });
-  
+    
   that.content.on('keydown', function(event) {
     //default behaviour
     //https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
