@@ -73,12 +73,12 @@ func (b *Branch) WriteToBuffer(buffer *bytes.Buffer, slices *mgo.Collection) err
 	fmt.Println("going deeper")
 	err := b.Left.WriteToBuffer(buffer, slices)
 	if err != nil {
-		fmt.Println("left child writing error")
+		fmt.Println("left child writing error:", err.Error())
 		return err
 	}
 	err = b.Right.WriteToBuffer(buffer, slices)
 	if err != nil {
-		fmt.Println("right child writing error")
+		fmt.Println("right child writing error", err.Error())
 	}
 	return err
 }

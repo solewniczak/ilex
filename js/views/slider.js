@@ -20,7 +20,8 @@ ilex.views.slider = function(canvas) {
 //      return ilex.widgetsCollection.textWithLinks(win, canvas, file);
 //  });
   
-  view.slider = ilex.widgetsCollection.documentsSlider(view.mainSplit.left, canvas);
+  view.slider = ilex.widgetsCollection.documentsSlider(view.mainSplit.left,
+                                                    ilex.widgetsCollection.textStarter);
   
   view.mainSplit.right
     .css('position', 'relative')

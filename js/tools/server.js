@@ -27,7 +27,9 @@ ilex.tools.server.create = function (host) {
   socket.onmessage = function(event) {
     var msg = JSON.parse(event.data);
     console.log('Recieve: ', msg);
-    if (typeof callbacks[msg.id] === 'function') {
+    if (msg.notification !== undefined) {
+      $(document).trigger('ilex-'+msg.notification, [msg.parameters]);
+    } else if (typeof callbacks[msg.id] === 'function') {
       callbacks[msg.id](msg);
     } else {
         throw 'no callback registered for message ' + msg.id.toString();
@@ -91,21 +93,30 @@ ilex.tools.server.create = function (host) {
   
   //createdCallback is launch after document creation
   //createdCallback (document)
-  that.createDocument = function(tabId, name, createdCallback) {
+  that.createDocument = function(tabId, params, createdCallback) {
       that.sendAndRecieve('createDocument', {
         'tab': tabId,
-        'name': name
+        'class': params.class || '',
+        'format': params.format || '',
+        'name': params.name || '',
+        'text': params.text || '',
       },
       {
-        'documentCreated': function(file) {
-          ilex.documents.set(file.id, file);
-          createdCallback(that.document(tabId, file));
+        'documentCreated': function(fileX) {
+          var file = {};
+          file.id = fileX.Id;
+          file.format = fileX.Format;
+          file.name = fileX.name;
+          file.totalVersions = fileX.TotalVersions;
+          console.log(file);
+          ilex.documents.set(file.id, file);          
+          createdCallback(that.document(tabId, file.id));
         }
       });
   };
     
   //object that represents document in tab
-  that.document = function(tabId, file) {
+  that.document = function(tabId, documentId) {
     var thatDocument = {},
         ackRecieve = function (params) {},
         sendAction = function(method, params, callbacks) {
@@ -114,13 +125,13 @@ ilex.tools.server.create = function (host) {
           that.sendAndRecieve(action.method, action.params, callbacks);
         };
     
-    thatDocument.getFileInfo = function() {
-      return file;
+    thatDocument.getId = function () {
+      return documentId;
     };
-    
+      
     thatDocument.addText = function(position, str) {
       sendAction('documentAddText', {
-          'document': file.id,
+          'document': documentId,
           'tab': tabId,
           'position': position,
           'string': str,
@@ -130,7 +141,7 @@ ilex.tools.server.create = function (host) {
     
     thatDocument.removeText = function(position, length) {
       sendAction('documentRemoveText', {
-          'document': file.id,
+          'document': documentId,
           'tab': tabId,
           'position': position,
           'length': length
@@ -139,14 +150,15 @@ ilex.tools.server.create = function (host) {
     
     thatDocument.changeName = function(name) {
       sendAction('documentChangeName', {
-          'document': file.id,
+          'document': documentId,
           'tab': tabId,
           'name': name
       }, {
         'ack': function() {
+          var file = ilex.documents.get(documentId);
           file.name = name;
           //change files structure
-          ilex.documents.set(file.id, file);
+          ilex.documents.set(documentId, file);
         }
       });
     };
@@ -160,7 +172,7 @@ ilex.tools.server.create = function (host) {
     
     thatDocument.getVersionsInfo = function(callback) {
       sendAction('documentGetVersionsInfo', {
-          'document': file.id
+          'document': documentId
       }, {
         'documentVersionsInfoRetrieved': callback
       });

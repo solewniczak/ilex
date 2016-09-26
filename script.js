@@ -36,7 +36,7 @@ $(document).ready(function(){
             ilex.view.slider.createWindowSplitSlider(false);
             ilex.view.slider.createWindow();
             var loadToWindow = function (winInd, id, version) {
-              ilex.view.loadDocument(winInd, ilex.documents.get(id));
+              ilex.view.loadDocument(winInd, id);
               
 //              ilex.server.sendAndRecieve('documentGetDump', {
 //                'text': id,
