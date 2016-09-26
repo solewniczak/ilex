@@ -598,10 +598,10 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     //clean content
     that.content.html('');
     
-    for (let line of text.split('\n')) {
+    for (let line of text.match(/.*\n/g)) {
       let $line = that.textDocument.insertLineAfter();
       //that.textEditor.textDocument.insertText($line.find("span"), 0, line + "\n");
-      $line.find("span").text(line + '\n');
+      $line.find("span").text(line);
     }
   };
   
