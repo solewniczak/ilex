@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/fatih/structs"
 	"golang.org/x/net/websocket"
 	"gopkg.in/mgo.v2"
 	"ilex/ilex"
@@ -43,6 +44,9 @@ type DocumentUpdate struct {
 type NewDocumentRequest struct {
 	Client    ClientTab
 	Name      string
+	Class     string
+	Format    string
+	Text      string
 	RequestId int
 }
 
@@ -58,12 +62,13 @@ func NotifyClientsNewVersion(message *DocumentUpdate) {
 	}
 }
 
-func NotifyClientsNewDocument(message *NewDocumentRequest) {
+func NotifyClientsNewDocument(newDoc *DocumentWithName) {
 	for client, is_present := range Globals.Clients {
 		if is_present {
 			n := NewNotification()
 			n.Notification = NEW_DOCUMENT_AVAILABLE
-			n.Parameters[NAME] = message.Name
+			n.Parameters = structs.Map(newDoc.Document)
+			n.Parameters[NAME] = newDoc.Name
 			n.SendTo(client)
 		}
 	}
@@ -114,7 +119,6 @@ func NewGlobalView() *GlobalView {
 		fmt.Println("Did not find database!")
 		return nil
 	}
-	defer db_session.Close()
 
 	database := db_session.DB(ilex.DEFAULT_DB)
 	docs := database.C(ilex.DOCS)
@@ -122,7 +126,7 @@ func NewGlobalView() *GlobalView {
 	var found []ilex.Document
 	err = docs.Find(nil).All(&found)
 	if err != nil {
-		fmt.Println("Could not start DocumentsView. Getting docs error:", err.Error())
+		fmt.Println("Could not start GlobalView. Getting docs error:", err.Error())
 		return nil
 	}
 
@@ -132,21 +136,22 @@ func NewGlobalView() *GlobalView {
 	for _, doc := range found {
 		err = GetLatestVersion(database, &doc, &version)
 		if err != nil {
-			fmt.Println("Could not start DocumentsView because of database inconsistency. Error getting versions for", doc.Id.Hex(), ":", err.Error())
+			fmt.Println("Could not start GlobalView because of database inconsistency. Error getting versions for", doc.Id.Hex(), ":", err.Error())
 			return nil
 		}
 		gv.texts[doc.Id.Hex()] = DocumentWithName{doc, version.Name}
 	}
 
-	fmt.Println("DocumentsView is ready with document map: ", gv.texts)
+	fmt.Println("GlobalView is ready with document map: ", gv.texts)
 
 	go func() {
+		defer db_session.Close()
 		for {
 			select {
 			case message := <-Globals.DocumentUpdatedMessages:
 				text, ok := gv.texts[message.DocumentId]
 				if !ok {
-					fmt.Println("DocumentsView received notification about an unknown document: " + message.DocumentId)
+					fmt.Println("GlobalView received notification about an unknown document: " + message.DocumentId)
 					break
 				}
 				if text.Document.TotalVersions > message.Version || text.Document.TotalVersions+1 < message.Version {
@@ -176,26 +181,28 @@ func NewGlobalView() *GlobalView {
 				respond(message.WS, response)
 
 			case message := <-Globals.NewDocumentRequests:
-				err, doc := CreateNewDocument(docs)
+				err, doc := CreateNewDocument(docs, message)
 				if err != nil {
 					break
 				}
-				err = CreateFirstVersion(database, doc, message.Name)
+				err = CreateFirstVersion(database, doc, message)
 				if err != nil {
 					break
 				}
 				docId := doc.Id.Hex()
-				gv.texts[docId] = DocumentWithName{*doc, message.Name}
-				fmt.Println("Created document", docId, "with name", message.Name, "and an empty version")
+				createdDoc := DocumentWithName{*doc, message.Name}
+				gv.texts[docId] = createdDoc
+				fmt.Println("Created document", docId, "with name", message.Name, "and and its first version")
 
 				gv.registerOpening(ClientTabOpenedDoc(message.Client.WS, message.Client.TabId, docId, 1))
 				response := NewIlexMessage()
 				response.Id = message.RequestId
 				response.Action = DOCUMENT_CREATED
-				response.Parameters[ID] = docId
+				response.Parameters = structs.Map(doc)
+				response.Parameters[NAME] = createdDoc.Name
 				respond(message.Client.WS, response)
 
-				NotifyClientsNewDocument(message)
+				NotifyClientsNewDocument(&createdDoc)
 
 			case message := <-Globals.TabControlMessages:
 				fmt.Println("Received message about document", message.DocumentId, ".")

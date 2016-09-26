@@ -43,25 +43,37 @@ func GetLinksForDoc(database *mgo.Database, documentId *bson.ObjectId, version i
 	return err, doc_links
 }
 
-func CreateNewDocument(docs *mgo.Collection) (error, *ilex.Document) {
+func CreateNewDocument(docs *mgo.Collection, message *NewDocumentRequest) (error, *ilex.Document) {
 	var doc ilex.Document
 	doc.Id = bson.NewObjectId()
-	doc.Class = "utf-8 encoded text file"
-	doc.Format = "plain text"
+	doc.Class = message.Class
+	doc.Format = message.Format
 	doc.Created = ilex.CurrentTime()
+	doc.Modified = doc.Created
 	doc.TotalVersions = 1
 	err := docs.Insert(doc)
 	return err, &doc
 }
 
-func CreateFirstVersion(database *mgo.Database, doc *ilex.Document, name string) error {
+func CreateFirstVersion(database *mgo.Database, doc *ilex.Document, message *NewDocumentRequest) error {
 	versions := database.C(VERSIONS)
 	var version ilex.Version
 	version.DocumentId = doc.Id
 	version.No = 1
-	version.Name = name
+	version.Name = message.Name
 	version.Created = ilex.CurrentTime()
-	version.Size = 0
-	version.Addresses = ilex.AddressTable{}
+
+	if len(message.Text) > 0 {
+		slices := database.C(ilex.PERMASCROLL)
+		err, address, length := ilex.Persist([]byte(message.Text), slices)
+		if err != nil {
+			return err
+		}
+		version.Addresses = ilex.AddressTable{ilex.Address{0, address}}
+		version.Size = length
+	} else {
+		version.Addresses = ilex.AddressTable{}
+		version.Size = 0
+	}
 	return versions.Insert(version)
 }
