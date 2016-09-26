@@ -5,6 +5,8 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"ilex/ilex"
+	"unicode"
+	"unicode/utf8"
 )
 
 func GetLatestVersion(database *mgo.Database, doc *ilex.Document, version *ilex.Version) error {
@@ -76,4 +78,9 @@ func CreateFirstVersion(database *mgo.Database, doc *ilex.Document, message *New
 		version.Size = 0
 	}
 	return versions.Insert(version)
+}
+
+func LowerFirst(s string) string {
+	r, n := utf8.DecodeRuneInString(s)
+	return string(unicode.ToLower(r)) + s[n:]
 }

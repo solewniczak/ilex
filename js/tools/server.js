@@ -104,10 +104,10 @@ ilex.tools.server.create = function (host) {
       {
         'documentCreated': function(fileX) {
           var file = {};
-          file.id = fileX.Id;
-          file.format = fileX.Format;
+          file.id = fileX.id;
+          file.format = fileX.format;
           file.name = fileX.name;
-          file.totalVersions = fileX.TotalVersions;
+          file.totalVersions = fileX.totalVersions;
           console.log(file);
           ilex.documents.set(file.id, file);          
           createdCallback(that.document(tabId, file.id));

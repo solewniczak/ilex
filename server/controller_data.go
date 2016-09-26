@@ -41,7 +41,7 @@ func (cd *ControllerData) GetDocumentData(database *mgo.Database) error {
 
 func (cd *ControllerData) RegisterNewClientTab(clientTab *ClientTab) {
 	if cd.Clients[*clientTab] {
-		fmt.Println("Received an unexpected document opened message. Document did not have the tab registered as a client.")
+		fmt.Println("Received an unexpected document opened message. Document already had the tab registered as a client.")
 	} else {
 		cd.Clients[*clientTab] = true
 		cd.TotalClients++
