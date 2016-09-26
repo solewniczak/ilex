@@ -28,7 +28,7 @@ ilex.tools.server.create = function (host) {
     var msg = JSON.parse(event.data);
     console.log('Recieve: ', msg);
     if (msg.notification !== undefined) {
-      $(document).trigger('ilex-'+msg.notification, [msg.parameters, msg.tab]);
+      $(document).trigger('ilex-'+msg.notification, [msg.parameters]);
     } else if (typeof callbacks[msg.id] === 'function') {
       callbacks[msg.id](msg);
     } else {

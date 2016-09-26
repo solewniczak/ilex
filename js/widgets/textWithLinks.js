@@ -118,15 +118,15 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
     }
   });
   
-  $(document).on('ilex-documentChangeName', function (event, params, tabId) {
-    if (tabId === windowObject.tabId) {
+  $(document).on('ilex-documentChangeName', function (event, params) {
+    if (params.tab === windowObject.tabId) {
       that.documentNameInput.val(params.name);
     }
   });
   
   //wait for changes
-  $(document).on('ilex-documentAddText', function (event, params, tabId) {
-    if (tabId === windowObject.tabId &&
+  $(document).on('ilex-documentAddText', function (event, params) {
+    if (params.tab === windowObject.tabId &&
         version.get() === getFileInfo('totalVersions')) {
       that.textEditor.insertText(params.string, params.position);
     }
