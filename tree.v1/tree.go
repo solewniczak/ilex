@@ -44,14 +44,14 @@ func construct_tree_from_address_table(addresses ilex.AddressTable, total_length
 	var i, length_left int
 	for ; i < len(addresses); i++ {
 		if addresses[i][0]-start_position > total_length/2 {
-			length_left = addresses[i][0]
+			length_left = addresses[i][0] - start_position
 			break
 		}
 	}
 
 	if i == len(addresses) {
 		i = len(addresses) - 1
-		length_left = addresses[i][0]
+		length_left = addresses[i][0] - start_position
 	}
 
 	left := construct_tree_from_address_table(addresses[:i], length_left, start_position)
