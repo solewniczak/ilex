@@ -128,7 +128,14 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   $(document).on('ilex-documentAddText', function (event, params) {
     if (params.tab === windowObject.tabId &&
         version.get() === getFileInfo('totalVersions')) {
-      that.textEditor.insertText(params.string, params.position);
+      that.textEditor.insertText(params.position, params.string);
+    }
+  });
+  
+  $(document).on('ilex-documentRemoveText', function (event, params) {
+    if (params.tab === windowObject.tabId &&
+        version.get() === getFileInfo('totalVersions')) {
+      that.textEditor.removeText(params.position, params.length);
     }
   });
   
