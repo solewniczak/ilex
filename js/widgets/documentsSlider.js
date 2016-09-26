@@ -16,7 +16,7 @@ if (ilex.widgetsCollection.toolbar === undefined)
 if (ilex.widgetsCollection.documentsSlider !== undefined)
   throw 'ilex.widgetsCollection.horizontalSplit already defined';
 
-ilex.widgetsCollection.documentsSlider = function ($parentWidget, canvas) {
+ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterWidget) {
   var that = {},
     tabId = 0,
     //which window display left most
@@ -157,7 +157,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, canvas) {
       //by default newest version
       //get new document
       var win = that.addWindowBefore(newWindow.element.data('ilex-window'));
-      ilex.tools.mime.loadDocument(win, file);
+      ilex.tools.mime.loadDocument(win, file.id);
       ilex.applySize();
     });
     
@@ -177,7 +177,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, canvas) {
       //by default newest version
       //get new document
       var win = that.addWindowAfter(newWindow.element.data('ilex-window'));
-      ilex.tools.mime.loadDocument(win, file);
+      ilex.tools.mime.loadDocument(win, file.id);
       ilex.applySize();
       
     });
@@ -204,7 +204,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, canvas) {
       tabId++;
       
       newWindow.removeWidget();
-      ilex.tools.mime.loadDocument(newWindow, file);
+      ilex.tools.mime.loadDocument(newWindow, file.id);
       //ilex.applySize();
     });
 
@@ -281,6 +281,13 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, canvas) {
       });
     };
     
+    newWindow.closeDocument = function(event) {
+      ilex.server.tabClose(newWindow.tabId);
+      newWindow.tabId = tabId;
+      tabId += 1;
+      newWindow.widget.html('');
+    };
+    
     //Close document and move first document from left.
     //If there is no document on the left create new document.
 //    newWindow.closeDocument = function(event) {
@@ -334,6 +341,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, canvas) {
     newWindow.rightSideHandler.appendTo(that.table);
     
     newWindow.element.data('ilex-window', that.windows.length);
+    
     that.windows.push(newWindow);
 
     
@@ -407,18 +415,27 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, canvas) {
     
     return win;
   };
-
+  
   that.createWindowSplitSlider = function(animate) {
     if (animate === undefined) {
       animate = true;
     }
     
-    that.visibleWindows += 1;
-
     //create new text widndow
-    if (that.windows.length < that.windowPointer + that.visibleWindows) {
-      that.createWindow();
+    if (that.windows.length < that.windowPointer + that.visibleWindows + 1) {
+      //check if starter widget visible on the right
+      let starterWiget = that.windows[that.windows.length - 1].widget.children(':first');
+      //block action
+      if (starterWiget.hasClass("ilex-starterWidget")) {
+        return;
+      }
+
+      let newWindow = that.createWindow();
+      let widget = createStarterWidget(newWindow);
+      newWindow.setContentWidget(widget);
     }
+    
+    that.visibleWindows += 1;
     setEqualWindowPositions();
     applyWindowPosition();
 
@@ -429,6 +446,11 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, canvas) {
     if (that.windowPointer + that.visibleWindows >= that.windows.length) {
       return;
     }
+    //break if some animation in progress
+    if (that.table.is(':animated')) {
+      return;
+    }
+    
     var leftWidth = that.windows[that.windowPointer].element.data('ilex-width'),
       tablePos = that.table.position(),
       slide = tablePos.left - (leftWidth + ilex.widgetsCollection.handlerSize);
@@ -456,6 +478,10 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, canvas) {
 
   that.slideRight = function (callback) {
     if (that.windowPointer === 0) {
+      return;
+    }
+    //break if some animation in progress
+    if (that.table.is(':animated')) {
       return;
     }
 

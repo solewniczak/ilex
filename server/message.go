@@ -45,15 +45,8 @@ func (n *Notification) SendTo(ws *websocket.Conn) error {
 	return websocket.JSON.Send(ws, n)
 }
 
-type TabNotification struct {
-	Notification
-	Tab int `json:"tab"`
-}
-
-func NewTabNotification(tabId int) *TabNotification {
-	var n TabNotification
-	n.Parameters = make(map[string]interface{})
-	n.Id = Globals.Counter.GetNew()
-	n.Tab = tabId
-	return &n
+func NewTabNotification(tabId int) *Notification {
+	n := NewNotification()
+	n.Parameters[TAB] = tabId
+	return n
 }

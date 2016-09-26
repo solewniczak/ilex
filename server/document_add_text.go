@@ -32,7 +32,7 @@ func documentAddText(request *IlexMessage, ws *websocket.Conn) error {
 		return respond_with_nak(ws, response, "No length supplied!")
 	}
 
-	text, ok := request.Parameters[STRING].(string)
+	addedText, ok := request.Parameters[STRING].(string)
 	if !ok {
 		return respond_with_nak(ws, response, "No string supplied!")
 	}
@@ -42,16 +42,16 @@ func documentAddText(request *IlexMessage, ws *websocket.Conn) error {
 	position := int(position_float)
 	length := int(length_float)
 
-	if utf8.RuneCount([]byte(text)) != length {
+	if utf8.RuneCount([]byte(addedText)) != length {
 		return respond_with_nak(ws, response, "The supplied has wrong length!")
 	}
 
-	doc_id, ok := Globals.ClientDoc[client]
+	text, ok := Globals.ClientDoc[client]
 	if !ok {
 		return respond_with_nak(ws, response, "The tab did not have any document opened!")
 	}
 
-	Globals.DocAddTextMessages[doc_id] <- &AddTextMessage{client, position, length, text}
+	Globals.DocAddTextMessages[text.Document] <- &AddTextMessage{client, position, length, addedText}
 	response.Action = ACK
 
 	return respond(ws, response)

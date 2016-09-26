@@ -10,11 +10,12 @@ if (ilex.tools.server === undefined)
 
 ilex.tools.mime = {};
 
-ilex.tools.mime.loadDocument = function (win, file) {
+ilex.tools.mime.loadDocument = function (win, documentId) {
+  var file = ilex.documents.get(documentId);
   if (ilex.tools.mime.formats[file.format] === undefined) {
     throw 'ilex.tools.mime.loadDocument: undefined file format';
   }
-  ilex.tools.mime.formats[file.format].load(win, file);
+  ilex.tools.mime.formats[file.format].load(win, documentId);
 };
 
 //type from mime.formats
@@ -28,14 +29,19 @@ ilex.tools.mime.createDocument = function (win, type) {
 ilex.tools.mime.formats = {};
 ilex.tools.mime.formats['plain text'] = {
   'create': function (win) {
-    var name = 'Unititled document';
-    ilex.server.createDocument(win.tabId, name, function(documentObject) {
+    var params = {};
+    params.name = 'Unititled document';
+    params.text = '\n';
+    params.class = 'utf-8 encoded text file';
+    params.format = 'plain text';
+    
+    ilex.server.createDocument(win.tabId, params, function(documentObject) {
       var widget = ilex.widgetsCollection.textWithLinks(win, documentObject);
       win.setContentWidget(widget);
     });
   },
-  'load': function (win, file) {
-    var documentObject = ilex.server.document(win.tabId, file),
+  'load': function (win, documentId) {
+    var documentObject = ilex.server.document(win.tabId, documentId),
         widget = ilex.widgetsCollection.textWithLinks(win, documentObject);
     
     win.setContentWidget(widget);

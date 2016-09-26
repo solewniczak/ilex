@@ -26,9 +26,8 @@ ilex.widgetsCollection.verticalFileSelector = function ($parentWidget) {
 
   that.filterInput = ilex.widgetsCollection.blockInput(that.container, 'Filter documents');
   
-  that.filterInput.element.on('input', function(event) {
-    var $this = $(this),
-        query = $(this).text();
+  var filterFiles = function (query) {
+    var query = that.filterInput.val();
     
     that.fileContainer.find('.ilex-file').each(function () {
       var $div = $(this);
@@ -38,7 +37,9 @@ ilex.widgetsCollection.verticalFileSelector = function ($parentWidget) {
         $div.hide();
       }
     });
-  });
+  }
+  
+  that.filterInput.element.on('input', filterFiles);
   
   that.fileContainer = $('<div class="ilex-fileContainer">').appendTo(that.container);
 
@@ -63,6 +64,8 @@ ilex.widgetsCollection.verticalFileSelector = function ($parentWidget) {
         $('.ilex-dropableRegion').css('background', 'transparent').hide();
       });
     };
+    //filter files after adding them
+    filterFiles();
   });
   
 //  var $createNewDocumentLink = 

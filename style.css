@@ -91,3 +91,22 @@ div:focus {
   margin: 0 10px;
   display: inline-block;
 }
+
+.ilex-noBorderButton {
+  text-align: center;
+  vertical-align: middle;
+  background-color: #efefef;
+  color: #262626;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 12px;
+  font-family: IlexSans;
+}
+
+.ilex-noBorderButton:hover {
+  background-color: #ccc;
+}
+
+.ilex-noBorderButton:active {
+  background-color: #aaa;
+}

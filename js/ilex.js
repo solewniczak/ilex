@@ -89,6 +89,14 @@ ilex.documents.get = function(id) {
   return ilex.documents.map.get(id);
 };
 
+//notifications
+$(document).on('ilex-newVersionAvailable', function (event, data) {
+  var file = ilex.documents.get(data.document);
+  file.totalVersions = data.version;
+  ilex.documents.set(file.id, file);
+  $(document).trigger('ilex-fileInfoUpdated', file.id);
+});
+
 //apply sizes to elements
 ilex.applySize = function(animateWidth, animateHeight, selector) {
   animateWidth = animateWidth || false;
