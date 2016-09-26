@@ -285,7 +285,10 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     //         removedSpanClasses: [],
     //         focus: {span: js obj, position: int}
     //        }
-    'removeText': function ($startSpan, relStart, $endSpan, relEnd) {
+    'removeText': function ($startSpan, relStart, $endSpan, relEnd, notify) {
+      if (notify === undefined) {
+        notify = true;
+      }
       var length = 0,
           absStart = that.textDocument.absPosition($startSpan, relStart),
           removedSpanClasses = [],
@@ -406,13 +409,15 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
         }
       }
       
-      //send removal event  
-      that.content.trigger('documentRemoveText',[{
-                    'absStart': absStart,
-                    'length': length,
-                    'removedSpanClasses': removedSpanClasses
-                  }]);
-            
+      if (notify) {
+        //send removal event  
+        that.content.trigger('documentRemoveText',[{
+                      'absStart': absStart,
+                      'length': length,
+                      'removedSpanClasses': removedSpanClasses
+                    }]);
+      }
+           
       return {
         'length': length,
         'removedSpanClasses': removedSpanClasses,
@@ -441,12 +446,12 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
       that.content.find('span').each(function () {
         if (absPos < $(this).text().length) {
           let text = this.textContent;
-          if (text.charAt(absPos) === '\n') {
+          if (text.charAt(absPos) === '\n' && line.nextElementSibling !== null) {
             let line = this.parentElement,
                 nextLine = line.nextElementSibling,
                 span = nextLine.firstElementChild;
-            focus.span = span;
-            focus.position = 0;
+              focus.span = span;
+              focus.position = 0;
           } else {
             focus.span = this;
             focus.position = absPos + 1;
@@ -600,13 +605,8 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     }
   };
   
-  that.insertText = function(text, absStart) {
-    if (absStart === undefined) {
-      absStart = 0;
-    }
-    
+  that.insertText = function(absStart, text) {
     var focus = that.textDocument.relPosition(absStart);
-    console.log(focus);
     
     for (let i = 0; i < text.length; i++) {
       let ch = text.charAt(i), info;
@@ -620,7 +620,11 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
   };
   
   that.removeText = function(absStart, length) {
+    var start = that.textDocument.relPosition(absStart - 1),
+        end = that.textDocument.relPosition(absStart + length - 1);
     
+    that.textDocument.removeText($(start.span), start.position,
+                                 $(end.span), end.position, false);
   };
   
    //There cannot be empty spans in ilex document
