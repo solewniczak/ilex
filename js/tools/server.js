@@ -93,21 +93,24 @@ ilex.tools.server.create = function (host) {
   
   //createdCallback is launch after document creation
   //createdCallback (document)
-  that.createDocument = function(tabId, name, createdCallback) {
+  that.createDocument = function(tabId, params, createdCallback) {
       that.sendAndRecieve('createDocument', {
         'tab': tabId,
-        'name': name
+        'class': params.class || '',
+        'format': params.format || '',
+        'name': params.name || '',
+        'text': params.text || '',
       },
       {
-        'documentCreated': function(params) {
-          //TEMP CODE
+        'documentCreated': function(fileX) {
           var file = {};
-          file.id = params.id;
-          file.name = name;
-          file.totalVersions = 1;
-          ilex.documents.set(params.id, file);
-          
-          createdCallback(that.document(tabId, params.id));
+          file.id = fileX.Id;
+          file.format = fileX.Format;
+          file.name = fileX.name;
+          file.totalVersions = fileX.TotalVersions;
+          console.log(file);
+          ilex.documents.set(file.id, file);          
+          createdCallback(that.document(tabId, file.id));
         }
       });
   };

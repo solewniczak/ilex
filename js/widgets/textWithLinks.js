@@ -42,6 +42,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf016;</span>', //<span class="ilex-awesome">&#xf00d;</span>
     function(event) {
       windowObject.closeDocument();
+      ilex.tools.mime.createDocument(windowObject, 'plain text');
   });
   
   var getFileInfo = function (attr) {

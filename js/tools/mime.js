@@ -29,8 +29,13 @@ ilex.tools.mime.createDocument = function (win, type) {
 ilex.tools.mime.formats = {};
 ilex.tools.mime.formats['plain text'] = {
   'create': function (win) {
-    var name = 'Unititled document';
-    ilex.server.createDocument(win.tabId, name, function(documentId) {
+    var params = {};
+    params.name = 'Unititled document';
+    params.text = '\n';
+    params.class = 'utf-8 encoded text file';
+    params.format = 'plain text';
+    
+    ilex.server.createDocument(win.tabId, params, function(documentObject) {
       var widget = ilex.widgetsCollection.textWithLinks(win, documentObject);
       win.setContentWidget(widget);
     });

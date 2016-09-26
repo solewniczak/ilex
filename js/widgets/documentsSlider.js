@@ -281,6 +281,13 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       });
     };
     
+    newWindow.closeDocument = function(event) {
+      ilex.server.tabClose(newWindow.tabId);
+      newWindow.tabId = tabId;
+      tabId += 1;
+      newWindow.widget.html('');
+    };
+    
     //Close document and move first document from left.
     //If there is no document on the left create new document.
 //    newWindow.closeDocument = function(event) {
