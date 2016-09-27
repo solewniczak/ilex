@@ -14,11 +14,11 @@ const (
 )
 
 func createDocument(request *IlexMessage, ws *websocket.Conn) error {
-	response := NewIlexResponse(request)
 
+	var clientTab ClientTab
 	clientTabFloat, ok := request.Parameters[TAB].(float64)
-	if !ok {
-		return respond_with_nak(ws, response, "No tab id supplied!")
+	if ok {
+		clientTab = ClientTab{ws, int(clientTabFloat)}
 	}
 
 	name, ok := request.Parameters[NAME].(string)
@@ -41,7 +41,6 @@ func createDocument(request *IlexMessage, ws *websocket.Conn) error {
 		format = DEFAULT_FORMAT
 	}
 
-	clientTabId := int(clientTabFloat)
-	Globals.NewDocumentRequests <- &NewDocumentRequest{ClientTab{ws, clientTabId}, name, class, format, text, request.Id}
+	Globals.NewDocumentRequests <- &NewDocumentRequest{clientTab, name, class, format, text, request.Id}
 	return nil
 }
