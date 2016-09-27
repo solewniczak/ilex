@@ -38,6 +38,7 @@ ilex.tools.mime.formats['plain text'] = {
     ilex.server.createDocument(win.tabId, params, function(documentObject) {
       var widget = ilex.widgetsCollection.textWithLinks(win, documentObject);
       win.setContentWidget(widget);
+      ilex.applySize();
     });
   },
   'load': function (win, documentId) {
@@ -45,5 +46,7 @@ ilex.tools.mime.formats['plain text'] = {
         widget = ilex.widgetsCollection.textWithLinks(win, documentObject);
     
     win.setContentWidget(widget);
+    
+    ilex.applySize();
   }
 };
