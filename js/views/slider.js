@@ -33,7 +33,7 @@ ilex.views.slider = function(canvas) {
 
   view.loadDocument = function(winInd, file) {
     if (winInd >= view.slider.windows.length) {
-      throw 'window: ' + winInd + 'does not exist';
+      throw 'window: ' + winInd + ' does not exist';
     }
     var win = view.slider.windows[winInd];
     ilex.tools.mime.loadDocument(win, file);

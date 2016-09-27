@@ -353,6 +353,12 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     return newWindow;
   };
   
+  that.createStarterWindow = function () {
+    var newWindow = that.createWindow(),
+        widget = createStarterWidget(newWindow);
+    newWindow.setContentWidget(widget);
+  };
+  
   that.addWindowAfter = function(afterInd) {
     var winInd = afterInd + 1,
         newWindow = createWindowObject();
@@ -424,15 +430,13 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     //create new text widndow
     if (that.windows.length < that.windowPointer + that.visibleWindows + 1) {
       //check if starter widget visible on the right
-      let starterWiget = that.windows[that.windows.length - 1].widget.children(':first');
-      //block action
-      if (starterWiget.hasClass("ilex-starterWidget")) {
-        return;
-      }
-
-      let newWindow = that.createWindow();
-      let widget = createStarterWidget(newWindow);
-      newWindow.setContentWidget(widget);
+//      let starterWidget = that.windows[that.windows.length - 1].widget.children(':first');
+//      //block action
+//      if (starterWidget.hasClass('ilex-starterWidget')) {
+//        return;
+//      }
+      
+      that.createStarterWindow();
     }
     
     that.visibleWindows += 1;
@@ -450,7 +454,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     if (that.table.is(':animated')) {
       return;
     }
-    
+        
     var leftWidth = that.windows[that.windowPointer].element.data('ilex-width'),
       tablePos = that.table.position(),
       slide = tablePos.left - (leftWidth + ilex.widgetsCollection.handlerSize);
@@ -511,10 +515,10 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     });
   };
 
-  //create default window
+  //create starter window
   that.visibleWindows = 1;
-
-  that.createWindow();
+  
+  that.createStarterWindow();
 
   setEqualWindowPositions();
   applyWindowPosition();
@@ -583,12 +587,26 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     //forward
     { 'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf105;</span>',
       'callback': function(event) {
+       var starterWidget = that.windows[that.windows.length - 1].widget.children(':first');
+        if (that.windowPointer + that.visibleWindows >= that.windows.length
+           && !starterWidget.hasClass('ilex-starterWidget')) {
+          //check if starter widget visible on the right
+          that.createStarterWindow();
+        }
         that.slideLeft();
       }
     },
     //add
     {'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf067;</span>',
-     'callback': that.createWindowSplitSlider
+     'callback': function () {
+       var starterWidget = that.windows[that.windows.length - 1].widget.children(':first');
+        if (that.windows.length < that.windowPointer + that.visibleWindows + 1
+           && starterWidget.hasClass('ilex-starterWidget')) {
+          //check if starter widget visible on the right
+          return;
+        }
+       that.createWindowSplitSlider();
+     }
    },
    //remove
    {'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf068;</span>',
