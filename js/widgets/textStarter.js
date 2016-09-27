@@ -33,8 +33,6 @@ ilex.widgetsCollection.textStarter = function (windowObject) {
     var width = windowObject.widget.data('ilex-width'),
       height = windowObject.widget.data('ilex-height');
     
-    console.log(width, height);
-    
     that.container.data('ilex-width', width)
                   .data('ilex-height', height);
     
