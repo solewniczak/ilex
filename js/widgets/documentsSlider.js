@@ -85,6 +85,9 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       'get': function(ind) {
         return windows[ind];
       },
+      'last': function() {
+        return windows[windows.length-1];
+      },
       'getAll': function() {
         return windows;
       },
@@ -342,6 +345,10 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       var windowHeight = $(window).height();
       //cannot close last tab
       if (that.windows.length === 1) {
+        let lastWin = that.windows.get(0);
+        lastWin.closeDocument();
+        lastWin.setContentWidget(createStarterWidget(lastWin));
+        ilex.applySize();
         return;
       }
       
@@ -349,21 +356,35 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       newWindow.contentWidget.container.css('position', 'relative');
                                        
       newWindow.contentWidget.container.animate({'top': windowHeight}, function() {
-
+        if (that.windows.get(that.windowPointer + 1) !== undefined) {
+          var nextWidgetIsStarter = that.windows.get(that.windowPointer + 1)
+                                          .widget.children(':first')
+                                          .hasClass('ilex-starterWidget');
+        } else {
+          var nextWidgetIsStarter = false;
+        }
+        
         //slide right window
         if (that.visibleWindows.get() === 1
+            && !nextWidgetIsStarter
             && that.windowPointer < that.windows.length - 1) {
-          that.slideRight(function () {
-              newWindow.remove();
-              ilex.applySize();
-            });
+          that.slideLeft(function () {
+            var removedWidth = newWindow.getWidth();
+            newWindow.remove();
+            //remember about decresing window pointar after removing window
+            that.windowPointer -= 1;
+            //align left slide
+            that.table.css('left', that.table.position().left + removedWidth + 
+                          ilex.widgetsCollection.handlerSize);
+            ilex.applySize();
+          });
         //slide left window
         } else if (that.visibleWindows.get() === 1
             && that.windowPointer > 0) {
-          that.slideLeft(function () {
-              newWindow.remove();
-              ilex.applySize();
-            });
+          that.slideRight(function () {
+            newWindow.remove();
+            ilex.applySize();
+          }); 
         //just remove window
         } else {
           newWindow.remove();
@@ -572,7 +593,8 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     //forward
     { 'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf105;</span>',
       'callback': function(event) {
-       var starterWidget = that.windows.get(that.windows.length - 1).widget.children(':first');
+        var starterWidget = that.windows.last().widget.children(':first');
+
         if (that.windowPointer + that.visibleWindows.get() === that.windows.length
            && !starterWidget.hasClass('ilex-starterWidget')) {
           //check if starter widget visible on the right
@@ -586,7 +608,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     {'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf067;</span>',
      'callback': function () {
       if (that.windows.length < that.windowPointer + that.visibleWindows.get() + 1) {
-        let starterWidget = that.windows.get(that.windows.length - 1).widget.children(':first');
+        let starterWidget = that.windows.last().widget.children(':first');
          if (starterWidget.hasClass('ilex-starterWidget')) {
           //check if starter widget visible on the right
           return;
@@ -605,6 +627,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       if (this.visibleWindows === 1) {
         return;
       }
+  
       that.visibleWindows.dec();
       ilex.applySize(true);
     }
