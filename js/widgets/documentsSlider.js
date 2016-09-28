@@ -71,39 +71,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
                             .data('ilex-height', height)
                             .css('background', '#000');
   };
-  //private
-//  var applyWindowPosition = function () {
-//    for (let i = 0; i < that.visibleWindows.get(); i++) {
-//      if (that.position[i] === undefined) {
-//        console.log("can't apply position: postion not set");
-//        return;
-//      }
-//      let ratio = that.position[i],
-//          win = that.windows.get(that.windowPointer + i),
-//          width = getInnerWidth() * ratio;
-//      
-//      win.setWidth(width);
-//    }
-//  },
-////  updateWindowsPositions = function () {
-////    let sum = 0.0;
-////    for (let i = 0; i < that.visibleWindows.get(); i++) {
-////      let win = that.windows.get(that.windowPointer + i);
-////      sum += win.element.width();
-////    }
-////    for (let i = 0; i < that.visibleWindows.get(); i++) {
-////      let win = that.windows.get(that.windowPointer + i);
-////      that.position[i] = win.element.width()/sum;
-////    }
-////  },
-//  setEqualWindowPositions = function() {
-//    that.position = [];
-//    let ratio = 1.0/that.visibleWindows.get();
-//    for (let i = 0; i < that.visibleWindows.get(); i++) {
-//      that.position.push(ratio);
-//    }
-//  };
-  
   //public
   that.windows = function() {
     var windows = [],
@@ -337,14 +304,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       newWindow.rightSideHandler.remove();
 
       ilex.server.tabClose(winInd);
-      
-      //send close message to widget
-      //newWindow.contentWidget.close();
-
-//      setEqualWindowPositions();
-//      applyWindowPosition();
-
-//      ilex.applySize();
     };
     
     newWindow.getWidth = function () {
@@ -421,35 +380,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       newWindow.widget.html('');
     };
     
-    //Close document and move first document from left.
-    //If there is no document on the left create new document.
-//    newWindow.closeDocument = function(event) {
-//      var windowHeight = $(window).height();
-//
-//      //close tab and "reopen" it with new id
-//      ilex.server.tabClose(newWindow.tabId);
-//      newWindow.tabId = tabId;
-//      tabId++;
-//
-//      //bakground for animanito purposes
-//      newWindow.contentWidget.container.css('background', '#fff')
-//                                       .css('position', 'relative');
-//      newWindow.contentWidget.container.animate({'top': windowHeight},
-//        function() {
-//          //send close message to widget
-//          //curWindow.contentWidget.close();
-//          this.setContentWidget(newWindowWidgetCallback(newWindow));
-//
-////              //there is no window to the right
-////              if (curWindow.id+1 >= that.windows.length) {
-////                curWindow.setContentWidget(newWindowWidgetCallback(curWindow));
-////              //move windows to the right
-////              } else {
-////                curWindow.remove();
-////              }
-//      });
-//    };
-    
     newWindow.setContentWidget = function(contentWidget) {
       this.contentWidget = contentWidget;
     };
@@ -463,27 +393,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
 
     return newWindow;
   };
-  
-//  that.appendWindow = function(newWindow) {
-//    var winInd = that.windows.length;
-//    
-//    newWindow.id = winInd;
-//    //append window to the end
-//    newWindow.element.appendTo(that.table);
-//    newWindow.rightSideHandler.appendTo(that.table);
-//    
-//    newWindow.element.data('ilex-window', that.windows.length);
-//    
-//    that.windows.push(newWindow);
-//
-//    
-//    //setEqualWindowPositions();
-////    applyWindowPosition();
-//    
-////    ilex.applySize();
-//    
-//    return newWindow;
-//  };
   
   that.createStarterWindow = function () {
     var newWindow = that.createWindow(),
@@ -504,15 +413,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       newWindow.rightSideHandler.insertAfter(newWindow.element);
       that.windows.splice(afterInd + 1, 0, newWindow);
     }
-
-    
-//    that.visibleWindows += 1;
-//    
-//    setEqualWindowPositions();
-//    applyWindowPosition();
-//    ilex.applySize(true);
-//    
-//    return newWindow;
   };
   
   that.addWindowBefore = function(newWindow, beforeInd) {
@@ -532,39 +432,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     
   }
   
-  
-//  that.appendWindowBefore = function(windowObj, beforeInd) {
-//    var winInd = beforeInd;
-//    
-//    windowObj.id = winInd;
-//    windowObj.element.insertBefore(that.windows[beforeInd].element);
-//    windowObj.rightSideHandler.insertAfter(windowObj.element);
-//    
-//    that.windows.splice(winInd, 0, windowObj);
-//    updateIlexWindowData();
-//    
-//    return windowObj;
-//  };
-//  
-//  that.addWindowBefore = function(beforeInd, animate, windowObj) {
-//    var winInd = beforeInd,
-//        windowObj = windowObj || createWindowObject();
-//    
-//    if (animate === undefined) {
-//      animate = true;
-//    }
-//    
-//    that.appendWindowBefore(beforeInd, windowObj);
-//    
-//    that.visibleWindows += 1;
-//    
-//    setEqualWindowPositions();
-//    applyWindowPosition();
-//    ilex.applySize(animate);
-//    
-//    return windowObj;
-//  };
-  
   that.detachWindow = function(winInd) {
     var win = that.windows.get(winInd),
         element = win.element.detach(),
@@ -574,23 +441,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
 
     return win;
   };
-  
-//  that.createWindowSplitSlider = function(animate) {
-//    if (animate === undefined) {
-//      animate = true;
-//    }
-//    
-//    //create new text widndow
-//    if (that.windows.length < that.windowPointer + that.visibleWindows + 1) {
-//      that.createStarterWindow();
-//    }
-//    
-//    that.visibleWindows += 1;
-//    setEqualWindowPositions();
-//    applyWindowPosition();
-//
-//    ilex.applySize(animate);
-//  }
 
   that.slideLeft = function (callback) {
     if (that.windowPointer + that.visibleWindows.get() >= that.windows.length) {
@@ -600,15 +450,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     if (that.table.is(':animated')) {
       return;
     }
-        
-//    var leftWidth = that.windows[that.windowPointer].getWidth(),
-//      tablePos = that.table.position(),
-//      slide = tablePos.left - (leftWidth + ilex.widgetsCollection.handlerSize);
-//    
-//    console.log(leftWidth, that.windows[that.windowPointer + that.visibleWindows]);
-//
-//    //apply width to window that will be shown
-//    that.windows[that.windowPointer + that.visibleWindows].setWidth(leftWidth);
     
     var leftWidth = that.windows.get(that.windowPointer ).getWidth(),
         tablePos = that.table.position(),
@@ -642,26 +483,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       return;
     }
 
-//    that.windowPointer -= 1;
-//    var rightWidth = that.windows.get(that.windowPointer + that.visibleWindows.get()).getWidth(),
-//      //the window to show
-//      windowToShow = that.windows.get(that.windowPointer);
-//
-//    //align left position after resizing windowToShow
-//    that.table.css('left', that.table.position().left +
-//                   (windowToShow.getWidth() - rightWidth));
-//
-//    //the window to show
-//    windowToShow.setWidth(rightWidth);
-//    ilex.applySize();
-//
-//    let slide = that.table.position().left + (rightWidth + ilex.widgetsCollection.handlerSize);
-    
-
-//    var previousRightWidth = that.windows.get(that.windowPointer).getWidth(),
-//        previousLeftWidth =  that.windows.get(that.windowPointer + that.visibleWindows.get() - 1).getWidth();
-    
-
     that.windowPointer -= 1;
     
     var windowToShow = that.windows.get(that.windowPointer),
@@ -670,30 +491,12 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     //set positions to new windows
     that.visibleWindows.shiftRight();
 
-//    var currentRightWidth = that.windows.get(that.windowPointer).getWidth(),
-//        widthDelta = previousRightWidth - currentRightWidth;
-    
-    //console.log(windowToShowPreviousWidth, windowToShow.getWidth());
-    
     //align left position after resizing right window
     let widthDelta = windowToShowPreviousWidth - windowToShow.getWidth();
     that.table.css('left', that.table.position().left + widthDelta);
     
     ilex.applySize();
-    
-//    
-//    var rightWidth = that.windows.get(that.windowPointer +
-//                                      that.visibleWindows.get()).getWidth(),
-//        windowToShow = that.windows.get(that.windowPointer);
-    
-    
-    
-    //align left position after resizing windowToShow
-//    that.table.css('left', that.table.position().left +
-//                   (windowToShow.getWidth() - rightWidth));
-    
 
-    
     let slide = that.table.position().left + (windowToShow.getWidth() +
                                             ilex.widgetsCollection.handlerSize);
     that.table.animate({'left': slide}, {
