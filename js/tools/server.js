@@ -102,13 +102,7 @@ ilex.tools.server.create = function (host) {
         'text': params.text || '',
       },
       {
-        'documentCreated': function(fileX) {
-          var file = {};
-          file.id = fileX.id;
-          file.format = fileX.format;
-          file.name = fileX.name;
-          file.totalVersions = fileX.totalVersions;
-          console.log(file);
+        'documentCreated': function(file) {
           ilex.documents.set(file.id, file);          
           createdCallback(that.document(tabId, file.id));
         }
