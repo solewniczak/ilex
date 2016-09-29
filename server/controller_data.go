@@ -8,6 +8,10 @@ import (
 	"ilex/tree.v1"
 )
 
+const (
+	VERSION_NUMBER_INCREMENTED = "versionNumberIncremented"
+)
+
 type ControllerData struct {
 	Document               ilex.Document
 	DocumentId             string
@@ -105,6 +109,7 @@ func (cd *ControllerData) TryUpdateVersion(database *mgo.Database, root *tree.Ro
 			}
 			Globals.DocumentUpdatedMessages <- &DocumentUpdate{cd.DocumentId, cd.Version.No, cd.Version.Name}
 		}
+		cd.NotifyClientsNewVersion()
 	}
 }
 
@@ -153,6 +158,17 @@ func (cd *ControllerData) NotifyClientsNameChange(message *ChangeNameMessage) {
 			n := NewTabNotification(client.TabId)
 			n.Notification = DOCUMENT_CHANGE_NAME
 			n.Parameters[NAME] = message.NewName
+			n.SendTo(client.WS)
+		}
+	}
+}
+
+func (cd *ControllerData) NotifyClientsNewVersion() {
+	for client, is_present := range cd.Clients {
+		if is_present {
+			n := NewTabNotification(client.TabId)
+			n.Notification = VERSION_NUMBER_INCREMENTED
+			n.Parameters[VERSION] = cd.Version.No
 			n.SendTo(client.WS)
 		}
 	}
