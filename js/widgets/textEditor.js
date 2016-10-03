@@ -561,17 +561,16 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
   
   //public API
   
-  //Returns spans that covers selection or create new ones if needed
-  that.getSelectionSpans = function () {
-    if (selectionRange.collapsed === true) {
+  that.getRangeSpans = function(range) {
+    if (range.collapsed === true) {
       return $();
     }
-    var startSpan = selectionRange.startContainer.parentElement,
+    var startSpan = range.startContainer.parentElement,
         startLine = startSpan.parentElement,
-        relStart = selectionRange.startOffset,
-        endSpan = selectionRange.endContainer.parentElement,
+        relStart = range.startOffset,
+        endSpan = range.endContainer.parentElement,
         endLine = endSpan.parentElement,
-        relEnd = selectionRange.endOffset;
+        relEnd = range.endOffset;
     if (startLine === endLine) {
       return getSingleLineSpans(startSpan, relStart, endSpan, relEnd); 
     } else {
@@ -592,6 +591,11 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
       
       return $spans;
     }
+  };
+  
+  //Returns spans that covers selection or create new ones if needed
+  that.getSelectionSpans = function () {
+    return that.getRangeSpans(selectionRange);
   };
   
   that.setContent = function (text) {
@@ -626,6 +630,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     that.textDocument.removeText($(start.span), start.position,
                                  $(end.span), end.position, false);
   };
+
   
    //There cannot be empty spans in ilex document
   that.content.on('mouseup', function(event) {

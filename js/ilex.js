@@ -97,6 +97,29 @@ $(document).on('ilex-newVersionAvailable', function (event, data) {
   $(document).trigger('ilex-fileInfoUpdated', file.id);
 });
 
+  //Navigation mode
+  ilex.navigationMode = false;
+  $(window).on('keydown', function(event) {
+    if (event.ctrlKey && event.altKey) {
+      ilex.navigationMode = true;
+      $(document).trigger('ilex-navigationModeOn');
+    };
+  });
+  
+  $(window).on('keyup', function(event) {
+    if (ilex.navigationMode) {
+      ilex.navigationMode = false;
+      $(document).trigger('ilex-navigationModeOff');
+    }
+  });
+
+  $(window).on('focus', function(event) {
+    if (ilex.navigationMode) {
+      ilex.navigationMode = false;
+      $(document).trigger('ilex-navigationModeOff');
+    }
+  });
+
 //apply sizes to elements
 ilex.applySize = function(animateWidth, animateHeight, selector) {
   animateWidth = animateWidth || false;

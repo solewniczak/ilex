@@ -110,3 +110,15 @@ div:focus {
 .ilex-noBorderButton:active {
   background-color: #aaa;
 }
+
+.ilex-textLink {
+  color: #00f;
+}
+
+.ilex-textLinkNavigationMode {
+  text-decoration: underline;
+}
+
+.ilex-textLinkNavigationMode:hover {
+  cursor: pointer;
+}

@@ -14,14 +14,37 @@ ilex.views.slider = function(canvas) {
   view.mainSplit = ilex.widgetsCollection.horizontalSplit(ilex.window, [0.85, 0.15]);
 
   view.fileSelector = ilex.widgetsCollection.verticalFileSelector(view.mainSplit.right);
-
-//  view.slider = ilex.widgetsCollection.documentsSlider(view.mainSplit.left,
-//    function (win, file) {
-//      return ilex.widgetsCollection.textWithLinks(win, canvas, file);
-//  });
   
   view.slider = ilex.widgetsCollection.documentsSlider(view.mainSplit.left,
                                                     ilex.widgetsCollection.textStarter);
+  
+  
+  $(document).on('canvasRedraw', function () {
+    if (ilex.navigationMode) {
+      for (let i = view.slider.windowPointer;
+           i < view.slider.windowPointer + view.slider.visibleWindows.get() - 1;
+           i += 2) {
+        let leftWindow = view.slider.windows.get(i),
+            rightWindow = view.slider.windows.get(i + 1);
+        
+        if (leftWindow.widget !== undefined && rightWindow.widget !== undefined) {
+          var leftLinks = leftWindow.contentWidget.getLinks(),
+            rightLinks = rightWindow.contentWidget.getLinks();
+        
+          console.log(leftLinks, rightLinks);
+        }
+      }
+    }
+  });
+  
+  $(document).on('ilex-navigationModeOn', function () {
+    $(document).trigger('canvasRedraw');
+  });
+  
+  $(document).on('ilex-navigationModeOff', function () {
+    $(document).trigger('canvasRedraw');
+  });
+  
   
   view.mainSplit.right
     .css('position', 'relative')
