@@ -297,6 +297,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     
     newWindow.removeWidget = function() {
       newWindow.widget.html('');
+      newWindow.contentWidget = undefined;
     };
     
     newWindow.remove = function () {
@@ -399,10 +400,11 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       newWindow.tabId = tabId;
       tabId += 1;
       newWindow.widget.html('');
+       newWindow.contentWidget = undefined;
     };
     
     newWindow.setContentWidget = function(contentWidget) {
-      this.contentWidget = contentWidget;
+      newWindow.contentWidget = contentWidget;
     };
     
     newWindow.rightSideHandler = createHandlerObject();
