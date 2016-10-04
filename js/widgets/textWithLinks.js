@@ -54,6 +54,10 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
     return documentLinks;
   };
   
+  that.getVersion = function () {
+    return version.get();
+  };
+  
   that.documentNameInput =
     ilex.widgetsCollection.blockInput(that.dock.toolbarTop.container, 'Untitled document');
   that.documentNameInput.element
@@ -110,7 +114,6 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   that.textEditor = ilex.widgetsCollection.textEdiotr(that.container);
     
   that.setLink = function (link) {
-    console.log(link);
     var linkRange = document.createRange(),
         start = that.textEditor.textDocument.relPosition(link.firstPosition),
         end = that.textEditor.textDocument.relPosition(link.firstPosition +
@@ -120,8 +123,9 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
     linkRange.setEnd(end.span.firstChild, end.position);
     
     let $spans = that.textEditor.getRangeSpans(linkRange);
+    
     //temp CODE link id
-    let linkId = Math.random().toString().substr(2);
+    let linkId = ilex.linkHash(link);
     let linkClass = 'ilex-linkId-' + linkId;
     
     $spans.addClass('ilex-textLink').addClass(linkClass);

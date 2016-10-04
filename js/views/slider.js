@@ -20,21 +20,38 @@ ilex.views.slider = function(canvas) {
   
   
   $(document).on('canvasRedraw', function () {
-    if (ilex.navigationMode) {
-      for (let i = view.slider.windowPointer;
-           i < view.slider.windowPointer + view.slider.visibleWindows.get() - 1;
-           i += 2) {
-        let leftWindow = view.slider.windows.get(i),
-            rightWindow = view.slider.windows.get(i + 1);
-        
-        if (leftWindow.widget !== undefined && rightWindow.widget !== undefined) {
-          var leftLinks = leftWindow.contentWidget.getLinks(),
-            rightLinks = rightWindow.contentWidget.getLinks();
-        
-          console.log(leftLinks, rightLinks);
+    if (!ilex.navigationMode) {
+      return;
+    }
+    var colorId = 0;
+    for (let i = view.slider.windowPointer;
+         i < view.slider.windowPointer + view.slider.visibleWindows.get() - 1;
+         i += 1) {
+      let leftWindow = view.slider.windows.get(i),
+          rightWindow = view.slider.windows.get(i + 1);
+
+
+      if (typeof leftWindow.contentWidget.getFileInfo === 'function' &&
+          typeof rightWindow.contentWidget.getFileInfo === 'function') {
+        var leftWidget = leftWindow.contentWidget,
+            rightWidget = rightWindow.contentWidget,
+            leftLinks = leftWidget.getLinks(),
+            rightDocumentVersion = rightWidget.getVersion(),
+            rightDocumentId = rightWidget.getFileInfo('id');
+
+        for (let link of leftLinks) {
+          if (link.secondDocumentId === rightDocumentId &&
+             link.secondVersionNo === rightDocumentVersion) {
+            var linkId = ilex.linkHash(link),
+              $leftSpans = leftWindow.contentWidget.container.find('span.ilex-linkId-'+linkId),
+                $rightSpans = rightWindow.contentWidget.container.find('span.ilex-linkId-'+linkId);
+            ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans, ilex.tools.colors.htmlToRgba(ilex.linksColors[colorId], 0.8), true);
+            colorId = (colorId + 1) % ilex.linksColors.length;
+          }
         }
       }
     }
+
   });
   
   $(document).on('ilex-navigationModeOn', function () {

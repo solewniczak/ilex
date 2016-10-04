@@ -209,7 +209,7 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
   //draw two rects and a line that connects them
   //a, b are ClientRectLists
   that.drawConnection = function (left, right, color, stroke) {
-    var color = color || '#c1f0c1',
+    var color = color || 'rgba(0, 108, 255, 0.3)',
       stroke = stroke || false,
       leftThreeRectSel = that.threeRectsSelection(left),
       rightTreeRectSel = that.threeRectsSelection(right);
@@ -335,7 +335,7 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
 
     that.ctx.save();
     if (!stroke) {
-      that.ctx.globalAlpha = 0.4;
+      that.ctx.globalAlpha = 1;
       that.ctx.fillStyle = color;
     } else {
       //stroke connection should not contain interior lines
@@ -361,6 +361,24 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
 
     that.ctx.restore();
 
+  };
+  
+  that.drawConnectionSpans = function($leftSpans, $rightSpans, color, stroke) {
+    var concatClientRectsList = function(array, clientRectsList) {
+      for (let i = 0; i < clientRectsList.length; i++) {
+        array.push(clientRectsList[i]);
+      }
+    };
+    var leftRects = [],
+        rightRects = [];
+    
+    for (let span of $leftSpans) {
+      concatClientRectsList(leftRects, span.getClientRects());
+    }
+    for (let span of $rightSpans) {
+      concatClientRectsList(rightRects, span.getClientRects());
+    }
+    that.drawConnection(leftRects, rightRects, color, stroke);
   };
 
   //basic canvasRedraw behaviour
