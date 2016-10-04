@@ -10,6 +10,10 @@ div:focus {
   outline: 0;
 }
 
+strong {
+  font-family: IlexSansBold;
+}
+
 /*CSS is based on Metro UI design*/
 /*becouse it's flat and looks well :)*/
 /*https://metroui.org.ua/*/

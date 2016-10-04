@@ -135,6 +135,15 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
         
       }
     });
+    that.textEditor.content.on('mouseenter', '.'+linkClass, function (event) {
+      if (ilex.navigationMode) {
+        var file = ilex.documents.get(link.secondDocumentId);
+        ilex.view.popupNote.show(file.name + ' | <strong>'+link.secondVersionNo+'</strong>');
+      }
+    });
+    that.textEditor.content.on('mouseleave', '.'+linkClass, function (event) {
+      ilex.view.popupNote.hide();
+    });
   };
   
   var version = {};

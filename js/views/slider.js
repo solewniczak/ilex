@@ -15,6 +15,8 @@ ilex.views.slider = function(canvas) {
 
   view.fileSelector = ilex.widgetsCollection.verticalFileSelector(view.mainSplit.right);
   
+  view.popupNote = ilex.widgetsCollection.popupNote($('body'), 1000);
+  
   view.slider = ilex.widgetsCollection.documentsSlider(view.mainSplit.left,
                                                     ilex.widgetsCollection.textStarter);
   
@@ -60,6 +62,7 @@ ilex.views.slider = function(canvas) {
   
   $(document).on('ilex-navigationModeOff', function () {
     $(document).trigger('canvasRedraw');
+    view.popupNote.hide();
   });
   
   
