@@ -2,12 +2,12 @@
 {
 "From": {
 "VersionNo": 1,
-"Position": 348,
-"Length": 15
+"Range" : { "Position": 348,
+"Length": 15}
 }, "To": {
 "VersionNo": 1,
-"Position": 737,
-"Length" : 10
+"Range" : { "Position": 737,
+"Length": 10}
 },
 "Type" : "HH"
 },
@@ -15,12 +15,12 @@
 {
 "From": {
 "VersionNo": 1,
-"Position": 81,
-"Length": 28
+"Range" : { "Position": 81,
+"Length": 28}
 }, "To": {
 "VersionNo": 2,
-"Position": 389,
-"Length" : 34
+"Range" : { "Position": 389,
+"Length": 34}
 },
 "Type" : "FF"
 },
@@ -28,12 +28,12 @@
 {
 "From": {
 "VersionNo": 1,
-"Position": 81,
-"Length": 28
+"Range" : { "Position": 81,
+"Length": 28}
 }, "To": {
 "VersionNo": 3,
-"Position": 389,
-"Length" : 34
+"Range" : { "Position": 389,
+"Length": 34}
 },
 "Type" : "FF"
 },
@@ -41,12 +41,12 @@
 {
 "From": {
 "VersionNo": 1,
-"Position": 200,
-"Length": 14
+"Range" : { "Position": 200,
+"Length": 14}
 }, "To": {
 "VersionNo": 2,
-"Position": 902,
-"Length" : 35
+"Range" : { "Position": 902,
+"Length": 35}
 },
 "Type" : "FF"
 },
@@ -54,25 +54,12 @@
 {
 "From": {
 "VersionNo": 2,
-"Position": 200,
-"Length": 14
+"Range" : { "Position": 200,
+"Length": 14}
 }, "To": {
 "VersionNo": 2,
-"Position": 902,
-"Length" : 35
-},
-"Type" : "FF"
-},
-
-{
-"From": {
-"VersionNo": 3,
-"Position": 200,
-"Length": 14
-}, "To": {
-"VersionNo": 2,
-"Position": 902,
-"Length" : 35
+"Range" : { "Position": 902,
+"Length": 35}
 },
 "Type" : "FF"
 },
@@ -80,12 +67,25 @@
 {
 "From": {
 "VersionNo": 3,
-"Position": 200,
-"Length": 14
+"Range" : { "Position": 200,
+"Length": 14}
+}, "To": {
+"VersionNo": 2,
+"Range" : { "Position": 902,
+"Length": 35}
+},
+"Type" : "FF"
+},
+
+{
+"From": {
+"VersionNo": 3,
+"Range" : { "Position": 200,
+"Length": 14}
 }, "To": {
 "VersionNo": 1,
-"Position": 897,
-"Length" : 35
+"Range" : { "Position": 897,
+"Length": 35}
 },
 "Type" : "FF"
 },
@@ -93,12 +93,12 @@
 {
 "From": {
 "VersionNo": 1,
-"Position": 110,
-"Length": 13
+"Range" : { "Position": 110,
+"Length": 13}
 }, "To": {
 "VersionNo": 1,
-"Position": 600,
-"Length" : 9
+"Range" : { "Position": 600,
+"Length": 9}
 },
 "Type" : "HH"
 },
@@ -106,12 +106,12 @@
 {
 "From": {
 "VersionNo": 2,
-"Position": 110,
-"Length": 13
+"Range" : { "Position": 110,
+"Length": 13}
 }, "To": {
 "VersionNo": 1,
-"Position": 600,
-"Length" : 9
+"Range" : { "Position": 600,
+"Length": 9}
 },
 "Type" : "HH"
 },
@@ -119,12 +119,12 @@
 {
 "From": {
 "VersionNo": 3,
-"Position": 110,
-"Length": 13
+"Range" : { "Position": 110,
+"Length": 13}
 }, "To": {
 "VersionNo": 1,
-"Position": 600,
-"Length" : 9
+"Range" : { "Position": 600,
+"Length": 9}
 },
 "Type" : "HH"
 },
@@ -132,12 +132,12 @@
 {
 "From": {
 "VersionNo": 1,
-"Position": 110,
-"Length": 13
+"Range" : { "Position": 110,
+"Length": 13}
 }, "To": {
 "VersionNo": 2,
-"Position": 605,
-"Length" : 9
+"Range" : { "Position": 605,
+"Length": 9}
 },
 "Type" : "HH"
 },
@@ -145,25 +145,12 @@
 {
 "From": {
 "VersionNo": 1,
-"Position": 285,
-"Length": 18
+"Range" : { "Position": 285,
+"Length": 18}
 }, "To": {
 "VersionNo": 1,
-"Position": 334,
-"Length" : 25
-},
-"Type" : "HH"
-},
-
-{
-"From": {
-"VersionNo": 2,
-"Position": 290,
-"Length": 18
-}, "To": {
-"VersionNo": 1,
-"Position": 334,
-"Length" : 25
+"Range" : { "Position": 334,
+"Length": 25}
 },
 "Type" : "HH"
 },
@@ -171,12 +158,25 @@
 {
 "From": {
 "VersionNo": 2,
-"Position": 454,
-"Length": 34
+"Range" : { "Position": 290,
+"Length": 18}
 }, "To": {
 "VersionNo": 1,
-"Position": 204,
-"Length" : 22
+"Range" : { "Position": 334,
+"Length": 25}
+},
+"Type" : "HH"
+},
+
+{
+"From": {
+"VersionNo": 2,
+"Range" : { "Position": 454,
+"Length": 34}
+}, "To": {
+"VersionNo": 1,
+"Range" : { "Position": 204,
+"Length": 22}
 },
 "Type" : "FH"
 },
@@ -184,12 +184,12 @@
 {
 "From": {
 "VersionNo": 1,
-"Position": 195,
-"Length": 13
+"Range" : { "Position": 195,
+"Length": 13}
 }, "To": {
 "VersionNo": 1,
-"Position": 403,
-"Length" : 21
+"Range" : { "Position": 403,
+"Length": 21}
 },
 "Type" : "HF"
 }

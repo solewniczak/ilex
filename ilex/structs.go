@@ -34,17 +34,20 @@ type Document struct {
 }
 
 type Range struct {
-	//	Id         bson.ObjectId `bson:"_id,omitempty" json:"-"`
-	DocumentId bson.ObjectId `bson:"DocumentId"    json:"documentId"`
-	VersionNo  int           `bson:"VersionNo"     json:"versionNo"`
-	Position   int           `bson:"Position"      json:"position"`
-	Length     int           `bson:"Length"        json:"length"`
+	Position int `bson:"Position"      json:"position"`
+	Length   int `bson:"Length"        json:"length"`
+}
+
+type HalfLink struct {
+	DocumentId bson.ObjectId `bson:"DocumentId" json:"documentId"`
+	VersionNo  int           `bson:"VersionNo"  json:"versionNo"`
+	Range      Range         `bson:"Range"      json:"range"`
 }
 
 type TwoWayLink struct {
-	Id     bson.ObjectId `bson:"_id,omitempty" json:"-"`
+	Id     bson.ObjectId `bson:"_id,omitempty" json:"id"`
 	LinkId bson.ObjectId `bson:"LinkId"        json:"linkId"`
-	From   Range         `bson:"From"          json:"from"`
-	To     Range         `bson:"To"            json:"to"`
+	From   HalfLink      `bson:"From"          json:"from"`
+	To     HalfLink      `bson:"To"            json:"to"`
 	Type   string        `bson:"Type"          json:"type"`
 }
