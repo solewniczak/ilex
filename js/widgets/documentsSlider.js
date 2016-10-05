@@ -545,19 +545,41 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
         ilex.tools.mime.loadDocument(win, documentId, version, callback);
       }
     };
+    var closeWindowsAfter = function (rightWindow) {
+      if (rightWindow === undefined) {
+        return;
+      }
+      
+      for (let i = rightWindow.getInd() + 1; i < that.windows.length; i += 1) {
+        let win = that.windows.get(i);
+        win.remove();
+      }
+    };
     
     // only one visible window
     if (that.visibleWindows.get() === 1) {
+      let rightWindow = that.windows.get(windowObject.getInd() + 1);
+      //close all tabs after right window
+      closeWindowsAfter(rightWindow);
       
+      if (rightWindow === undefined) {
+        rightWindow = that.createWindow();
+        that.addWindowAfter(newWindow, windowObject.getInd());
+      }
+      
+      loadAndScroll(rightWindow,
+                     link.secondDocumentId,
+                     link.secondVersionNo,
+        function () {
+          that.visibleWindows.inc();
+          ilex.applySize();
+        });    
     //two visible windows - link on left
     } else if (that.visibleWindows.get() === 2
                && windowObject.getInd() === that.windowPointer) {
       let rightWindow = that.windows.get(windowObject.getInd() + 1);
       //close all tabs after right window
-      for (let i = rightWindow.getInd() + 1; i < that.windows.length; i += 1) {
-        let win = that.windows.get(i);
-        win.remove();
-      }
+      closeWindowsAfter(rightWindow);
       loadAndScroll(rightWindow,
                      link.secondDocumentId,
                      link.secondVersionNo);
@@ -567,17 +589,14 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
                windowObject.getInd() === that.windowPointer + 1) {
       
       let rightWindow = that.windows.get(windowObject.getInd() + 1);
-      if (rightWindow !== undefined) {
-        //close all tabs after right window
-        for (let i = rightWindow.getInd() + 1; i < that.windows.length; i += 1) {
-          let win = that.windows.get(i);
-          win.remove();
-        }
-      }
+     
+      closeWindowsAfter(rightWindow);
       
-      var newWindow = that.createWindow();
-      that.addWindowAfter(newWindow, windowObject.getInd());
-      loadAndScroll(newWindow,
+      if (rightWindow === undefined) {
+        rightWindow = that.createWindow();
+        that.addWindowAfter(rightWindow, windowObject.getInd());
+      }
+      loadAndScroll(rightWindow,
                      link.secondDocumentId,
                      link.secondVersionNo,
         function () {
