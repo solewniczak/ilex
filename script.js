@@ -33,8 +33,17 @@ $(document).ready(function(){
             ilex.documents.setFileArray(texts);
 
             //load example texts
-            ilex.view.slider.createWindowSplitSlider(false);
-            ilex.view.slider.createWindow();
+            let win1 = ilex.view.slider.createWindow();
+            ilex.view.slider.addWindowAfter(win1);
+            
+            
+            let win2 = ilex.view.slider.createWindow();
+            ilex.view.slider.addWindowAfter(win2);
+            
+            ilex.view.slider.visibleWindows.inc();
+
+            ilex.applySize();
+            
             var loadToWindow = function (winInd, id, version) {
               ilex.view.loadDocument(winInd, id);
               

@@ -24,6 +24,16 @@ type DocumentWithName struct {
 	Name string `json:"name"`
 }
 
+func (dwn *DocumentWithName) toMap() map[string]interface{} {
+	resp := make(map[string]interface{})
+	upper := structs.Map(dwn.Document)
+	for _, name := range structs.Names(dwn.Document) {
+		resp[LowerFirst(name)] = upper[name]
+	}
+	resp[NAME] = dwn.Name
+	return resp
+}
+
 type ById []DocumentWithName
 
 func (a ById) Len() int           { return len(a) }
@@ -67,8 +77,7 @@ func NotifyClientsNewDocument(newDoc *DocumentWithName) {
 		if is_present {
 			n := NewNotification()
 			n.Notification = NEW_DOCUMENT_AVAILABLE
-			n.Parameters = structs.Map(newDoc.Document)
-			n.Parameters[NAME] = newDoc.Name
+			n.Parameters = newDoc.toMap()
 			n.SendTo(client)
 		}
 	}
@@ -96,6 +105,11 @@ func (gv *GlobalView) clearAllDataForSocket(ws *websocket.Conn) {
 
 func (gv *GlobalView) registerOpening(message *ClientTabMessage) {
 	text := Text{message.DocumentId, message.Version}
+	previous_text, ok := Globals.ClientDoc[message.ClientTab]
+	if ok && text == previous_text {
+		return
+	}
+
 	if gv.isLatest(text) {
 		if !Globals.Controllers[message.DocumentId] {
 			start_document_controller(message.DocumentId)
@@ -103,7 +117,7 @@ func (gv *GlobalView) registerOpening(message *ClientTabMessage) {
 		Globals.DocTabControlMessages[message.DocumentId] <- message
 	}
 
-	if previous_text, ok := Globals.ClientDoc[message.ClientTab]; ok && gv.isLatest(previous_text) {
+	if ok && gv.isLatest(previous_text) {
 		// the client tab no longer uses the previous document
 		Globals.DocTabControlMessages[previous_text.Document] <- ClientTabClosed(message.ClientTab)
 	}
@@ -193,13 +207,13 @@ func NewGlobalView() *GlobalView {
 				createdDoc := DocumentWithName{*doc, message.Name}
 				gv.texts[docId] = createdDoc
 				fmt.Println("Created document", docId, "with name", message.Name, "and and its first version")
-
-				gv.registerOpening(ClientTabOpenedDoc(message.Client.WS, message.Client.TabId, docId, 1))
+				if message.Client.WS != nil {
+					gv.registerOpening(ClientTabOpenedDoc(message.Client.WS, message.Client.TabId, docId, 1))
+				}
 				response := NewIlexMessage()
 				response.Id = message.RequestId
 				response.Action = DOCUMENT_CREATED
-				response.Parameters = structs.Map(doc)
-				response.Parameters[NAME] = createdDoc.Name
+				response.Parameters = createdDoc.toMap()
 				respond(message.Client.WS, response)
 
 				NotifyClientsNewDocument(&createdDoc)
