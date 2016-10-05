@@ -80,6 +80,9 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   
   that.loadVersion = function(v, callback) {
     if (v === version.get()) {
+      if (typeof callback === 'function') {
+        callback();
+      }
       return;
     }
     ilex.server.documentGetDump(windowObject.tabId, documentObject.getId(), v,
