@@ -10,12 +10,12 @@ if (ilex.tools.server === undefined)
 
 ilex.tools.mime = {};
 
-ilex.tools.mime.loadDocument = function (win, documentId) {
+ilex.tools.mime.loadDocument = function (win, documentId, version, callback) {
   var file = ilex.documents.get(documentId);
   if (ilex.tools.mime.formats[file.format] === undefined) {
     throw 'ilex.tools.mime.loadDocument: undefined file format';
   }
-  ilex.tools.mime.formats[file.format].load(win, documentId);
+  ilex.tools.mime.formats[file.format].load(win, documentId, version, callback);
 };
 
 //type from mime.formats
@@ -38,12 +38,15 @@ ilex.tools.mime.formats['plain text'] = {
     ilex.server.createDocument(win.tabId, params, function(documentObject) {
       var widget = ilex.widgetsCollection.textWithLinks(win, documentObject);
       win.setContentWidget(widget);
+      ilex.applySize();
     });
   },
-  'load': function (win, documentId) {
+  'load': function (win, documentId, version, callback) {
     var documentObject = ilex.server.document(win.tabId, documentId),
-        widget = ilex.widgetsCollection.textWithLinks(win, documentObject);
+        widget = ilex.widgetsCollection.textWithLinks(win, documentObject, version, callback);
     
     win.setContentWidget(widget);
+    
+    ilex.applySize();
   }
 };

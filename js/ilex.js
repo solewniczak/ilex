@@ -89,6 +89,24 @@ ilex.documents.get = function(id) {
   return ilex.documents.map.get(id);
 };
 
+
+ilex.symHash = function (a,b) {
+  var len = a.length < b.length ? a.length : b.length,
+      hash = '';
+  for (let i = 0; i < len; i++) {
+    let x = a.charCodeAt(i),
+        y = b.charCodeAt(i);
+    hash += (x+y).toString();
+  }
+  return hash;
+};
+
+ilex.linkHash = function (link) {
+  var x = link.firstDocumentId + link.firstPosition,
+      y = link.secondDocumentId + link.secondPosition;
+  return ilex.symHash(x, y);
+};
+
 //notifications
 $(document).on('ilex-newVersionAvailable', function (event, data) {
   var file = ilex.documents.get(data.document);
@@ -96,6 +114,29 @@ $(document).on('ilex-newVersionAvailable', function (event, data) {
   ilex.documents.set(file.id, file);
   $(document).trigger('ilex-fileInfoUpdated', file.id);
 });
+
+  //Navigation mode
+  ilex.navigationMode = false;
+  $(window).on('keydown', function(event) {
+    if (event.ctrlKey && event.altKey) {
+      ilex.navigationMode = true;
+      $(document).trigger('ilex-navigationModeOn');
+    };
+  });
+  
+  $(window).on('keyup', function(event) {
+    if (ilex.navigationMode) {
+      ilex.navigationMode = false;
+      $(document).trigger('ilex-navigationModeOff');
+    }
+  });
+
+  $(window).on('focus', function(event) {
+    if (ilex.navigationMode) {
+      ilex.navigationMode = false;
+      $(document).trigger('ilex-navigationModeOff');
+    }
+  });
 
 //apply sizes to elements
 ilex.applySize = function(animateWidth, animateHeight, selector) {

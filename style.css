@@ -10,6 +10,10 @@ div:focus {
   outline: 0;
 }
 
+strong {
+  font-family: IlexSansBold;
+}
+
 /*CSS is based on Metro UI design*/
 /*becouse it's flat and looks well :)*/
 /*https://metroui.org.ua/*/
@@ -109,4 +113,16 @@ div:focus {
 
 .ilex-noBorderButton:active {
   background-color: #aaa;
+}
+
+.ilex-textLink {
+  color: #00f;
+}
+
+.ilex-textLinkNavigationMode {
+  text-decoration: underline;
+}
+
+.ilex-textLinkNavigationMode:hover {
+  cursor: pointer;
 }

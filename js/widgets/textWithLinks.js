@@ -11,7 +11,7 @@ if (ilex.widgetsCollection.text !== undefined)
 //file is allTextsInfoResponse object
 //document is ilex.tools.server.document object
 
-ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
+ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, startVersion, firstLoadCallback) {
   var that = {},
     width = windowObject.element.data('ilex-width'),
     height = windowObject.element.data('ilex-height');
@@ -45,9 +45,18 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
       ilex.tools.mime.createDocument(windowObject, 'plain text');
   });
   
-  var getFileInfo = function (attr) {
+  that.getFileInfo = function (attr) {
     return ilex.documents.get(documentObject.getId())[attr];
-  }
+  };
+  
+  var documentLinks = [];
+  that.getLinks = function () {
+    return documentLinks;
+  };
+  
+  that.getVersion = function () {
+    return version.get();
+  };
   
   that.documentNameInput =
     ilex.widgetsCollection.blockInput(that.dock.toolbarTop.container, 'Untitled document');
@@ -57,11 +66,11 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
     .css('vertical-align', 'middle');
   
   //set name
-  that.documentNameInput.val(getFileInfo('name'));
+  that.documentNameInput.val(that.getFileInfo('name'));
   
   that.documentNameInput.element.on('blur', function () {
     var val = that.documentNameInput.val();
-    if (val !==  getFileInfo('name')) {
+    if (val !==  that.getFileInfo('name')) {
       documentObject.changeName(val);
     }
   });
@@ -69,10 +78,27 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   
   that.dock.toolbarTop.addSeparator();
   
-  var loadVersion = function(v) {
+  that.loadVersion = function(v, callback) {
+    if (v === version.get()) {
+      if (typeof callback === 'function') {
+        callback();
+      }
+      return;
+    }
     ilex.server.documentGetDump(windowObject.tabId, documentObject.getId(), v,
       function (resp) {
+        version.set(v);
         that.textEditor.setContent(resp.text);
+        documentLinks = resp.links;
+        if (resp.links !== null) {
+          for (let link of resp.links) {
+            that.setLink(link);
+          }
+        }
+        if (typeof callback === 'function') {
+          callback();
+        }
+        $(document).trigger('canvasRedraw');
       }
     );
   };
@@ -82,13 +108,53 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
       var v = version.get();
       if (v > 1) {
         v -= 1;
-        version.set(v);
         //load new version
-        loadVersion(v);  
+        that.loadVersion(v);  
       }
+  });
+
+  $(document).on('ilex-navigationModeOn', function () {
+    that.container.find('.ilex-textLink').addClass('ilex-textLinkNavigationMode');
+  });
+  
+  $(document).on('ilex-navigationModeOff', function () {
+    that.container.find('.ilex-textLink').removeClass('ilex-textLinkNavigationMode');
   });
   
   that.textEditor = ilex.widgetsCollection.textEdiotr(that.container);
+    
+  that.setLink = function (link) {
+    var linkRange = document.createRange(),
+        start = that.textEditor.textDocument.relPosition(link.firstPosition),
+        end = that.textEditor.textDocument.relPosition(link.firstPosition +
+                                                          link.firstLength);
+    
+    linkRange.setStart(start.span.firstChild, start.position);
+    linkRange.setEnd(end.span.firstChild, end.position);
+    
+    let $spans = that.textEditor.getRangeSpans(linkRange);
+    
+    //temp CODE link id
+    let linkId = ilex.linkHash(link);
+    let linkClass = 'ilex-linkId-' + linkId;
+    
+    $spans.addClass('ilex-textLink').addClass(linkClass);
+    
+    that.textEditor.content.on('click', '.'+linkClass, function () {
+      if (ilex.navigationMode) {
+        $(document).trigger('ilex-linkClicked', [windowObject, link]);
+      }
+    });
+    that.textEditor.content.on('mouseover', '.'+linkClass, function (event) {
+      if (ilex.navigationMode) {
+        var file = ilex.documents.get(link.secondDocumentId);
+        ilex.view.popupNote.show(file.name + ' | <strong>'+link.secondVersionNo+'</strong>');
+      }
+    });
+    that.textEditor.content.on('mouseleave', '.'+linkClass, function (event) {
+      ilex.view.popupNote.hide();
+    });
+  };
   
   var version = {};
   version.element = $('<span>0</span>').appendTo(that.dock.toolbarTop.container)
@@ -96,7 +162,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
                                     .css('display', 'inline-block')
                                     .css('margin', '0 4px');
   version.set = function (v) {
-    if (v === getFileInfo('totalVersions')) {
+    if (v === that.getFileInfo('totalVersions')) {
       version.element.html(v + ' (cur.)');
       that.textEditor.content.attr('contenteditable', 'true');
     } else {
@@ -109,13 +175,10 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
     return parseInt(version.element.text());
   };
   
-  //set current version
-  version.set(getFileInfo('totalVersions'));
-  
   //wait for version and names changes
   $(document).on('ilex-fileInfoUpdated', function (event, fileId) {
     if (documentObject.getId() === fileId) {
-      version.set(getFileInfo('totalVersions'));
+      version.set(that.getFileInfo('totalVersions'));
     }
   });
   
@@ -128,14 +191,14 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   //wait for changes
   $(document).on('ilex-documentAddText', function (event, params) {
     if (params.tab === windowObject.tabId &&
-        version.get() === getFileInfo('totalVersions')) {
+        version.get() === that.getFileInfo('totalVersions')) {
       that.textEditor.insertText(params.position, params.string);
     }
   });
   
   $(document).on('ilex-documentRemoveText', function (event, params) {
     if (params.tab === windowObject.tabId &&
-        version.get() === getFileInfo('totalVersions')) {
+        version.get() === that.getFileInfo('totalVersions')) {
       that.textEditor.removeText(params.position, params.length);
     }
   });
@@ -145,21 +208,19 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf105;</span>', //>
     function(event) {
       var v = version.get();
-      if (v < getFileInfo('totalVersions')) {
+      if (v < that.getFileInfo('totalVersions')) {
         v += 1;
-        version.set(v);
         //load new version
-        loadVersion(v);  
+        that.loadVersion(v);  
       }
   });
   
   that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf101;</span>', //>>
     function(event) {
-      var v = getFileInfo('totalVersions');
+      var v = that.getFileInfo('totalVersions');
       if (v !== version.get()) {
-        version.set(v);
         //load new version
-        loadVersion(v);  
+        that.loadVersion(v);  
       }
   });
   
@@ -209,7 +270,10 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   });
   
   //load text
-  loadVersion(getFileInfo('totalVersions'));  
+  if (startVersion === undefined) {
+    startVersion = that.getFileInfo('totalVersions');
+  }
+  that.loadVersion(startVersion, firstLoadCallback);  
 
   
 //  that.loadText = function (params) {
