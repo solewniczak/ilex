@@ -118,7 +118,7 @@ $(document).on('ilex-newVersionAvailable', function (event, data) {
   //Navigation mode
   ilex.navigationMode = false;
   $(window).on('keydown', function(event) {
-    if (event.ctrlKey && event.shiftKey) {
+    if (event.ctrlKey && event.altKey) {
       ilex.navigationMode = true;
       $(document).trigger('ilex-navigationModeOn');
     };

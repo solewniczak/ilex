@@ -11,7 +11,7 @@ if (ilex.widgetsCollection.text !== undefined)
 //file is allTextsInfoResponse object
 //document is ilex.tools.server.document object
 
-ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
+ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, startVersion, firstLoadCallback) {
   var that = {},
     width = windowObject.element.data('ilex-width'),
     height = windowObject.element.data('ilex-height');
@@ -78,9 +78,13 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   
   that.dock.toolbarTop.addSeparator();
   
-  var loadVersion = function(v) {
+  that.loadVersion = function(v, callback) {
+    if (v === version.get()) {
+      return;
+    }
     ilex.server.documentGetDump(windowObject.tabId, documentObject.getId(), v,
       function (resp) {
+        version.set(v);
         that.textEditor.setContent(resp.text);
         documentLinks = resp.links;
         if (resp.links !== null) {
@@ -88,6 +92,10 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
             that.setLink(link);
           }
         }
+        if (typeof callback === 'function') {
+          callback();
+        }
+        $(document).trigger('canvasRedraw');
       }
     );
   };
@@ -97,9 +105,8 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
       var v = version.get();
       if (v > 1) {
         v -= 1;
-        version.set(v);
         //load new version
-        loadVersion(v);  
+        that.loadVersion(v);  
       }
   });
 
@@ -132,10 +139,10 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
     
     that.textEditor.content.on('click', '.'+linkClass, function () {
       if (ilex.navigationMode) {
-        
+        $(document).trigger('ilex-linkClicked', [windowObject, link]);
       }
     });
-    that.textEditor.content.on('mouseenter', '.'+linkClass, function (event) {
+    that.textEditor.content.on('mouseover', '.'+linkClass, function (event) {
       if (ilex.navigationMode) {
         var file = ilex.documents.get(link.secondDocumentId);
         ilex.view.popupNote.show(file.name + ' | <strong>'+link.secondVersionNo+'</strong>');
@@ -164,9 +171,6 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   version.get = function () {
     return parseInt(version.element.text());
   };
-  
-  //set current version
-  version.set(that.getFileInfo('totalVersions'));
   
   //wait for version and names changes
   $(document).on('ilex-fileInfoUpdated', function (event, fileId) {
@@ -203,9 +207,8 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
       var v = version.get();
       if (v < that.getFileInfo('totalVersions')) {
         v += 1;
-        version.set(v);
         //load new version
-        loadVersion(v);  
+        that.loadVersion(v);  
       }
   });
   
@@ -213,9 +216,8 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
     function(event) {
       var v = that.getFileInfo('totalVersions');
       if (v !== version.get()) {
-        version.set(v);
         //load new version
-        loadVersion(v);  
+        that.loadVersion(v);  
       }
   });
   
@@ -265,7 +267,10 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject) {
   });
   
   //load text
-  loadVersion(that.getFileInfo('totalVersions'));  
+  if (startVersion === undefined) {
+    startVersion = that.getFileInfo('totalVersions');
+  }
+  that.loadVersion(startVersion, firstLoadCallback);  
 
   
 //  that.loadText = function (params) {

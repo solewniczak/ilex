@@ -400,7 +400,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       newWindow.tabId = tabId;
       tabId += 1;
       newWindow.widget.html('');
-       newWindow.contentWidget = undefined;
+      newWindow.contentWidget = undefined;
     };
     
     newWindow.setContentWidget = function(contentWidget) {
@@ -533,6 +533,61 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       }
     });
   };
+  
+  $(document).on('ilex-linkClicked', function(event, windowObject, link) {
+    var loadAndScroll = function(win, documentId, version, callback) {
+      if (win.contentWidget !== undefined &&
+          typeof win.contentWidget.getFileInfo === 'function' &&
+          win.contentWidget.getFileInfo('id') === documentId) {
+        win.contentWidget.loadVersion(version, callback);
+      } else {
+        win.closeDocument();
+        ilex.tools.mime.loadDocument(win, documentId, version, callback);
+      }
+    };
+    
+    // only one visible window
+    if (that.visibleWindows.get() === 1) {
+      
+    //two visible windows - link on left
+    } else if (that.visibleWindows.get() === 2
+               && windowObject.getInd() === that.windowPointer) {
+      let rightWindow = that.windows.get(windowObject.getInd() + 1);
+      //close all tabs after right window
+      for (let i = rightWindow.getInd() + 1; i < that.windows.length; i += 1) {
+        let win = that.windows.get(i);
+        win.remove();
+      }
+      loadAndScroll(rightWindow,
+                     link.secondDocumentId,
+                     link.secondVersionNo);
+      
+    //two visible windows - link on right
+    } else if (that.visibleWindows.get() === 2 &&
+               windowObject.getInd() === that.windowPointer + 1) {
+      
+      let rightWindow = that.windows.get(windowObject.getInd() + 1);
+      if (rightWindow !== undefined) {
+        //close all tabs after right window
+        for (let i = rightWindow.getInd() + 1; i < that.windows.length; i += 1) {
+          let win = that.windows.get(i);
+          win.remove();
+        }
+      }
+      
+      var newWindow = that.createWindow();
+      that.addWindowAfter(newWindow, windowObject.getInd());
+      loadAndScroll(newWindow,
+                     link.secondDocumentId,
+                     link.secondVersionNo,
+        function () {
+          that.slideLeft();
+        });    
+    } else {
+      console.log('not implemented');
+    }
+  });
+  
 
   let win = that.createStarterWindow();
   that.addWindowAfter(win);
