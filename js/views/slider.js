@@ -37,8 +37,14 @@ ilex.views.slider = function(canvas) {
           typeof rightWindow.contentWidget.getFileInfo === 'function') {
         var leftWidget = leftWindow.contentWidget,
             rightWidget = rightWindow.contentWidget,
-            leftLinks = leftWidget.getLinks(),
-            rightDocumentVersion = rightWidget.getVersion(),
+            leftLinks = leftWidget.getLinks();
+        
+        if (leftLinks === null) {
+          //no links in this window
+          continue;
+        }
+        
+        var rightDocumentVersion = rightWidget.getVersion(),
             rightDocumentId = rightWidget.getFileInfo('id');
 
         for (let link of leftLinks) {
