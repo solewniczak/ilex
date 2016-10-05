@@ -163,3 +163,7 @@ func GetStringFromAddresses(addresses AddressTable, total_runes int, database *m
 func CurrentTime() string {
 	return time.Now().Format(time.RFC3339)
 }
+
+func (link *TwoWayLink) Reverse() {
+	link.From, link.To = link.To, link.From
+}

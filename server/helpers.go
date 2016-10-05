@@ -36,14 +36,24 @@ func UpdateDocument(docs *mgo.Collection, doc *ilex.Document, version *ilex.Vers
 
 func GetLinksForDoc(database *mgo.Database, documentId *bson.ObjectId, version int) (error, []ilex.TwoWayLink) {
 	links := database.C(LINKS)
-	var doc_links []ilex.TwoWayLink
+	var linksToDoc []ilex.TwoWayLink
+	var linksFromDoc []ilex.TwoWayLink
 	//	pointsHere := bson.M{"DocumentId": *documentId, "VersionNo": version}
-	err := links.Find(
-		bson.M{"$or": []bson.M{
-			bson.M{"From.DocumentId": *documentId, "From.VersionNo": version}, //pointsHere},
-			bson.M{"To.DocumentId": *documentId, "To.VersionNo": version},     //pointsHere},
-		}}).All(&doc_links)
-	return err, doc_links
+	if err := links.Find(
+		bson.M{"From.DocumentId": *documentId, "From.VersionNo": version},
+	).All(&linksFromDoc); err != nil {
+		return nil, nil
+	}
+	if err := links.Find(
+		bson.M{"To.DocumentId": *documentId, "To.VersionNo": version},
+	).All(&linksToDoc); err != nil {
+		return nil, nil
+	}
+	for i, _ := range linksToDoc {
+		linksToDoc[i].Reverse()
+	}
+	linksFromDoc = append(linksFromDoc, linksToDoc...)
+	return nil, linksFromDoc
 }
 
 func CreateNewDocument(docs *mgo.Collection, message *NewDocumentRequest) (error, *ilex.Document) {
