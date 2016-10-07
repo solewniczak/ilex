@@ -568,8 +568,8 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       }
       
       loadAndScroll(rightWindow,
-                     link.secondDocumentId,
-                     link.secondVersionNo,
+                     link.to.documentId,
+                     link.to.versionNo,
         function () {
           that.visibleWindows.inc();
           ilex.applySize();
@@ -581,8 +581,8 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       //close all tabs after right window
       closeWindowsAfter(rightWindow);
       loadAndScroll(rightWindow,
-                     link.secondDocumentId,
-                     link.secondVersionNo);
+                     link.to.documentId,
+                     link.to.versionNo);
       
     //two visible windows - link on right
     } else if (that.visibleWindows.get() === 2 &&
@@ -597,8 +597,8 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
         that.addWindowAfter(rightWindow, windowObject.getInd());
       }
       loadAndScroll(rightWindow,
-                     link.secondDocumentId,
-                     link.secondVersionNo,
+                     link.to.documentId,
+                     link.to.versionNo,
         function () {
           that.slideLeft();
         });    

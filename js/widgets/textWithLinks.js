@@ -125,18 +125,20 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     
   that.setLink = function (link) {
     var linkRange = document.createRange(),
-        start = that.textEditor.textDocument.relPosition(link.firstPosition),
-        end = that.textEditor.textDocument.relPosition(link.firstPosition +
-                                                          link.firstLength);
+        start = that.textEditor.textDocument.relPosition(link.from.range.position),
+        end = that.textEditor.textDocument.relPosition(link.from.range.position +
+                                                          link.from.range.length);
+    
+    if (start === false || end === false) {
+      return;
+    }
     
     linkRange.setStart(start.span.firstChild, start.position);
     linkRange.setEnd(end.span.firstChild, end.position);
     
     let $spans = that.textEditor.getRangeSpans(linkRange);
     
-    //temp CODE link id
-    let linkId = ilex.linkHash(link);
-    let linkClass = 'ilex-linkId-' + linkId;
+    let linkClass = 'ilex-linkId-' + link.linkId;
     
     $spans.addClass('ilex-textLink').addClass(linkClass);
     
@@ -147,8 +149,8 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     });
     that.textEditor.content.on('mouseover', '.'+linkClass, function (event) {
       if (ilex.navigationMode) {
-        var file = ilex.documents.get(link.secondDocumentId);
-        ilex.view.popupNote.show(file.name + ' | <strong>'+link.secondVersionNo+'</strong>');
+        var file = ilex.documents.get(link.to.documentId);
+        ilex.view.popupNote.show(file.name + ' | <strong>'+link.to.versionNo+'</strong>');
       }
     });
     that.textEditor.content.on('mouseleave', '.'+linkClass, function (event) {

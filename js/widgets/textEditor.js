@@ -442,7 +442,8 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
       return length + relPos;
     },
     'relPosition': function (absPos) {
-      var focus = {};
+      var startAbsPos = absPos,
+          focus;
       that.content.find('span').each(function () {
         if (absPos < $(this).text().length) {
           let text = this.textContent;
@@ -450,9 +451,11 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
             let line = this.parentElement,
                 nextLine = line.nextElementSibling,
                 span = nextLine.firstElementChild;
+              focus = {};
               focus.span = span;
               focus.position = 0;
           } else {
+            focus = {};
             focus.span = this;
             focus.position = absPos + 1;
           }
@@ -461,6 +464,10 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
           absPos -= $(this).text().length;
         }
       });
+      if (focus === undefined) {
+        console.log('textDocument.relPosition: ' + startAbsPos + ' out of range');
+        return false;
+      }
       return focus;
     }
   };
