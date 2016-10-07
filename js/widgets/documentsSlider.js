@@ -83,6 +83,9 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     return {
       'length': 0,
       'get': function(ind) {
+        if (ind < 0 || ind >= windows.length) {
+          return undefined;
+        }
         return windows[ind];
       },
       'last': function() {
@@ -303,7 +306,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     newWindow.remove = function () {
       var winInd = newWindow.getInd();
       that.windows.splice(winInd, 1);
-
+      
       newWindow.element.remove();
       newWindow.rightSideHandler.remove();
 
@@ -535,75 +538,130 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
   };
   
   $(document).on('ilex-linkClicked', function(event, windowObject, link) {
+    var getWindowDocumentId = function(windowObject) {
+      if (windowObject !== undefined &&
+          windowObject.contentWidget !== undefined &&
+          typeof windowObject.contentWidget.getFileInfo === 'function') {
+        return windowObject.contentWidget.getFileInfo('id');
+      }
+      return null;
+    };
     var loadAndScroll = function(win, documentId, version, callback) {
-      if (win.contentWidget !== undefined &&
-          typeof win.contentWidget.getFileInfo === 'function' &&
-          win.contentWidget.getFileInfo('id') === documentId) {
+      if (getWindowDocumentId(win) === documentId) {
         win.contentWidget.loadVersion(version, callback);
       } else {
         win.closeDocument();
         ilex.tools.mime.loadDocument(win, documentId, version, callback);
       }
     };
-    var closeWindowsAfter = function (rightWindow) {
-      if (rightWindow === undefined) {
+    var closeWindowsAfter = function (windowObj) {
+      if (windowObj === undefined) {
         return;
       }
       
-      for (let i = rightWindow.getInd() + 1; i < that.windows.length; i += 1) {
+      for (let i = that.windows.length - 1; i > windowObj.getInd(); i -= 1) {
         let win = that.windows.get(i);
         win.remove();
       }
     };
     
-    // only one visible window
+    //1
     if (that.visibleWindows.get() === 1) {
-      let rightWindow = that.windows.get(windowObject.getInd() + 1);
-      //close all tabs after right window
-      closeWindowsAfter(rightWindow);
+      let rightWindow = that.windows.get(windowObject.getInd() + 1),
+          leftWindow = that.windows.get(windowObject.getInd() - 1);
       
-      if (rightWindow === undefined) {
-        rightWindow = that.createWindow();
-        that.addWindowAfter(newWindow, windowObject.getInd());
-      }
-      
-      loadAndScroll(rightWindow,
-                     link.to.documentId,
-                     link.to.versionNo,
+      //1.1
+      if (getWindowDocumentId(rightWindow) === link.to.documentId) {
+        loadAndScroll(rightWindow,
+          link.to.documentId,
+          link.to.versionNo,
         function () {
           that.visibleWindows.inc();
           ilex.applySize();
-        });    
-    //two visible windows - link on left
-    } else if (that.visibleWindows.get() === 2
-               && windowObject.getInd() === that.windowPointer) {
-      let rightWindow = that.windows.get(windowObject.getInd() + 1);
-      //close all tabs after right window
-      closeWindowsAfter(rightWindow);
-      loadAndScroll(rightWindow,
-                     link.to.documentId,
-                     link.to.versionNo);
-      
-    //two visible windows - link on right
-    } else if (that.visibleWindows.get() === 2 &&
-               windowObject.getInd() === that.windowPointer + 1) {
-      
-      let rightWindow = that.windows.get(windowObject.getInd() + 1);
-     
-      closeWindowsAfter(rightWindow);
-      
-      if (rightWindow === undefined) {
-        rightWindow = that.createWindow();
-        that.addWindowAfter(rightWindow, windowObject.getInd());
+        });  
+      //1.2
+      } else if (getWindowDocumentId(leftWindow) === link.to.documentId) {
+        loadAndScroll(leftWindow,
+          link.to.documentId,
+          link.to.versionNo,
+        function () {
+          that.visibleWindows.inc();
+          that.slideRight();
+        });
+      //1.3
+      } else {
+        let newWindow = that.createWindow();
+        that.addWindowAfter(newWindow, windowObject.getInd());
+        closeWindowsAfter(newWindow);
+        
+        loadAndScroll(newWindow,
+          link.to.documentId,
+          link.to.versionNo,
+        function () {
+          that.visibleWindows.inc();
+          ilex.applySize();
+        });
       }
-      loadAndScroll(rightWindow,
-                     link.to.documentId,
-                     link.to.versionNo,
+    //2.1, 2.2, 2.3
+    } else if (that.visibleWindows.get() === 2
+                 && windowObject.getInd() === that.windowPointer) {
+      let rightWindow = that.windows.get(windowObject.getInd() + 1),
+          leftWindow = that.windows.get(windowObject.getInd() - 1);
+      //2.1
+      if (getWindowDocumentId(rightWindow) === link.to.documentId) {
+        loadAndScroll(rightWindow,
+          link.to.documentId,
+          link.to.versionNo);
+      //2.2
+      } else if (getWindowDocumentId(leftWindow) === link.to.documentId) {
+        loadAndScroll(leftWindow,
+          link.to.documentId,
+          link.to.versionNo,
+        function () {
+          that.slideRight();
+        });
+      //2.3
+      } else {
+        let newWindow = that.createWindow();
+        that.addWindowAfter(newWindow, windowObject.getInd());
+        
+        closeWindowsAfter(newWindow);
+        
+        loadAndScroll(newWindow,
+          link.to.documentId,
+          link.to.versionNo);
+      }
+    //2.4, 2.5, 2.6
+    } else if (that.visibleWindows.get() === 2
+                 && windowObject.getInd() === that.windowPointer + 1) {
+      let rightWindow = that.windows.get(windowObject.getInd() + 1),
+            leftWindow = that.windows.get(windowObject.getInd() - 1);
+      //2.4
+      if (getWindowDocumentId(leftWindow) === link.to.documentId) {
+        loadAndScroll(leftWindow,
+          link.to.documentId,
+          link.to.versionNo);
+      //2.5
+      } else if (getWindowDocumentId(rightWindow) === link.to.documentId) {
+        loadAndScroll(rightWindow,
+          link.to.documentId,
+          link.to.versionNo,
         function () {
           that.slideLeft();
-        });    
-    } else {
-      console.log('not implemented');
+        });
+      //2.6
+      } else {
+        let newWindow = that.createWindow();
+        that.addWindowAfter(newWindow, windowObject.getInd());
+        closeWindowsAfter(newWindow);
+        
+        loadAndScroll(newWindow,
+          link.to.documentId,
+          link.to.versionNo,
+        function () {
+           that.slideLeft();
+        });
+      }
     }
   });
   
