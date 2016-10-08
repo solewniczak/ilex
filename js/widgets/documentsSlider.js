@@ -95,23 +95,32 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
         return windows;
       },
       'push': function(win) {
-        windows.push(win);
+        windows.push(win);        
         this.length = windows.length;
         updateIlexWindowData();
+
+        $(document).trigger('ilex-slider-windowAddedAfter', [windows.length - 2, win]);
       },
       'unshift': function(win) {
         windows.unshift(win);
         this.length = windows.length;
         updateIlexWindowData();
+        
+        $(document).trigger('ilex-slider-windowAddedAfter', [-1, win]);
       },
-      'splice': function(start, deleteCount, win) {
-        if (win === undefined) {
-          windows.splice(start, deleteCount);
-        } else {
-          windows.splice(start, deleteCount, win);
-        }
+      'insert': function (ind, win) {
+        windows.splice(ind, 0, win);
         this.length = windows.length;
         updateIlexWindowData();
+        
+        $(document).trigger('ilex-slider-windowAddedAfter', [ind, win]);
+      },
+      'remove': function (ind) {
+        windows.splice(ind, 1);
+        this.length = windows.length;
+        updateIlexWindowData();
+        
+        $(document).trigger('ilex-slider-windowRemoved', [ind]);
       }
     };
   }();
@@ -305,7 +314,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     
     newWindow.remove = function () {
       var winInd = newWindow.getInd();
-      that.windows.splice(winInd, 1);
+      that.windows.remove(winInd);
       
       newWindow.element.remove();
       newWindow.rightSideHandler.remove();
@@ -431,13 +440,14 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
   
   that.addWindowAfter = function(newWindow, afterInd) {
     if (afterInd === undefined) {
+      afterInd = -1;
       newWindow.element.appendTo(that.table);
       newWindow.rightSideHandler.insertAfter(newWindow.element);
       that.windows.push(newWindow);
     } else {
       newWindow.element.insertAfter(that.windows.get(afterInd).rightSideHandler);
       newWindow.rightSideHandler.insertAfter(newWindow.element);
-      that.windows.splice(afterInd + 1, 0, newWindow);
+      that.windows.insert(afterInd + 1, newWindow);
     }
   };
   
@@ -463,7 +473,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
         element = win.element.detach(),
         handler = win.rightSideHandler.detach();
     
-    that.windows.splice(winInd, 1);
+    that.windows.remove(winInd);
 
     return win;
   };
