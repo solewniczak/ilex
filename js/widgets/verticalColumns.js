@@ -15,29 +15,7 @@ ilex.widgetsCollection.verticalColumns = function ($parentWidget, columns) {
     height = $parentWidget.data('ilex-height');
   
    //static columns widths - calculate percentage value basing on clumnsStaticWidth
-  var staticColumns = [],
-    calculateSizes = function() {
-      var columnsStaticWidth = 0;
-      //calculate columns static width to deal with percentage values
-      for (let column of columns) {
-        if (typeof column === 'number') {
-          columnsStaticWidth += column;
-        }
-      }
-
-      staticColumns = [];
-      
-      //space used in percentage calculations
-      var avalibleSpace = width - columnsStaticWidth;
-      for (let column of columns) {
-        if (typeof column === 'string') {
-          let value = parseFloat(column) / 100.0;
-          staticColumns.push(avalibleSpace * value);
-        } else {
-          staticColumns.push(column);
-        }
-      }
-  }, applySizes = function() {
+  var applySizes = function() {
     for (let i = 0; i < that.columns.length; i++) {
       let $column = that.columns[i];
       $column.data('ilex-width', staticColumns[i]).data('ilex-height', height);
@@ -51,7 +29,8 @@ ilex.widgetsCollection.verticalColumns = function ($parentWidget, columns) {
                   .data('ilex-height', height);
   $parentWidget.html(that.table);
 
-  calculateSizes();
+  var staticColumns = ilex.tools.geometry.staticSizes(columns, width);
+  
   that.columns = [];
   for (let staticColumn of staticColumns) {
     let $column = $('<div class="ilex-verticalColumn">').appendTo(that.table)
@@ -62,7 +41,7 @@ ilex.widgetsCollection.verticalColumns = function ($parentWidget, columns) {
 
   that.setColumnWidth = function(column, width) {
     columns[column] = width;
-    calculateSizes();
+    staticColumns = ilex.tools.geometry.staticSizes(columns, width);
     applySizes();
   };
   
@@ -77,7 +56,7 @@ ilex.widgetsCollection.verticalColumns = function ($parentWidget, columns) {
     that.table.data('ilex-width', width);
     that.table.data('ilex-height', height);
 
-    calculateSizes();
+    staticColumns = ilex.tools.geometry.staticSizes(columns, width);
     applySizes();
     
   });

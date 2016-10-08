@@ -10,84 +10,82 @@ if (ilex.widgetsCollection.handlerSize === undefined)
 if (ilex.widgetsCollection.verticalSplit !== undefined)
   throw 'ilex.widgetsCollection.verticalSplit already defined';
 
-ilex.widgetsCollection.verticalSplit = function ($parentWidget, position) {
+ilex.widgetsCollection.verticalSplit = function ($parentWidget, columnWidths) {
   var that = {},
-    position = position || [0.5, 0.5],
     width = $parentWidget.data('ilex-width'),
     height = $parentWidget.data('ilex-height'),
-    innerHeight = height - ilex.widgetsCollection.handlerSize;
+    innerWidth = width - ilex.widgetsCollection.handlerSize,
+    staticColumnWidths = ilex.tools.geometry.staticSizes(columnWidths, innerWidth);
+      
+  that.table = $('<div class="ilex-resize ilex-horizontalSplit">')
+                    .data('ilex-width', width)
+                    .data('ilex-height', height)
+                    .css('display', 'flex');
 
-  //replace content of parentWidget
-  that.container = $('<div class="ilex-resize ilex-verticalSplit">')
-                      .data('ilex-width', width)
-                      .data('ilex-height', height);
+  $parentWidget.html(that.table);
+  
+  that.columnWidths = columnWidths.slice();
 
-  $parentWidget.html(that.container);
+  that.left = $('<div class="ilex-left">').appendTo(that.table)
+                          .data('ilex-width', staticColumnWidths[0])
+                          .data('ilex-height', height);
 
-  that.top = $('<div class="ilex-top">').appendTo(that.container)
-                          .data('ilex-width', width)
-                          .data('ilex-height', innerHeight * position[0]);
-
-  that.position = position;
-  that.handler = $('<div class="ilex-handler">').appendTo(that.container)
-                          .css('cursor', 'ns-resize')
-                          .data('ilex-width', width)
-                          .data('ilex-height', ilex.widgetsCollection.handlerSize)
+  that.handler = $('<div class="ilex-handler">').appendTo(that.table)
+                          .css('cursor', 'ew-resize')
+                          .data('ilex-width', ilex.widgetsCollection.handlerSize)
+                          .data('ilex-height', height)
                           .css('background', '#000');
 
-  that.bottom = $('<div class="ilex-bottom">').appendTo(that.container)
-                          .data('ilex-width', width)
-                          .data('ilex-height', innerHeight * position[1]);
 
-  //where ther is no text in top div the behaviour of a split is not correct
-  that.top.html("<br>");
+  that.right = $('<div class="ilex-right">').appendTo(that.table)
+                          .data('ilex-width', staticColumnWidths[1])
+                          .data('ilex-height', height);
 
-  that.container.on('windowResize', function(event) {
-      var width = that.container.parent().data('ilex-width'),
-        height = that.container.parent().data('ilex-height'),
-          interHeight = height - ilex.widgetsCollection.handlerSize;
+  that.table.on('windowResize', function(event) {
+    var width = that.table.parent().data('ilex-width'),
+      height = that.table.parent().data('ilex-height'),
+      innerWidth = width - ilex.widgetsCollection.handlerSize,
+      staticColumnWidths = ilex.tools.geometry.staticSizes(that.columnWidths, innerWidth);
 
-      that.container.data('ilex-width', width).data('ilex-height', height);
-      that.container.children().data('ilex-width', width);
-      that.top.data('ilex-height', interHeight * that.position[0]);
-      that.bottom.data('ilex-height', interHeight * that.position[1]);
+    that.table.data('ilex-width', width).data('ilex-height', height);
+    that.table.children().data('ilex-height', height);
+    that.left.data('ilex-width', staticColumnWidths[0]);
+    that.right.data('ilex-width', staticColumnWidths[1]);
   });
   that.handler.on('mousedown', function(event) {
-    var startY = event.pageY,
-      topHeight = that.top.data('ilex-height'),
-      bottomHeight = that.bottom.data('ilex-height'),
-      innerHeight =  topHeight + bottomHeight;
-    $('body').css('cursor', 'ns-resize');
+    var startX = event.pageX,
+      leftWidth = that.left.data('ilex-width'),
+      rightWidth = that.right.data('ilex-width'),
+      innerWidth =  leftWidth + rightWidth,
+      orgColumnWidths = that.columnWidths.slice();
+    $('body').css('cursor', 'ew-resize');
     //prevent selectin while resizing
-    $(document).on('selectstart.ilex.verticalSplit', function(event) {
+    $(document).on('selectstart.ilex.horizontalSplit', function(event) {
       event.preventDefault();
     });
-    $(document).on('mouseup.ilex.verticalSplit', function () {
-      $(document).off('mouseup.ilex.verticalSplit');
-      $(document).off('mousemove.ilex.verticalSplit');
-      $(document).off('selectstart.ilex.verticalSplit');
+    $(document).on('mouseup.ilex.horizontalSplit', function () {
+      $(document).off('mouseup.ilex.horizontalSplit');
+      $(document).off('mousemove.ilex.horizontalSplit');
+      $(document).off('selectstart.ilex.horizontalSplit');
       $('body').css('cursor', 'initial');
     });
-    $(document).on('mousemove.ilex.verticalSplit', function(event) {
+    $(document).on('mousemove.ilex.horizontalSplit', function(event) {
       //calculate new position
-      var delta = event.pageY - startY,
-        newTopHeight = topHeight + delta,
-        newBottomHeight = bottomHeight - delta;
-      if (newTopHeight < 0) {
-        newTopHeight = 0;
-        newBottomHeight = innerHeight;
-      } else if (newBottomHeight < 0) {
-        newTopHeight = innerHeight;
-        newBottomHeight = 0;
-      }
-
-      that.position = [newTopHeight/innerHeight, newBottomHeight/innerHeight];
-
+      var delta = event.pageX - startX;
+      
+      that.columnWidths = ilex.tools.geometry.updateColumnsSizes(orgColumnWidths, delta);
+      
       ilex.applySize();
 
       //prevent text selection while resizing
       event.preventDefault();
     });
   });
+  that.handler.on('dblclick', function (event) {
+    //return to start position
+    that.columnWidths = columnWidths.slice();
+    ilex.applySize();
+  });
   return that;
+  
 };
