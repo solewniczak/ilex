@@ -4,6 +4,7 @@
 body {
   font-family: IlexSans;
   font-size: 12pt;
+  user-select: none;
 }
 
 div:focus {
