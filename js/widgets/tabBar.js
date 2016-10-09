@@ -19,6 +19,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
   that.tabWidth = maxTabWidth;
   
   that.addTabAfter = function(afterInd, windowObject) {
+    var buttonWidth = 20;
     //http://stackoverflow.com/questions/5322895/is-there-a-way-to-create-a-chrome-like-tab-using-css
     var $tab = $('<div class="ilex-tab">')
             .width(that.tabWidth)
@@ -31,7 +32,21 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
             .css('border-top-right-radius', '25px 170px')
             .css('border-top-left-radius', '20px 90px');
     
-    $tab.append('<div>tab ' + afterInd + '</div>');
+    var $tabText = $('<div class="ilex-tabName">').appendTo($tab)
+            .width(that.tabWidth - buttonWidth)
+            .css('display', 'inline-block')
+            .css('white-space', 'nowrap')
+            .css('overflow', 'hidden');
+    
+    var $closeButton = $('<div class="ilex-closeTabButton">').appendTo($tab)
+            .css('float', 'right');
+    
+    
+    $closeButton.html('<span class="ilex-awesome">&#xf00d;</span>');
+    $closeButton.on('click', function () {
+      $tab.remove();
+      windowObject.remove();
+    });
     
     if (afterInd === -1) {
       that.container.append($tab);
@@ -40,16 +55,26 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
     }
   };
   
+  that.setTabName = function (ind, name) {
+    that.container.children().eq(ind).find('.ilex-tabName').text(name);
+  };
+  
   that.activateTab = function (ind) {
-    that.container.children().eq(ind).css('background', '#fff');
+    that.container.children().eq(ind);
   };
   
   $(document).on('ilex-slider-windowAddedAfter', function (event, afterInd, win) {
     that.addTabAfter(afterInd, win);
   });
   
-  $(document).on('ilex-slider-tabRemoved', function (event, tabInd) {
+  $(document).on('ilex-slider-windowRemoved', function (event, tabInd) {
     
+  });
+  
+  $(document).on('ilex-documentLoaded', function (event, windowObject) {
+    var ind = windowObject.getInd(),
+        name = windowObject.contentWidget.getFileInfo('name');
+    that.setTabName(ind, name);
   });
   
   

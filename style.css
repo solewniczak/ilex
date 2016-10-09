@@ -127,3 +127,23 @@ strong {
   cursor: pointer;
 }
 
+
+.ilex-closeTabButton {
+  text-align: center;
+  vertical-align: middle;
+  line-height: 15px;
+  width: 15px;
+  border-radius: 50%;
+  cursor: default;
+  color: #898989;
+}
+
+.ilex-closeTabButton:hover {
+  background-color: #d96359;
+  color: #fff;
+}
+
+.ilex-closeTabButton:active {
+  background-color: #b1574e;
+}
+
