@@ -36,14 +36,23 @@ ilex.tools.mime.formats['plain text'] = {
     params.format = 'plain text';
     
     ilex.server.createDocument(win.tabId, params, function(documentObject) {
-      var widget = ilex.widgetsCollection.textWithLinks(win, documentObject);
+      var widget = ilex.widgetsCollection.textWithLinks(win, documentObject, 1,
+        function () {
+          $(document).trigger('ilex-documentLoaded', [win]);
+        });
       win.setContentWidget(widget);
       ilex.applySize();
     });
   },
   'load': function (win, documentId, version, callback) {
     var documentObject = ilex.server.document(win.tabId, documentId),
-        widget = ilex.widgetsCollection.textWithLinks(win, documentObject, version, callback);
+        widget = ilex.widgetsCollection.textWithLinks(win, documentObject, version,
+          function () {
+            if (typeof callback === 'function') {
+              callback();
+            }
+            $(document).trigger('ilex-documentLoaded', [win]);
+          });
     
     win.setContentWidget(widget);
     
