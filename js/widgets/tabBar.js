@@ -24,13 +24,29 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
     var $tab = $('<div class="ilex-tab">')
             .width(that.tabWidth)
             .height(170)
+            .css('position', 'relative')
             .css('margin', '5px -10px 0')
             .css('background', '#eee')
             .css('font', '12px IlexSans')
             .css('padding', '5px 30px 0 25px')
             .css('border', '1px solid #000')
             .css('border-top-right-radius', '25px 170px')
-            .css('border-top-left-radius', '20px 90px');
+            .css('border-top-left-radius', '20px 90px')
+            .css('cursor', 'default');
+    
+    $tab.on('mousedown', function () {
+      var startX = event.pageX,
+          tabLeft = $tab.offset().left;
+      $(document).on('mouseup', function () {
+        $(document).off('mousemove');
+        $tab.animate({'left': 0});
+      });
+      
+      $(document).on('mousemove', function (event) {
+        var delta = event.pageX - startX;
+        $tab.offset({'left': tabLeft + delta});
+      });
+    });
     
     var $tabText = $('<div class="ilex-tabName">').appendTo($tab)
             .width(that.tabWidth - buttonWidth)
