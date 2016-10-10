@@ -18,15 +18,21 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
 
   that.tabWidth = maxTabWidth;
   
+  var buttonWidth = 20;
+  var getStartLeft = function(ind) {
+    var outerWidth = that.tabWidth + 20;
+    return ind * outerWidth;
+  };
+  
   that.addTabAfter = function(afterInd, windowObject) {
-    var buttonWidth = 20;
+    
     //http://stackoverflow.com/questions/5322895/is-there-a-way-to-create-a-chrome-like-tab-using-css
-    var outerWidth = that.tabWidth + 25;
+    
     var $tab = $('<div class="ilex-tab">')
             .width(that.tabWidth)
             .height(170)
             .css('position', 'absolute')
-            .css('left', (afterInd + 1) * outerWidth)
+            .css('left', getStartLeft(afterInd + 1))
             .css('background', '#eee')
             .css('font', '12px IlexSans')
             .css('padding', '10px 30px 0 25px')
@@ -38,21 +44,51 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
     
     $tab.on('mousedown', function () {
       var startX = event.pageX,
-          tabLeft = $tab.offset().left;
+          tabStartLeft = $tab.offset().left;
       
       $tab.css('z-index', 2);
       
       $(document).on('mouseup', function () {
         $(document).off('mousemove');
         $(document).off('mouseup');
-        
+
          $tab.css('z-index', 0);
-        $tab.animate({'left': tabLeft});
+        $tab.animate({'left': getStartLeft($tab.index())});
       });
       
       $(document).on('mousemove', function (event) {
-        var delta = event.pageX - startX;
-        $tab.offset({'left': tabLeft + delta});
+        var swapTabsMargin = 20;
+        
+        var delta = event.pageX - startX,
+            newTabLeft = tabStartLeft + delta,
+            $leftTab = $tab.prev(),
+            $rightTab = $tab.next();
+        $tab.offset({'left': newTabLeft});
+              
+        if ($rightTab.length > 0 &&
+            !$rightTab.is(':animated') &&
+            $rightTab.offset().left < newTabLeft + $tab.outerWidth() / 2) {
+          
+          let tabInd = $tab.index(),
+              rightTabInd = $rightTab.index();
+          
+          $tab.insertAfter($rightTab);
+          $rightTab.animate({left: getStartLeft($rightTab.index())}, 200);
+          
+          $(document).trigger('ilex-slider-swapWindows', [tabInd, rightTabInd]);
+          
+        } else if ($leftTab.length > 0 &&
+            !$leftTab.is(':animated') &&
+            $leftTab.offset().left + $leftTab.outerWidth() / 2 > newTabLeft) {
+          let tabInd = $tab.index(),
+              leftTabInd = $leftTab.index();
+          
+          $tab.insertBefore($leftTab);
+          $leftTab.animate({left: getStartLeft($leftTab.index())}, 200);
+          
+          $(document).trigger('ilex-slider-swapWindows', [tabInd, leftTabInd]);
+        }
+        
       });
     });
     
@@ -83,8 +119,11 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
     that.container.children().eq(ind).find('.ilex-tabName').text(name);
   };
   
-  that.activateTab = function (ind) {
-    that.container.children().eq(ind);
+  that.setActiveTabs = function (windowPointer, visibleWindows) {
+    that.container.children().css('background', '#eee'); 
+    for (let i = windowPointer; i < windowPointer + visibleWindows; i++) {
+     that.container.children().eq(i).css('background', '#fff'); 
+    }
   };
   
   $(document).on('ilex-slider-windowAddedAfter', function (event, afterInd, win) {
@@ -93,6 +132,10 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
   
   $(document).on('ilex-slider-windowRemoved', function (event, tabInd) {
     
+  });
+  
+  $(document).on('ilex-slider-viewChanged', function (event, windowPointer, visibleWindows) {
+    that.setActiveTabs(windowPointer, visibleWindows);
   });
   
   $(document).on('ilex-documentLoaded', function (event, windowObject) {
