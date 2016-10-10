@@ -21,25 +21,33 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
   that.addTabAfter = function(afterInd, windowObject) {
     var buttonWidth = 20;
     //http://stackoverflow.com/questions/5322895/is-there-a-way-to-create-a-chrome-like-tab-using-css
+    var outerWidth = that.tabWidth + 25;
     var $tab = $('<div class="ilex-tab">')
             .width(that.tabWidth)
             .height(170)
-            .css('position', 'relative')
-            .css('margin', '5px -10px 0')
+            .css('position', 'absolute')
+            .css('left', (afterInd + 1) * outerWidth)
             .css('background', '#eee')
             .css('font', '12px IlexSans')
-            .css('padding', '5px 30px 0 25px')
+            .css('padding', '10px 30px 0 25px')
             .css('border', '1px solid #000')
             .css('border-top-right-radius', '25px 170px')
             .css('border-top-left-radius', '20px 90px')
             .css('cursor', 'default');
     
+    
     $tab.on('mousedown', function () {
       var startX = event.pageX,
           tabLeft = $tab.offset().left;
+      
+      $tab.css('z-index', 2);
+      
       $(document).on('mouseup', function () {
         $(document).off('mousemove');
-        $tab.animate({'left': 0});
+        $(document).off('mouseup');
+        
+         $tab.css('z-index', 0);
+        $tab.animate({'left': tabLeft});
       });
       
       $(document).on('mousemove', function (event) {
