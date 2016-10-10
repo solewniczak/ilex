@@ -19,14 +19,13 @@ ilex.views.slider = function(canvas) {
   
   view.browser = ilex.widgetsCollection.horizontalColumns(view.mainSplit.left, ['30', '100%']);
   
-  
-
   view.tabs = ilex.widgetsCollection.tabBar(view.browser.columns[0]);
   
   view.browser.columns[1].css('position', 'relative').css('z-index', 10);
   
   view.slider = ilex.widgetsCollection.documentsSlider(view.browser.columns[1],
                                                   ilex.widgetsCollection.textStarter);
+  
   
   $(document).on('canvasRedraw', function () {
     if (!ilex.navigationMode) {

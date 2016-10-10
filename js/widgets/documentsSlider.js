@@ -121,6 +121,15 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
         updateIlexWindowData();
         
         $(document).trigger('ilex-slider-windowRemoved', [ind]);
+      },
+      'swap': function (win1, win2) {
+        var win1Ind = win1.getInd(),
+            win2Ind = win2.getInd();
+        
+        windows[win1Ind] = win2;
+        windows[win2Ind] = win1;
+        
+        updateIlexWindowData();
       }
     };
   }();
@@ -152,6 +161,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
         visWindows += 1;
         setEqualWindowPositions();
         this.applyWindowPosition();
+        $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, visWindows]);
       },
       'dec': function () {
         if (visWindows === 0) {
@@ -160,6 +170,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
         visWindows -= 1;
         setEqualWindowPositions();
         this.applyWindowPosition();
+        $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, visWindows]);
       },
       'applyWindowPosition': function () {
         for (let i = 0; i < visWindows; i++) {
@@ -415,6 +426,16 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       newWindow.contentWidget = undefined;
     };
     
+      
+    newWindow.detach = function(winInd) {
+      newWindow.element = newWindow.element.detach();
+      newWindow.rightSideHandler = newWindow.rightSideHandler.detach();
+
+      that.windows.remove(newWindow.getInd());
+      
+      return newWindow;
+    };
+    
     newWindow.setContentWidget = function(contentWidget) {
       newWindow.contentWidget = contentWidget;
     };
@@ -451,6 +472,23 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     }
   };
   
+  that.swapWindows = function(window1, window2) {
+    var win1Prev = window1.element.prev();
+    
+    window1.element.insertAfter(window2.rightSideHandler);
+    window1.rightSideHandler.insertAfter(window1.element);
+    
+    if (win1Prev.length === 0) {
+      window2.element.appendTo(that.table);
+    } else {
+      window2.element.insertAfter(win1Prev);
+    }
+    window2.rightSideHandler.insertAfter(window2.element);
+    
+    that.windows.swap(window1, window2);
+    ilex.applySize();
+  };
+  
   that.addWindowBefore = function(newWindow, beforeInd) {
     if (beforeInd === undefined) {
       beforeInd = 0;
@@ -466,16 +504,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       that.windows.unshift(newWindow);
     }
     
-  }
-  
-  that.detachWindow = function(winInd) {
-    var win = that.windows.get(winInd),
-        element = win.element.detach(),
-        handler = win.rightSideHandler.detach();
-    
-    that.windows.remove(winInd);
-
-    return win;
   };
 
   that.slideLeft = function (callback) {
@@ -493,6 +521,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
         
     //move to next window
     that.windowPointer += 1;
+    $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
     
     //swap positions
     that.visibleWindows.shiftLeft();
@@ -520,6 +549,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     }
 
     that.windowPointer -= 1;
+    $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
     
     var windowToShow = that.windows.get(that.windowPointer),
         windowToShowPreviousWidth = windowToShow.getWidth();
@@ -679,7 +709,11 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
   let win = that.createStarterWindow();
   that.addWindowAfter(win);
   that.visibleWindows.inc();
-
+  
+  $(document).on('ilex-slider-swapWindows', function (event, ind1, ind2) {
+    console.log(ind1, ind2);
+    that.swapWindows(that.windows.get(ind1), that.windows.get(ind2));
+  });
   
   //create buttons
   let fontSize = '20px';
@@ -696,7 +730,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       'callbackOn': function(event) {
         var width = that.container.data('ilex-width'),
             offset = that.table.offset(),
-            win = that.detachWindow(that.windowPointer),
+            win = that.windows.get(that.windowPointer).detach(),
             winWidth = win.getWidth();
         
         that.superTable.setColumnWidth(0, winWidth);
