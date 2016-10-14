@@ -728,6 +728,22 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     that.swapWindows(ind1, ind2);
   });
   
+  $(document).on('ilex-slider-setWindowPointer', function (event, windowPointer) {
+    if (windowPointer < 0 || windowPointer >= that.windows.length) {
+      console.log('on ilex-slider-setWindowPointer: windowPointer ' + windowPointer + ' out of bound');
+      return;
+    }
+    //last windows
+    if (windowPointer + that.visibleWindows.get() >= that.windows.length) {
+        windowPointer = that.windows.length - that.visibleWindows.get();
+    }
+    console.log(windowPointer);
+//    that.windowPointer = windowPointer;
+//    that.visibleWindows.applyWindowPosition();
+//    ilex.applySize();
+  });
+  
+  
   //create buttons
   let fontSize = '20px';
   ilex.widgetsCollection.verticalToolbar(that.leftButtons, [
