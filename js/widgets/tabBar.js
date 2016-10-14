@@ -75,6 +75,9 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
             .css('border-top-left-radius', '20px 90px')
             .css('cursor', 'default');
     
+    $tab.on('click', function () {
+      $(document).trigger('ilex-slider-setWindowPointer', [$tab.index()]);
+    });
 
     $tab.on('mousedown', function () {
       var startX = event.pageX,
