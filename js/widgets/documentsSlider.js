@@ -331,6 +331,8 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       newWindow.rightSideHandler.remove();
 
       ilex.server.tabClose(winInd);
+      
+      $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
     };
     
     newWindow.getWidth = function () {
@@ -472,14 +474,24 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     }
   };
   
-  that.swapWindows = function(window1, window2) {
+  that.swapWindows = function(ind1, ind2) {
+    if (ind1 === ind2) {
+      return;
+    } else if (ind1 > ind2) {
+      let tmp = ind1;
+      ind1 = ind2;
+      ind2 = tmp;
+    }
+    
+    var window1 = that.windows.get(ind1),
+        window2 = that.windows.get(ind2);
     var win1Prev = window1.element.prev();
     
     window1.element.insertAfter(window2.rightSideHandler);
     window1.rightSideHandler.insertAfter(window1.element);
     
     if (win1Prev.length === 0) {
-      window2.element.appendTo(that.table);
+      window2.element.prependTo(that.table);
     } else {
       window2.element.insertAfter(win1Prev);
     }
@@ -487,6 +499,8 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     
     that.windows.swap(window1, window2);
     ilex.applySize();
+    
+    $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
   };
   
   that.addWindowBefore = function(newWindow, beforeInd) {
@@ -711,8 +725,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
   that.visibleWindows.inc();
   
   $(document).on('ilex-slider-swapWindows', function (event, ind1, ind2) {
-    console.log(ind1, ind2);
-    that.swapWindows(that.windows.get(ind1), that.windows.get(ind2));
+    that.swapWindows(ind1, ind2);
   });
   
   //create buttons

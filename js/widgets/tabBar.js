@@ -24,6 +24,13 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
     return ind * outerWidth;
   };
   
+  var setTabsLeft = function() {
+    that.container.children().each(function (ind) {
+      var $tab = $(this);
+      $tab.animate({'left': getStartLeft(ind)});
+    });
+  };
+  
   that.addTabAfter = function(afterInd, windowObject) {
     
     //http://stackoverflow.com/questions/5322895/is-there-a-way-to-create-a-chrome-like-tab-using-css
@@ -118,6 +125,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
     $closeButton.html('<span class="ilex-awesome">&#xf00d;</span>');
     $closeButton.on('click', function () {
       $tab.remove();
+      setTabsLeft();
       windowObject.remove();
     });
     
