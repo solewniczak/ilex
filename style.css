@@ -148,3 +148,17 @@ strong {
   background-color: #b1574e;
 }
 
+.ilex-background-button {
+  background: #eee;
+  border: 1px solid #777;
+  border-radius: 2px;
+}
+
+.ilex-background-button:hover {
+  background-color: #f8f8f8;
+}
+
+.ilex-background-button:active {
+  background-color: #ddd;
+}
+
