@@ -83,19 +83,24 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
       var startX = event.pageX,
           tabStartLeft = $tab.offset().left;
       
+
       $tab.css('z-index', 2);
       
       $(document).on('mouseup', function () {
         $(document).off('mousemove');
         $(document).off('mouseup');
-
-         $tab.css('z-index', 0);
+        
+        $createNewTabButton.show();
+        $tab.css('z-index', 0);
+        
         $tab.animate({'left': getStartLeft($tab.index())});
       });
       
       var leftOnSwitch = -1,
           swapMargin = 50;
       $(document).on('mousemove', function (event) {
+        $createNewTabButton.hide();
+        
         var delta = event.pageX - startX,
             newTabLeft = tabStartLeft + delta,
             $leftTab = $tab.prev(),
