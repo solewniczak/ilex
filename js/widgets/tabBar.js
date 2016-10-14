@@ -12,8 +12,18 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
   var that = {},
       maxTabWidth = 200;
   
-  that.container = $('<div class="ilex-resize ilex-tabBar">')
+  that.container = $('<div class="ilex-resize ilex-tabBar">');
+  
+  that.openTabsContainer = $('<div>').appendTo(that.container)
                       .css('display', 'flex');
+  
+  var $createNewTabButton = $('<div class="ilex-background-button">')
+                      .appendTo(that.container)
+                      .width(30).height(18)
+                      .css('top', 6)
+                      .css('position', 'absolute')   
+                      .css('transform', 'skewX(20deg)');
+  
   $parentWidget.html(that.container);
 
   that.tabWidth = maxTabWidth;
@@ -24,11 +34,29 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
     return ind * outerWidth;
   };
   
-  var setTabsLeft = function() {
-    that.container.children().each(function (ind) {
+  var setTabsLeft = function(animate) {
+    if (animate === undefined) {
+      animate = true;
+    };
+    
+    that.openTabsContainer.children().each(function (ind) {
       var $tab = $(this);
-      $tab.animate({'left': getStartLeft(ind)});
+      if (animate) {
+        $tab.animate({'left': getStartLeft(ind)});
+      } else {
+        $tab.css({'left': getStartLeft(ind)});
+      }
     });
+    
+    let buttonLeft = getStartLeft(1) * that.openTabsContainer.children().length;
+    
+    //margin
+    buttonLeft += 30;
+    if (animate) {
+      $createNewTabButton.animate({'left': buttonLeft});
+    } else {
+      $createNewTabButton.css({'left': buttonLeft});
+    }
   };
   
   that.addTabAfter = function(afterInd, windowObject) {
@@ -39,7 +67,6 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
             .width(that.tabWidth)
             .height(170)
             .css('position', 'absolute')
-            .css('left', getStartLeft(afterInd + 1))
             .css('background', '#eee')
             .css('font', '12px IlexSans')
             .css('padding', '10px 30px 0 25px')
@@ -48,7 +75,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
             .css('border-top-left-radius', '20px 90px')
             .css('cursor', 'default');
     
-    
+
     $tab.on('mousedown', function () {
       var startX = event.pageX,
           tabStartLeft = $tab.offset().left;
@@ -126,24 +153,26 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
     $closeButton.on('click', function () {
       $tab.remove();
       setTabsLeft();
-      windowObject.remove();
+      windowObject.closeTab();
     });
     
     if (afterInd === -1) {
-      that.container.append($tab);
+      that.openTabsContainer.append($tab);
     } else {
-      that.container.children().eq(afterInd).after($tab);
+      that.openTabsContainer.children().eq(afterInd).after($tab);
     }
+    
+    setTabsLeft(false);
   };
   
   that.setTabName = function (ind, name) {
-    that.container.children().eq(ind).find('.ilex-tabName').text(name);
+    that.openTabsContainer.children().eq(ind).find('.ilex-tabName').text(name);
   };
   
   that.setActiveTabs = function (windowPointer, visibleWindows) {
-    that.container.children().css('background', '#eee'); 
+    that.openTabsContainer.children().css('background', '#eee'); 
     for (let i = windowPointer; i < windowPointer + visibleWindows; i++) {
-     that.container.children().eq(i).css('background', '#fff'); 
+     that.openTabsContainer.children().eq(i).css('background', '#fff'); 
     }
   };
   
