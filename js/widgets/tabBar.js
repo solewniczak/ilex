@@ -56,18 +56,27 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
         $tab.animate({'left': getStartLeft($tab.index())});
       });
       
+      var leftOnSwitch = -1,
+          swapMargin = 50;
       $(document).on('mousemove', function (event) {
-        var swapTabsMargin = 20;
-        
         var delta = event.pageX - startX,
             newTabLeft = tabStartLeft + delta,
             $leftTab = $tab.prev(),
             $rightTab = $tab.next();
         $tab.offset({'left': newTabLeft});
-              
+        
+        //Zablokuj przełączanie kart dopóki nie przekroczy się granicy tolerancji.
+        //Poniższy kod zapobiega migotaniu przy zmianie kart.
+         if (leftOnSwitch > -1 &&
+             (newTabLeft > leftOnSwitch - swapMargin &&
+             newTabLeft < leftOnSwitch + swapMargin)) {
+            return;
+        }
+        leftOnSwitch = -1;
+        
         if ($rightTab.length > 0 &&
             !$rightTab.is(':animated') &&
-            $rightTab.offset().left < newTabLeft + $tab.outerWidth() / 2) {
+            newTabLeft + $tab.outerWidth() > $rightTab.offset().left + $rightTab.outerWidth() / 2) {
           
           let tabInd = $tab.index(),
               rightTabInd = $rightTab.index();
@@ -75,16 +84,20 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
           $tab.insertAfter($rightTab);
           $rightTab.animate({left: getStartLeft($rightTab.index())}, 200);
           
+          leftOnSwitch = newTabLeft;
+          
           $(document).trigger('ilex-slider-swapWindows', [tabInd, rightTabInd]);
           
         } else if ($leftTab.length > 0 &&
             !$leftTab.is(':animated') &&
-            $leftTab.offset().left + $leftTab.outerWidth() / 2 > newTabLeft) {
+            newTabLeft < $leftTab.offset().left + $leftTab.outerWidth() / 2) {
           let tabInd = $tab.index(),
               leftTabInd = $leftTab.index();
           
           $tab.insertBefore($leftTab);
           $leftTab.animate({left: getStartLeft($leftTab.index())}, 200);
+          
+          leftOnSwitch = newTabLeft;
           
           $(document).trigger('ilex-slider-swapWindows', [tabInd, leftTabInd]);
         }
