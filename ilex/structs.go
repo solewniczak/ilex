@@ -42,6 +42,7 @@ type HalfLink struct {
 	DocumentId bson.ObjectId `bson:"DocumentId" json:"documentId"`
 	VersionNo  int           `bson:"VersionNo"  json:"versionNo"`
 	Range      Range         `bson:"Range"      json:"range"`
+	Type       string        `bson:"Type"       json:"type"`
 }
 
 type TwoWayLink struct {
@@ -49,5 +50,4 @@ type TwoWayLink struct {
 	LinkId bson.ObjectId `bson:"LinkId"        json:"linkId"`
 	From   HalfLink      `bson:"From"          json:"from"`
 	To     HalfLink      `bson:"To"            json:"to"`
-	Type   string        `bson:"Type"          json:"type"`
 }
