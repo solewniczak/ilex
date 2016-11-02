@@ -1,10 +1,12 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"ilex/ilex"
+	"ilex/lc.v1"
 	"ilex/tree.v1"
 )
 
@@ -16,6 +18,7 @@ type ControllerData struct {
 	Document               ilex.Document
 	DocumentId             string
 	Version                ilex.Version
+	LinksContainter        lc.LinkContainer
 	Clients                map[ClientTab]bool
 	TotalClients           int
 	Editors                map[ClientTab]bool
@@ -40,7 +43,13 @@ func (cd *ControllerData) GetDocumentData(database *mgo.Database) error {
 	if err := docs.Find(bson.M{"_id": bson.ObjectIdHex(cd.DocumentId)}).One(&cd.Document); err != nil {
 		return err
 	}
-	return GetLatestVersion(database, &cd.Document, &cd.Version)
+	err := GetLatestVersion(database, &cd.Document, &cd.Version)
+	if err == nil {
+		if cd.LinksContainter = lc.NewLinkContainer(&cd.Document.Id, cd.Version.No, database); cd.LinksContainter == nil {
+			return errors.New("Could not create links container")
+		}
+	}
+	return err
 }
 
 func (cd *ControllerData) RegisterNewClientTab(clientTab *ClientTab) {
@@ -135,6 +144,7 @@ func (cd *ControllerData) NotifyClientsAddText(message *AddTextMessage) {
 			n.Parameters[POSITION] = message.Position
 			n.Parameters[STRING] = message.String
 			n.Parameters[LENGTH] = message.Length
+			n.Parameters[LINK_IDS] = message.LinkIds
 			n.SendTo(client.WS)
 		}
 	}

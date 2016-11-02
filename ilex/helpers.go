@@ -167,3 +167,25 @@ func CurrentTime() string {
 func (link *TwoWayLink) Reverse() {
 	link.From, link.To = link.To, link.From
 }
+
+func GetLinksForDoc(database *mgo.Database, documentId *bson.ObjectId, version int) (error, []TwoWayLink) {
+	links := database.C(LINKS)
+	var linksToDoc []TwoWayLink
+	var linksFromDoc []TwoWayLink
+	//	pointsHere := bson.M{"DocumentId": *documentId, "VersionNo": version}
+	if err := links.Find(
+		bson.M{"From.DocumentId": *documentId, "From.VersionNo": version},
+	).All(&linksFromDoc); err != nil {
+		return nil, nil
+	}
+	if err := links.Find(
+		bson.M{"To.DocumentId": *documentId, "To.VersionNo": version},
+	).All(&linksToDoc); err != nil {
+		return nil, nil
+	}
+	for i, _ := range linksToDoc {
+		linksToDoc[i].Reverse()
+	}
+	linksFromDoc = append(linksFromDoc, linksToDoc...)
+	return nil, linksFromDoc
+}
