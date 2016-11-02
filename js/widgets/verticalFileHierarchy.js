@@ -67,7 +67,7 @@ ilex.widgetsCollection.verticalFileHierarchy = function ($parentWidget) {
       });
       
       $superDiv.on('dblclick', function () {
-        alert('jgoss');
+       $(document).trigger('ilex-openDocument', [file, '']);
       });
       
       $superDiv.on('dragstart', function(event) {
