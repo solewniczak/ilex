@@ -746,6 +746,16 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
   that.addWindowAfter(win);
   that.visibleWindows.inc();
   
+  $(document).on('ilex-openDocument', function (event, file, afterInd) {
+      //by default newest version
+      //get new document
+      var win = that.createWindow();
+      that.addWindowBefore(win, that.windowPointer + that.visibleWindows.get());
+       
+      ilex.tools.mime.loadDocument(win, file.id);
+      that.slideLeft();
+    });
+  
   $(document).on('ilex-slider-swapWindows', function (event, ind1, ind2) {
     that.swapWindows(ind1, ind2);
   });
