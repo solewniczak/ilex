@@ -13,6 +13,7 @@ type AddTextMessage struct {
 	Position int
 	Length   int
 	String   string
+	LinkIds  []string
 }
 
 type RemoveTextMessage struct {
@@ -80,10 +81,11 @@ loop:
 				controllerData.Version.Size++
 				i++
 			}
+			controllerData.LinksContainter.AddRunes(message.Position+1, message.Length, message.LinkIds)
 			controllerData.HasUnsavedChanges = true
 			controllerData.NotifyClientsAddText(message)
-			root.Print(0)
-			fmt.Println(tree.GetTreeDump(root))
+			//root.Print(0)
+			//fmt.Println(tree.GetTreeDump(root))
 
 		case message := <-subscriptions.RemoveTextMessages:
 			fmt.Println("text removed", *message)
@@ -94,10 +96,11 @@ loop:
 				root.RemoveRune(message.Position)
 				controllerData.Version.Size--
 			}
+			controllerData.LinksContainter.RemoveRunes(message.Position, message.Length)
 			controllerData.HasUnsavedChanges = true
 			controllerData.NotifyClientsRemoveText(message)
-			root.Print(0)
-			fmt.Println(tree.GetTreeDump(root))
+			//root.Print(0)
+			//fmt.Println(tree.GetTreeDump(root))
 
 		case message := <-subscriptions.ChangeNameMessages:
 			fmt.Println("name changed", *message)
@@ -131,7 +134,7 @@ loop:
 				break
 			}
 
-			err, doc_links := GetLinksForDoc(database, &controllerData.Document.Id, controllerData.Version.No)
+			err, doc_links := ilex.GetLinksForDoc(database, &controllerData.Document.Id, controllerData.Version.No)
 			if err != nil {
 				fmt.Println(err.Error())
 				break
