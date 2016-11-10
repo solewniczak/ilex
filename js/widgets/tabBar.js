@@ -35,6 +35,26 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
   };
   
   var setTabsLeft = function(animate) {
+    var calculateButtonLeft = function () {
+      let buttonLeft = getStartLeft(1) * that.openTabsContainer.children().length;
+      //margin
+      buttonLeft += 30;
+      return buttonLeft;
+    };
+    var setTabsWidth = function() {
+       that.openTabsContainer.children().width(that.tabWidth);
+      that.openTabsContainer.children().find('.ilex-tabName').width(that.tabWidth - buttonWidth);
+    };
+    
+    let buttonLeft = calculateButtonLeft(),
+        tabBarWidth = that.container.data('ilex-width');
+    if (buttonLeft > tabBarWidth) {
+      //we must left 35 for add new tab button
+      that.tabWidth = (tabBarWidth - 35)/that.openTabsContainer.children().length;
+      setTabsWidth();
+      buttonLeft = calculateButtonLeft();
+    }
+
     if (animate === undefined) {
       animate = true;
     };
@@ -48,10 +68,8 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
       }
     });
     
-    let buttonLeft = getStartLeft(1) * that.openTabsContainer.children().length;
+
     
-    //margin
-    buttonLeft += 30;
     if (animate) {
       $createNewTabButton.animate({'left': buttonLeft});
     } else {
