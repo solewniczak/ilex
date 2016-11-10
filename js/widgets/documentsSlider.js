@@ -785,47 +785,47 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       }
     },
     //Freeze window
-    {
-      'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf152;</span>',
-      'htmlOn': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf191;</span>',
-      'callbackOn': function(event) {
-        var width = that.container.data('ilex-width'),
-            offset = that.table.offset(),
-            win = that.windows.get(that.windowPointer).detach(),
-            winWidth = win.getWidth();
-        
-        that.superTable.setColumnWidth(0, winWidth);
-        win.element.css('z-index', 10);
-        
-        //save frozen window object
-        that.froozenWindow = win;
-        that.frozenContainer.append(win.element);
-        
-        that.container.data('ilex-width', width - winWidth);
-        that.table.css('left', offset.left + winWidth);
-        
-        that.visibleWindows.dec();
-        ilex.applySize();
-      },
-      'callbackOff': function(event) {
-        var width = that.container.data('ilex-width'),
-            frozenWidth = that.frozenContainer.data('ilex-width'),
-            offset = that.table.offset();
-        
-        that.addWindowBefore(that.froozenWindow, that.windowPointer);
-        that.froozenWindow = null;
-        
-        that.visibleWindows.inc();
-        
-        that.superTable.setColumnWidth(0, 0);
-        
-        that.container.data('ilex-width', width + frozenWidth);
-        that.table.css('left', offset.left - frozenWidth);
-        
-        //applyWindowPosition();
-        ilex.applySize();
-      }
-    }
+//    {
+//      'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf152;</span>',
+//      'htmlOn': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf191;</span>',
+//      'callbackOn': function(event) {
+//        var width = that.container.data('ilex-width'),
+//            offset = that.table.offset(),
+//            win = that.windows.get(that.windowPointer).detach(),
+//            winWidth = win.getWidth();
+//        
+//        that.superTable.setColumnWidth(0, winWidth);
+//        win.element.css('z-index', 10);
+//        
+//        //save frozen window object
+//        that.froozenWindow = win;
+//        that.frozenContainer.append(win.element);
+//        
+//        that.container.data('ilex-width', width - winWidth);
+//        that.table.css('left', offset.left + winWidth);
+//        
+//        that.visibleWindows.dec();
+//        ilex.applySize();
+//      },
+//      'callbackOff': function(event) {
+//        var width = that.container.data('ilex-width'),
+//            frozenWidth = that.frozenContainer.data('ilex-width'),
+//            offset = that.table.offset();
+//        
+//        that.addWindowBefore(that.froozenWindow, that.windowPointer);
+//        that.froozenWindow = null;
+//        
+//        that.visibleWindows.inc();
+//        
+//        that.superTable.setColumnWidth(0, 0);
+//        
+//        that.container.data('ilex-width', width + frozenWidth);
+//        that.table.css('left', offset.left - frozenWidth);
+//        
+//        //applyWindowPosition();
+//        ilex.applySize();
+//      }
+//    }
   ]);
 
   ilex.widgetsCollection.verticalToolbar(that.rightButtons, [
