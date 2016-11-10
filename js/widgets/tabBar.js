@@ -164,7 +164,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
       setTabsLeft();
       windowObject.closeTab();
     });
-    
+        
     if (afterInd === -1) {
       that.openTabsContainer.append($tab);
     } else {
@@ -186,6 +186,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
   };
   
   $(document).on('ilex-slider-windowAddedAfter', function (event, afterInd, win) {
+    console.log(afterInd, win);
     that.addTabAfter(afterInd, win);
   });
   
@@ -200,7 +201,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
   $(document).on('ilex-documentLoaded', function (event, windowObject) {
     var ind = windowObject.getInd(),
         name = windowObject.contentWidget.getFileInfo('name');
-      that.setTabName(ind, name);
+    that.setTabName(ind, name);
   });
   
   
