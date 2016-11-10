@@ -28,6 +28,7 @@ ilex.tools.mime.createDocument = function (win, type) {
 
 ilex.tools.mime.formats = {};
 ilex.tools.mime.formats['plain text'] = {
+  'icon': '<span class="ilex-awesome">&#xf0f6;</span>', //fa-file-text-o
   'create': function (win) {
     var params = {};
     params.name = 'Unititled document';
