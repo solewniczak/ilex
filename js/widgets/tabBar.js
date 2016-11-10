@@ -148,6 +148,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
     });
     
     var $tabText = $('<div class="ilex-tabName">').appendTo($tab)
+            .text('New tab')
             .width(that.tabWidth - buttonWidth)
             .css('display', 'inline-block')
             .css('white-space', 'nowrap')
@@ -199,7 +200,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
   $(document).on('ilex-documentLoaded', function (event, windowObject) {
     var ind = windowObject.getInd(),
         name = windowObject.contentWidget.getFileInfo('name');
-    that.setTabName(ind, name);
+      that.setTabName(ind, name);
   });
   
   

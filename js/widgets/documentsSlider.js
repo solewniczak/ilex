@@ -368,6 +368,28 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     };
     
     newWindow.closeTab = function(event) {
+      let mostRightId = that.windows.length - 1;
+      let rightVisible = that.windowPointer + that.visibleWindows.get() - 1;
+      console.log(mostRightId, rightVisible);
+      //we have tab on the right
+      if (rightVisible < mostRightId) {
+        newWindow.remove();
+      //we close most right window
+      } else if (rightVisible === mostRightId) {
+        that.slideRight(function () {
+          newWindow.remove();
+        });
+      } else if (that.windows.length === 0) {
+        let win = that.createStarterWindow();
+        that.addWindowAfter(win);
+      } else {
+        newWindow.remove();
+      }
+      
+      ilex.applySize();
+    };
+    
+    newWindow.oldCloseTab = function(event) {
       var windowHeight = $(window).height();
       //cannot close last tab
       if (that.windows.length === 1) {
@@ -723,6 +745,16 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
   let win = that.createStarterWindow();
   that.addWindowAfter(win);
   that.visibleWindows.inc();
+  
+  $(document).on('ilex-openDocument', function (event, file, afterInd) {
+      //by default newest version
+      //get new document
+      var win = that.createWindow();
+      that.addWindowBefore(win, that.windowPointer + that.visibleWindows.get());
+       
+      ilex.tools.mime.loadDocument(win, file.id);
+      that.slideLeft();
+    });
   
   $(document).on('ilex-slider-swapWindows', function (event, ind1, ind2) {
     that.swapWindows(ind1, ind2);

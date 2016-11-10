@@ -13,7 +13,7 @@ ilex.views.slider = function(canvas) {
 
   view.mainSplit = ilex.widgetsCollection.verticalSplit(ilex.window, ['100%', '200']);
 
-  view.fileSelector = ilex.widgetsCollection.verticalFileSelector(view.mainSplit.right);
+  view.fileSelector = ilex.widgetsCollection.verticalFileHierarchy(view.mainSplit.right);
   
   view.popupNote = ilex.widgetsCollection.popupNote($('body'), 1000);
   
