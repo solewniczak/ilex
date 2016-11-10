@@ -9,8 +9,7 @@ if (ilex.widgetsCollection.tabBar !== undefined)
   throw 'ilex.widgetsCollection.tabBar already defined';
 
 ilex.widgetsCollection.tabBar = function ($parentWidget) {
-  var that = {},
-      maxTabWidth = 200;
+  var that = {};
   
   that.container = $('<div class="ilex-resize ilex-tabBar">');
   
@@ -26,34 +25,57 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
   
   $parentWidget.html(that.container);
 
-  that.tabWidth = maxTabWidth;
-  
-  var buttonWidth = 20;
-  var getStartLeft = function(ind) {
-    var outerWidth = that.tabWidth + 20;
-    return ind * outerWidth;
-  };
-  
-  var setTabsLeft = function(animate) {
-    var calculateButtonLeft = function () {
-      let buttonLeft = getStartLeft(1) * that.openTabsContainer.children().length;
-      //margin
-      buttonLeft += 30;
-      return buttonLeft;
+  that.tabWidth = function () {
+    var maxTabWidth = 200,
+        buttonWidth = 20,
+        margin = 20;
+    
+    var width = maxTabWidth;
+    return {
+      'setLeft': function(new_width) {
+        new_width -= buttonWidth + margin;
+        if (new_width < maxTabWidth) {
+          width = new_width;
+        } else {
+          width = maxTabWidth;
+        }
+      },
+      //width of tab without close button
+      'getInner': function () {
+        return width;
+      },
+      //width of tab with close button
+      'getOuter': function () {
+        return width + buttonWidth;
+      },
+      'getLeft': function() {
+        return this.getOuter() + margin;
+      }
     };
+  }();
+  
+  var addTabButtonLeft = function () {
+    var buttonLeft =
+        that.openTabsContainer.children().length * that.tabWidth.getLeft() + 30,
+        tabBarWidth = that.container.data('ilex-width'),
+        buttonMaxLeft = tabBarWidth - 40;
+    if (buttonLeft > buttonMaxLeft) {
+      buttonLeft = buttonMaxLeft;
+    }
+    return buttonLeft;
+  };
+      
+  var setTabsLeft = function(animate) {
     var setTabsWidth = function() {
-       that.openTabsContainer.children().width(that.tabWidth);
-      that.openTabsContainer.children().find('.ilex-tabName').width(that.tabWidth - buttonWidth);
+      that.openTabsContainer.children().width(that.tabWidth.getOuter());
+      that.openTabsContainer.children().find('.ilex-tabName').width(that.tabWidth.getInner());
     };
     
-    let buttonLeft = calculateButtonLeft(),
-        tabBarWidth = that.container.data('ilex-width');
-    if (buttonLeft > tabBarWidth) {
-      //we must left 35 for add new tab button
-      that.tabWidth = (tabBarWidth - 35)/that.openTabsContainer.children().length;
-      setTabsWidth();
-      buttonLeft = calculateButtonLeft();
-    }
+    var tabBarWidth = that.container.data('ilex-width') - 70,
+        nOpenTabs = that.openTabsContainer.children().length;
+    
+    that.tabWidth.setLeft(tabBarWidth/nOpenTabs);
+    setTabsWidth();
 
     if (animate === undefined) {
       animate = true;
@@ -62,18 +84,16 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
     that.openTabsContainer.children().each(function (ind) {
       var $tab = $(this);
       if (animate) {
-        $tab.animate({'left': getStartLeft(ind)});
+        $tab.animate({'left': ind * that.tabWidth.getLeft()});
       } else {
-        $tab.css({'left': getStartLeft(ind)});
+        $tab.css({'left': ind * that.tabWidth.getLeft()});
       }
     });
     
-
-    
     if (animate) {
-      $createNewTabButton.animate({'left': buttonLeft});
+      $createNewTabButton.animate({'left': addTabButtonLeft()});
     } else {
-      $createNewTabButton.css({'left': buttonLeft});
+      $createNewTabButton.css({'left': addTabButtonLeft()});
     }
   };
   
@@ -82,7 +102,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
     //http://stackoverflow.com/questions/5322895/is-there-a-way-to-create-a-chrome-like-tab-using-css
     
     var $tab = $('<div class="ilex-tab">')
-            .width(that.tabWidth)
+            .width(that.tabWidth.getOuter())
             .height(170)
             .css('position', 'absolute')
             .css('background', '#eee')
@@ -111,7 +131,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
         $createNewTabButton.show();
         $tab.css('z-index', 0);
         
-        $tab.animate({'left': getStartLeft($tab.index())});
+        $tab.animate({'left': $tab.index() * that.tabWidth.getLeft()});
       });
       
       var leftOnSwitch = -1,
@@ -167,7 +187,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
     
     var $tabText = $('<div class="ilex-tabName">').appendTo($tab)
             .text('New tab')
-            .width(that.tabWidth - buttonWidth)
+            .width(that.tabWidth.getInner())
             .css('display', 'inline-block')
             .css('white-space', 'nowrap')
             .css('overflow', 'hidden');
