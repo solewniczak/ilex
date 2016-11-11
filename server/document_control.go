@@ -75,13 +75,16 @@ loop:
 			controllerData.CheckForNewEditor(&message.Client)
 			controllerData.TryUpdateVersion(database, root)
 
+			if err = controllerData.LinksContainter.AddRunes(message.Position+1, message.Length, message.LinkIds); err != nil {
+				fmt.Println("Adding text failed because of link container error:", err.Error())
+				continue
+			}
 			i := 0
 			for _, char := range message.String {
 				root.AddRune(char, message.Position+i+1)
 				controllerData.Version.Size++
 				i++
 			}
-			controllerData.LinksContainter.AddRunes(message.Position+1, message.Length, message.LinkIds)
 			controllerData.HasUnsavedChanges = true
 			controllerData.NotifyClientsAddText(message)
 			//root.Print(0)

@@ -1,6 +1,7 @@
 package lc
 
 import (
+	"errors"
 	"fmt"
 	"gopkg.in/mgo.v2"
 	//"gopkg.in/mgo.v2/bson"
@@ -40,7 +41,12 @@ func (lc *HalfLinkContainer) print() {
 	fmt.Printf("+ %d links to delete.\n", len(lc.ToDelete))
 }
 
-func (lc *HalfLinkContainer) AddRunes(position, length int, linkIds []string) {
+func (lc *HalfLinkContainer) AddRunes(position, length int, linkIds []string) error {
+	for _, link := range lc.Links {
+		if link.Anchor.Range.Position < position && link.Anchor.Range.Position+link.Anchor.Range.Length > position && !isAmongLinks(&link, linkIds) {
+			return errors.New("Splitting links with not linked text is not supported.")
+		}
+	}
 	for i, link := range lc.Links {
 		if link.Anchor.Range.Position <= position && link.Anchor.Range.Position+link.Anchor.Range.Length >= position && isAmongLinks(&link, linkIds) {
 			lc.Links[i].Anchor.Range.Length += length
@@ -50,6 +56,7 @@ func (lc *HalfLinkContainer) AddRunes(position, length int, linkIds []string) {
 		}
 	}
 	lc.print()
+	return nil
 }
 
 func (lc *HalfLinkContainer) RemoveRunes(position, length int) {
