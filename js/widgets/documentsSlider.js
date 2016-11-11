@@ -113,7 +113,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
         this.length = windows.length;
         updateIlexWindowData();
         
-        $(document).trigger('ilex-slider-windowAddedAfter', [ind, win]);
+        $(document).trigger('ilex-slider-windowAddedAfter', [ind-1, win]);
       },
       'remove': function (ind) {
         windows.splice(ind, 1);
@@ -630,115 +630,115 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
         ilex.tools.mime.loadDocument(win, documentId, version, callback);
       }
     };
-    var closeWindowsAfter = function (windowObj) {
-      if (windowObj === undefined) {
-        return;
-      }
-      
-      for (let i = that.windows.length - 1; i > windowObj.getInd(); i -= 1) {
-        let win = that.windows.get(i);
-        win.remove();
-      }
-    };
-    
-    //1
-    if (that.visibleWindows.get() === 1) {
-      let rightWindow = that.windows.get(windowObject.getInd() + 1),
-          leftWindow = that.windows.get(windowObject.getInd() - 1);
-      
-      //1.1
-      if (getWindowDocumentId(rightWindow) === link.to.documentId) {
-        loadAndScroll(rightWindow,
-          link.to.documentId,
-          link.to.versionNo,
-        function () {
-          that.visibleWindows.inc();
-          ilex.applySize();
-        });  
-      //1.2
-      } else if (getWindowDocumentId(leftWindow) === link.to.documentId) {
-        loadAndScroll(leftWindow,
-          link.to.documentId,
-          link.to.versionNo,
-        function () {
-          that.visibleWindows.inc();
-          that.slideRight();
-        });
-      //1.3
-      } else {
-        let newWindow = that.createWindow();
-        that.addWindowAfter(newWindow, windowObject.getInd());
-        closeWindowsAfter(newWindow);
-        
-        loadAndScroll(newWindow,
-          link.to.documentId,
-          link.to.versionNo,
-        function () {
-          that.visibleWindows.inc();
-          ilex.applySize();
-        });
-      }
-    //2.1, 2.2, 2.3
-    } else if (that.visibleWindows.get() === 2
-                 && windowObject.getInd() === that.windowPointer) {
-      let rightWindow = that.windows.get(windowObject.getInd() + 1),
-          leftWindow = that.windows.get(windowObject.getInd() - 1);
-      //2.1
-      if (getWindowDocumentId(rightWindow) === link.to.documentId) {
-        loadAndScroll(rightWindow,
-          link.to.documentId,
-          link.to.versionNo);
-      //2.2
-      } else if (getWindowDocumentId(leftWindow) === link.to.documentId) {
-        loadAndScroll(leftWindow,
-          link.to.documentId,
-          link.to.versionNo,
-        function () {
-          that.slideRight();
-        });
-      //2.3
-      } else {
-        let newWindow = that.createWindow();
-        that.addWindowAfter(newWindow, windowObject.getInd());
-        
-        closeWindowsAfter(newWindow);
-        
-        loadAndScroll(newWindow,
-          link.to.documentId,
-          link.to.versionNo);
-      }
-    //2.4, 2.5, 2.6
-    } else if (that.visibleWindows.get() === 2
-                 && windowObject.getInd() === that.windowPointer + 1) {
-      let rightWindow = that.windows.get(windowObject.getInd() + 1),
-            leftWindow = that.windows.get(windowObject.getInd() - 1);
-      //2.4
-      if (getWindowDocumentId(leftWindow) === link.to.documentId) {
-        loadAndScroll(leftWindow,
-          link.to.documentId,
-          link.to.versionNo);
-      //2.5
-      } else if (getWindowDocumentId(rightWindow) === link.to.documentId) {
-        loadAndScroll(rightWindow,
-          link.to.documentId,
-          link.to.versionNo,
-        function () {
-          that.slideLeft();
-        });
-      //2.6
-      } else {
-        let newWindow = that.createWindow();
-        that.addWindowAfter(newWindow, windowObject.getInd());
-        closeWindowsAfter(newWindow);
-        
-        loadAndScroll(newWindow,
-          link.to.documentId,
-          link.to.versionNo,
-        function () {
-           that.slideLeft();
-        });
-      }
-    }
+//    var closeWindowsAfter = function (windowObj) {
+//      if (windowObj === undefined) {
+//        return;
+//      }
+//      
+//      for (let i = that.windows.length - 1; i > windowObj.getInd(); i -= 1) {
+//        let win = that.windows.get(i);
+//        win.remove();
+//      }
+//    };
+//    
+//    //1
+//    if (that.visibleWindows.get() === 1) {
+//      let rightWindow = that.windows.get(windowObject.getInd() + 1),
+//          leftWindow = that.windows.get(windowObject.getInd() - 1);
+//      
+//      //1.1
+//      if (getWindowDocumentId(rightWindow) === link.to.documentId) {
+//        loadAndScroll(rightWindow,
+//          link.to.documentId,
+//          link.to.versionNo,
+//        function () {
+//          that.visibleWindows.inc();
+//          ilex.applySize();
+//        });  
+//      //1.2
+//      } else if (getWindowDocumentId(leftWindow) === link.to.documentId) {
+//        loadAndScroll(leftWindow,
+//          link.to.documentId,
+//          link.to.versionNo,
+//        function () {
+//          that.visibleWindows.inc();
+//          that.slideRight();
+//        });
+//      //1.3
+//      } else {
+//        let newWindow = that.createWindow();
+//        that.addWindowAfter(newWindow, windowObject.getInd());
+//        closeWindowsAfter(newWindow);
+//        
+//        loadAndScroll(newWindow,
+//          link.to.documentId,
+//          link.to.versionNo,
+//        function () {
+//          that.visibleWindows.inc();
+//          ilex.applySize();
+//        });
+//      }
+//    //2.1, 2.2, 2.3
+//    } else if (that.visibleWindows.get() === 2
+//                 && windowObject.getInd() === that.windowPointer) {
+//      let rightWindow = that.windows.get(windowObject.getInd() + 1),
+//          leftWindow = that.windows.get(windowObject.getInd() - 1);
+//      //2.1
+//      if (getWindowDocumentId(rightWindow) === link.to.documentId) {
+//        loadAndScroll(rightWindow,
+//          link.to.documentId,
+//          link.to.versionNo);
+//      //2.2
+//      } else if (getWindowDocumentId(leftWindow) === link.to.documentId) {
+//        loadAndScroll(leftWindow,
+//          link.to.documentId,
+//          link.to.versionNo,
+//        function () {
+//          that.slideRight();
+//        });
+//      //2.3
+//      } else {
+//        let newWindow = that.createWindow();
+//        that.addWindowAfter(newWindow, windowObject.getInd());
+//        
+//        closeWindowsAfter(newWindow);
+//        
+//        loadAndScroll(newWindow,
+//          link.to.documentId,
+//          link.to.versionNo);
+//      }
+//    //2.4, 2.5, 2.6
+//    } else if (that.visibleWindows.get() === 2
+//                 && windowObject.getInd() === that.windowPointer + 1) {
+//      let rightWindow = that.windows.get(windowObject.getInd() + 1),
+//            leftWindow = that.windows.get(windowObject.getInd() - 1);
+//      //2.4
+//      if (getWindowDocumentId(leftWindow) === link.to.documentId) {
+//        loadAndScroll(leftWindow,
+//          link.to.documentId,
+//          link.to.versionNo);
+//      //2.5
+//      } else if (getWindowDocumentId(rightWindow) === link.to.documentId) {
+//        loadAndScroll(rightWindow,
+//          link.to.documentId,
+//          link.to.versionNo,
+//        function () {
+//          that.slideLeft();
+//        });
+//      //2.6
+//      } else {
+//        let newWindow = that.createWindow();
+//        that.addWindowAfter(newWindow, windowObject.getInd());
+//        closeWindowsAfter(newWindow);
+//        
+//        loadAndScroll(newWindow,
+//          link.to.documentId,
+//          link.to.versionNo,
+//        function () {
+//           that.slideLeft();
+//        });
+//      }
+//    }
   });
   
 
