@@ -7,19 +7,23 @@ import (
 	"ilex/ilex"
 )
 
-type TwoWayLinkContainer struct {
-	Links    []ilex.TwoWayLink
-	ToDelete []ilex.TwoWayLink
+type HalfLinkContainer struct {
+	Links    []ilex.HalfLink
+	ToDelete []ilex.HalfLink
 }
 
-func (c TwoWayLinkContainer) Len() int      { return len(c.Links) }
-func (c TwoWayLinkContainer) Swap(i, j int) { c.Links[i], c.Links[j] = c.Links[j], c.Links[i] }
-func (c TwoWayLinkContainer) Less(i, j int) bool {
-	return c.Links[i].From.Range.Position < c.Links[j].From.Range.Position
+func (c HalfLinkContainer) Len() int      { return len(c.Links) }
+func (c HalfLinkContainer) Swap(i, j int) { c.Links[i], c.Links[j] = c.Links[j], c.Links[i] }
+func (c HalfLinkContainer) Less(i, j int) bool {
+	return c.Links[i].Anchor.Range.Position < c.Links[j].Anchor.Range.Position
 }
 
-func isAmongLinks(link *ilex.TwoWayLink, linkIds []string) bool {
-	idAsString := link.Id.Hex()
+func (lc *HalfLinkContainer) GetCurrent() []ilex.HalfLink {
+	return lc.Links
+}
+
+func isAmongLinks(link *ilex.HalfLink, linkIds []string) bool {
+	idAsString := link.LinkId.Hex()
 	for _, linkId := range linkIds {
 		if idAsString == linkId {
 			return true
@@ -28,56 +32,56 @@ func isAmongLinks(link *ilex.TwoWayLink, linkIds []string) bool {
 	return false
 }
 
-func (lc *TwoWayLinkContainer) print() {
+func (lc *HalfLinkContainer) print() {
 	fmt.Println("Link container contents:")
 	for _, link := range lc.Links {
-		fmt.Printf("\t[%4d,\t%4d]\n", link.From.Range.Position, link.From.Range.Position+link.From.Range.Length-1)
+		fmt.Printf("\t[%4d,\t%4d]\n", link.Anchor.Range.Position, link.Anchor.Range.Position+link.Anchor.Range.Length-1)
 	}
 	fmt.Printf("+ %d links to delete.\n", len(lc.ToDelete))
 }
 
-func (lc *TwoWayLinkContainer) AddRunes(position, length int, linkIds []string) {
+func (lc *HalfLinkContainer) AddRunes(position, length int, linkIds []string) {
 	for i, link := range lc.Links {
-		if link.From.Range.Position <= position && link.From.Range.Position+link.From.Range.Length >= position && isAmongLinks(&link, linkIds) {
-			lc.Links[i].From.Range.Length += length
-		} else if link.From.Range.Position >= position {
+		if link.Anchor.Range.Position <= position && link.Anchor.Range.Position+link.Anchor.Range.Length >= position && isAmongLinks(&link, linkIds) {
+			lc.Links[i].Anchor.Range.Length += length
+		} else if link.Anchor.Range.Position >= position {
 			// link is shifted right
-			lc.Links[i].From.Range.Position += length
+			lc.Links[i].Anchor.Range.Position += length
 		}
 	}
 	lc.print()
 }
 
-func (lc *TwoWayLinkContainer) RemoveRunes(position, length int) (removed []ilex.TwoWayLink) {
-	removed = make([]ilex.TwoWayLink, 0)
+func (lc *HalfLinkContainer) RemoveRunes(position, length int) {
 	writeIndex := 0
+	removed := 0
 	for _, link := range lc.Links {
-		leftPosition := link.From.Range.Position
-		linkLength := link.From.Range.Length
-		rightPosition := link.From.Range.Position + linkLength - 1
+		leftPosition := link.Anchor.Range.Position
+		linkLength := link.Anchor.Range.Length
+		rightPosition := link.Anchor.Range.Position + linkLength - 1
 		if leftPosition >= position && rightPosition <= position+length-1 {
 			// the link is wholly contained in the removed section. It's thus
 			// removed
-			removed = append(removed, link)
 			lc.ToDelete = append(lc.ToDelete, link)
+			removed++
 		} else {
 			if rightPosition < position {
 				// the removed section is after the link. Do nothind
 			} else if leftPosition > position+length-1 {
 				//the link and the section is before the link
-				link.From.Range.Position -= length
+				link.Anchor.Range.Position -= length
 			} else if leftPosition > position {
 				// the removed section starts before the link
-				link.From.Range.Position = position
-				link.From.Range.Length = linkLength - (position + length - leftPosition)
+				link.Anchor.Range.Position = position
+				link.Anchor.Range.Length = linkLength - (position + length - leftPosition)
 			} else if rightPosition >= position+length-1 {
 				// the removed section begins somewhere in the link, but does
 				// not extend after it
-				link.From.Range.Length -= length
+				link.Anchor.Range.Length -= length
 			} else if position+length >= rightPosition {
 				// the removed section begins somewhere in the link,
 				// and extends after it
-				link.From.Range.Length = linkLength - (rightPosition - position + 1)
+				link.Anchor.Range.Length = linkLength - (rightPosition - position + 1)
 			} else {
 				fmt.Println("Error! Link container encountered an unexpected condition!")
 			}
@@ -85,28 +89,29 @@ func (lc *TwoWayLinkContainer) RemoveRunes(position, length int) (removed []ilex
 			writeIndex++
 		}
 	}
-	if writeIndex+len(removed) != len(lc.Links) {
+	if writeIndex+removed != len(lc.Links) {
 		fmt.Println("Error! Link container is losing links!")
 	}
 	lc.Links = lc.Links[:writeIndex]
 	lc.print()
-	return removed
 }
 
-func (lc *TwoWayLinkContainer) Persist(db *mgo.Database) error {
+func (lc *HalfLinkContainer) Persist(db *mgo.Database) error {
+	// TODO: rework
+
 	//var err error
 	links := db.C(ilex.LINKS)
 	bulk := links.Bulk()
 	updates := make([]interface{}, 2*len(lc.Links))
 	for i, link := range lc.Links {
-		updates[2*i] = link.Id
+		updates[2*i] = link.LinkId
 		updates[2*i+1] = link
 	}
 	bulk.Update(updates...)
 	bulk.Run()
 	deletes := make([]interface{}, len(lc.ToDelete))
 	for i, link := range lc.ToDelete {
-		deletes[i] = link.Id
+		deletes[i] = link.LinkId
 	}
 	bulk.Remove(deletes...)
 	bulk.Run()
@@ -114,4 +119,4 @@ func (lc *TwoWayLinkContainer) Persist(db *mgo.Database) error {
 	return nil
 }
 
-func (lc *TwoWayLinkContainer) Propagate(db *mgo.Database) {}
+func (lc *HalfLinkContainer) Propagate(db *mgo.Database) {}
