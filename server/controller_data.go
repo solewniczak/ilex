@@ -43,13 +43,13 @@ func (cd *ControllerData) GetDocumentData(database *mgo.Database) error {
 	if err := docs.Find(bson.M{"_id": bson.ObjectIdHex(cd.DocumentId)}).One(&cd.Document); err != nil {
 		return err
 	}
-	err := GetLatestVersion(database, &cd.Document, &cd.Version)
-	if err == nil {
-		if cd.LinksContainter = lc.NewLinkContainer(&cd.Document.Id, cd.Version.No, database); cd.LinksContainter == nil {
-			return errors.New("Could not create links container")
-		}
+	if err := GetLatestVersion(database, &cd.Document, &cd.Version); err != nil {
+		return err
 	}
-	return err
+	if cd.LinksContainter = lc.NewLinkContainer(&cd.Document.Id, cd.Version.No, database); cd.LinksContainter == nil {
+		return errors.New("Could not create links container")
+	}
+	return nil
 }
 
 func (cd *ControllerData) RegisterNewClientTab(clientTab *ClientTab) {

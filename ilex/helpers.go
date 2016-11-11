@@ -164,28 +164,27 @@ func CurrentTime() string {
 	return time.Now().Format(time.RFC3339)
 }
 
-func (link *TwoWayLink) Reverse() {
-	link.From, link.To = link.To, link.From
-}
-
-func GetLinksForDoc(database *mgo.Database, documentId *bson.ObjectId, version int) (error, []TwoWayLink) {
+func GetLinksForDoc(database *mgo.Database, documentId *bson.ObjectId, version int) (error, []HalfLink) {
 	links := database.C(LINKS)
-	var linksToDoc []TwoWayLink
-	var linksFromDoc []TwoWayLink
+	var leftLinks []TwoWayLink
+	var rightLinks []TwoWayLink
+	var halfLinks []HalfLink
 	//	pointsHere := bson.M{"DocumentId": *documentId, "VersionNo": version}
 	if err := links.Find(
-		bson.M{"From.DocumentId": *documentId, "From.VersionNo": version},
-	).All(&linksFromDoc); err != nil {
-		return nil, nil
+		bson.M{"Left.DocumentId": *documentId, "Left.VersionNo": version},
+	).All(&leftLinks); err != nil {
+		return err, nil
 	}
 	if err := links.Find(
-		bson.M{"To.DocumentId": *documentId, "To.VersionNo": version},
-	).All(&linksToDoc); err != nil {
-		return nil, nil
+		bson.M{"Right.DocumentId": *documentId, "Right.VersionNo": version},
+	).All(&rightLinks); err != nil {
+		return err, nil
 	}
-	for i, _ := range linksToDoc {
-		linksToDoc[i].Reverse()
+	for _, link := range leftLinks {
+		halfLinks = append(halfLinks, HalfLink{link.Left, link.Id, true})
 	}
-	linksFromDoc = append(linksFromDoc, linksToDoc...)
-	return nil, linksFromDoc
+	for _, link := range rightLinks {
+		halfLinks = append(halfLinks, HalfLink{link.Right, link.Id, false})
+	}
+	return nil, halfLinks
 }

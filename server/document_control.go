@@ -134,13 +134,13 @@ loop:
 				break
 			}
 
-			err, doc_links := ilex.GetLinksForDoc(database, &controllerData.Document.Id, controllerData.Version.No)
-			if err != nil {
-				fmt.Println(err.Error())
-				break
-			}
+			//err, doc_links := ilex.GetLinksForDoc(database, &controllerData.Document.Id, controllerData.Version.No)
+			//if err != nil {
+			//	fmt.Println(err.Error())
+			//	break
+			//}
 			response.Parameters[TAB] = message.Client.TabId
-			response.Parameters[LINKS] = doc_links
+			response.Parameters[LINKS] = controllerData.LinksContainter.GetCurrent()
 			response.Parameters[IS_EDITABLE] = true
 			response.Parameters[NAME] = controllerData.Version.Name
 			response.Parameters[ID] = documentId

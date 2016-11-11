@@ -9,8 +9,9 @@ import (
 )
 
 type LinkContainer interface {
+	GetCurrent() []ilex.HalfLink
 	AddRunes(position, length int, linkIds []string)
-	RemoveRunes(position, length int) (removed []ilex.TwoWayLink)
+	RemoveRunes(position, length int)
 	Persist(db *mgo.Database) error
 	Propagate(db *mgo.Database) //should return new links for document and its neighbours
 }
@@ -21,10 +22,8 @@ func NewLinkContainer(documentId *bson.ObjectId, version int, db *mgo.Database) 
 		fmt.Println("DB error creating links container:", err.Error())
 		return nil
 	}
-	//result := new(TwoWayLinkContainer)
-	//result.Links = docLinks
-	//result.ToDelete = make([]ilex.TwoWayLink, 0)
-	result := TwoWayLinkContainer{Links: docLinks, ToDelete: make([]ilex.TwoWayLink, 0)}
+	result := HalfLinkContainer{Links: docLinks, ToDelete: make([]ilex.HalfLink, 0)}
 	sort.Sort(result)
+	result.print()
 	return &result
 }
