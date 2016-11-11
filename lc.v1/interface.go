@@ -10,7 +10,7 @@ import (
 
 type LinkContainer interface {
 	GetCurrent() []ilex.HalfLink
-	AddRunes(position, length int, linkIds []string)
+	AddRunes(position, length int, linkIds []string) error
 	RemoveRunes(position, length int)
 	Persist(db *mgo.Database) error
 	Propagate(db *mgo.Database) //should return new links for document and its neighbours
