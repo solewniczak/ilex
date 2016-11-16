@@ -24,6 +24,10 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
                       .css('transform', 'skewX(20deg)');
   
   $parentWidget.html(that.container);
+  
+  $createNewTabButton.on('click', function () {
+    $(document).trigger('ilex-slider-goToNewDocumentTab');
+  });
 
   that.tabWidth = function () {
     var maxTabWidth = 200,
