@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"gopkg.in/mgo.v2"
-	//"gopkg.in/mgo.v2/bson"
+	"gopkg.in/mgo.v2/bson"
 	"ilex/ilex"
 )
 
@@ -104,24 +104,34 @@ func (lc *HalfLinkContainer) RemoveRunes(position, length int) {
 }
 
 func (lc *HalfLinkContainer) Persist(db *mgo.Database) error {
-	// TODO: rework
-
-	//var err error
+	var err error
+	fmt.Println("Persist phase 1.")
 	links := db.C(ilex.LINKS)
 	bulk := links.Bulk()
 	updates := make([]interface{}, 2*len(lc.Links))
 	for i, link := range lc.Links {
-		updates[2*i] = link.LinkId
-		updates[2*i+1] = link
+		updates[2*i] = bson.M{"_id": link.LinkId}
+		var update bson.M
+		if link.IsLeft {
+			update = bson.M{"$set": bson.M{"Left.Range.Position": link.Range.Position, "Left.Range.Length": link.Range.Length}}
+		} else {
+			update = bson.M{"$set": bson.M{"Right.Range.Position": link.Range.Position, "Right.Range.Length": link.Range.Length}}
+		}
+		updates[2*i+1] = update
 	}
 	bulk.Update(updates...)
-	bulk.Run()
+	if _, err = bulk.Run(); err != nil && len(err.(*mgo.BulkError).Cases()) > 0 {
+		return err
+	}
+	fmt.Println("Persist phase 2.")
 	deletes := make([]interface{}, len(lc.ToDelete))
 	for i, link := range lc.ToDelete {
-		deletes[i] = link.LinkId
+		deletes[i] = bson.M{"_id": link.LinkId}
 	}
 	bulk.Remove(deletes...)
-	bulk.Run()
+	if _, err = bulk.Run(); err != nil && len(err.(*mgo.BulkError).Cases()) > 0 {
+		return err
+	}
 	lc.ToDelete = lc.ToDelete[:0]
 	return nil
 }
