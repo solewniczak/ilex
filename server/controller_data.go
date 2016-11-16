@@ -106,8 +106,11 @@ func (cd *ControllerData) TryUpdateVersion(database *mgo.Database, root *tree.Ro
 		} else {
 			cd.Version.Finished = ilex.CurrentTime()
 			// save current work in progress and start a new version
+			if err := cd.LinksContainter.Persist(database); err != nil {
+				fmt.Println("Could not save links: " + err.Error() + ". Database may be corrupted!")
+			}
 			if err := tree.PersistTree(root, &cd.Version); err != nil {
-				fmt.Println("Could not save changes: " + err.Error() + ". Database may be corrupted!")
+				fmt.Println("Could not save editions: " + err.Error() + ". Database may be corrupted!")
 			}
 			cd.HasUnsavedChanges = false
 			cd.Version.Id = bson.NewObjectId()
@@ -127,8 +130,11 @@ func (cd *ControllerData) TryFinalUpdate(database *mgo.Database, root *tree.Root
 	if cd.HasUnsavedChanges {
 		cd.Version.Finished = ilex.CurrentTime()
 		// save current work in progress
+		if err := cd.LinksContainter.Persist(database); err != nil {
+			fmt.Println("Could not save links: " + err.Error() + ". Database may be corrupted!")
+		}
 		if err := tree.PersistTree(root, &cd.Version); err != nil {
-			fmt.Println("Could not save changes: " + err.Error() + ". Database may be corrupted!")
+			fmt.Println("Could not save editions: " + err.Error() + ". Database may be corrupted!")
 		}
 		if err := UpdateDocument(docs, &cd.Document, &cd.Version); err != nil {
 			fmt.Println("Could not update document: " + err.Error())
