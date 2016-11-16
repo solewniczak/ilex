@@ -28,7 +28,7 @@ ilex.views.slider = function(canvas) {
   
   
   $(document).on('canvasRedraw', function () {
-    if (!ilex.navigationMode) {
+    if (!ilex.navigationMode && !ilex.conf.get('nelson mode')) {
       return;
     }
     var colorId = 0,
