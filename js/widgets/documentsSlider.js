@@ -142,15 +142,15 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
 
   that.visibleWindows = function() {
     var visWindows = 0,
-        position = [],
-      setEqualWindowPositions = function() {
+        position = [];
+    return {
+      'setEqualWindowPositions': function() {
         position = [];
         let ratio = 1.0/visWindows;
         for (let i = 0; i < visWindows; i++) {
           position.push(ratio);
         }
-      };
-    return {
+      },
       'get': function() {
         return visWindows;
       },
@@ -159,7 +159,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
           console.log('visibleWindows cannot be greater than windows.length');
         }
         visWindows += 1;
-        setEqualWindowPositions();
+        this.setEqualWindowPositions();
         this.applyWindowPosition();
         $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, visWindows]);
       },
@@ -168,7 +168,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
           return false;
         }
         visWindows -= 1;
-        setEqualWindowPositions();
+        this.setEqualWindowPositions();
         this.applyWindowPosition();
         $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, visWindows]);
       },
@@ -542,7 +542,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     
   };
 
-  that.slideLeft = function (callback) {
+  that.slideLeft = function (callback, winInd) {
     if (that.windowPointer + that.visibleWindows.get() >= that.windows.length) {
       return;
     }
@@ -551,17 +551,29 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       return;
     }
     
-    var leftWidth = that.windows.get(that.windowPointer ).getWidth(),
-        tablePos = that.table.position(),
-        slide = tablePos.left - (leftWidth + ilex.widgetsCollection.handlerSize);
-        
-    //move to next window
-    that.windowPointer += 1;
-    $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
-    
-    //swap positions
-    that.visibleWindows.shiftLeft();
+    that.visibleWindows.setEqualWindowPositions();
     ilex.applySize();
+    
+    if (winInd === undefined) {
+      winInd = that.windowPointer + 1;
+    }
+    
+    var flyOver = winInd - that.windowPointer,
+        tablePos = that.table.position();
+        
+    var slide = tablePos.left;
+    for (let i = 0; i < flyOver; i++) {
+      //move to next window
+      that.windowPointer += 1;
+      //swap positions
+      that.visibleWindows.shiftLeft();
+      //add slide
+      slide -= that.windows.get(that.windowPointer).getWidth() + ilex.widgetsCollection.handlerSize;      
+    }
+    ilex.applySize();
+    
+    $(document).trigger('ilex-slider-viewChanged',
+                        [that.windowPointer, that.visibleWindows.get()]);
     
     that.table.animate({'left': slide}, {
       'progress': function () {
@@ -575,7 +587,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     });
   };
 
-  that.slideRight = function (callback) {
+  that.slideRight = function (callback, winInd) {
     if (that.windowPointer === 0) {
       return;
     }
@@ -583,24 +595,32 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     if (that.table.is(':animated')) {
       return;
     }
-
-    that.windowPointer -= 1;
-    $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
     
-    var windowToShow = that.windows.get(that.windowPointer),
-        windowToShowPreviousWidth = windowToShow.getWidth();
-
-    //set positions to new windows
-    that.visibleWindows.shiftRight();
-
-    //align left position after resizing right window
-    let widthDelta = windowToShowPreviousWidth - windowToShow.getWidth();
-    that.table.css('left', that.table.position().left + widthDelta);
+    that.visibleWindows.setEqualWindowPositions();
+    ilex.applySize();
+    
+    if (winInd === undefined) {
+      winInd = that.windowPointer - 1;
+    }
+    
+    var flyOver = that.windowPointer - winInd,
+      tablePos = that.table.position();
+    
+    var slide = that.table.position().left;
+    for (let i = 0; i < flyOver; i++) {
+      //move to next window
+      that.windowPointer -= 1;
+      //swap positions
+      that.visibleWindows.shiftRight();
+      slide += that.windows.get(that.windowPointer).getWidth() +
+                  ilex.widgetsCollection.handlerSize
+    }
     
     ilex.applySize();
-
-    let slide = that.table.position().left + (windowToShow.getWidth() +
-                                            ilex.widgetsCollection.handlerSize);
+    
+    $(document).trigger('ilex-slider-viewChanged',
+                        [that.windowPointer, that.visibleWindows.get()]);
+    
     that.table.animate({'left': slide}, {
       'progress': function () {
         $(document).trigger('canvasRedraw');
@@ -611,6 +631,22 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
         }
       }
     });
+  };
+  
+  that.slideTo = function (windowPointer, callback) {
+    if (windowPointer < 0 || windowPointer >= that.windows.length) {
+      console.log('on ilex-slider-setWindowPointer: windowPointer ' + windowPointer + ' out of bound');
+      return;
+    }
+    //last windows
+    if (windowPointer + that.visibleWindows.get() >= that.windows.length) {
+        windowPointer = that.windows.length - that.visibleWindows.get();
+    }
+    if (windowPointer > that.windowPointer) {
+      that.slideLeft(callback, windowPointer);
+    } else if (windowPointer < that.windowPointer) {
+      that.slideRight(callback, windowPointer);
+    }
   };
   
   $(document).on('ilex-linkClicked', function(event, windowObject, link) {
@@ -761,18 +797,18 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
   });
   
   $(document).on('ilex-slider-setWindowPointer', function (event, windowPointer) {
-    if (windowPointer < 0 || windowPointer >= that.windows.length) {
-      console.log('on ilex-slider-setWindowPointer: windowPointer ' + windowPointer + ' out of bound');
-      return;
+    that.slideTo(windowPointer);
+  });
+  
+  $(document).on('ilex-slider-goToNewDocumentTab', function (event) {
+    var starterWidget = that.windows.last().widget.children(':first');
+
+    if (!starterWidget.hasClass('ilex-starterWidget')) {
+      //check if starter widget visible on the right
+      let win = that.createStarterWindow();
+      that.addWindowAfter(win);
     }
-    //last windows
-    if (windowPointer + that.visibleWindows.get() >= that.windows.length) {
-        windowPointer = that.windows.length - that.visibleWindows.get();
-    }
-    console.log(windowPointer);
-//    that.windowPointer = windowPointer;
-//    that.visibleWindows.applyWindowPosition();
-//    ilex.applySize();
+    that.slideTo(that.windows.last().getInd());
   });
   
   
@@ -785,47 +821,47 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       }
     },
     //Freeze window
-    {
-      'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf152;</span>',
-      'htmlOn': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf191;</span>',
-      'callbackOn': function(event) {
-        var width = that.container.data('ilex-width'),
-            offset = that.table.offset(),
-            win = that.windows.get(that.windowPointer).detach(),
-            winWidth = win.getWidth();
-        
-        that.superTable.setColumnWidth(0, winWidth);
-        win.element.css('z-index', 10);
-        
-        //save frozen window object
-        that.froozenWindow = win;
-        that.frozenContainer.append(win.element);
-        
-        that.container.data('ilex-width', width - winWidth);
-        that.table.css('left', offset.left + winWidth);
-        
-        that.visibleWindows.dec();
-        ilex.applySize();
-      },
-      'callbackOff': function(event) {
-        var width = that.container.data('ilex-width'),
-            frozenWidth = that.frozenContainer.data('ilex-width'),
-            offset = that.table.offset();
-        
-        that.addWindowBefore(that.froozenWindow, that.windowPointer);
-        that.froozenWindow = null;
-        
-        that.visibleWindows.inc();
-        
-        that.superTable.setColumnWidth(0, 0);
-        
-        that.container.data('ilex-width', width + frozenWidth);
-        that.table.css('left', offset.left - frozenWidth);
-        
-        //applyWindowPosition();
-        ilex.applySize();
-      }
-    }
+//    {
+//      'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf152;</span>',
+//      'htmlOn': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf191;</span>',
+//      'callbackOn': function(event) {
+//        var width = that.container.data('ilex-width'),
+//            offset = that.table.offset(),
+//            win = that.windows.get(that.windowPointer).detach(),
+//            winWidth = win.getWidth();
+//        
+//        that.superTable.setColumnWidth(0, winWidth);
+//        win.element.css('z-index', 10);
+//        
+//        //save frozen window object
+//        that.froozenWindow = win;
+//        that.frozenContainer.append(win.element);
+//        
+//        that.container.data('ilex-width', width - winWidth);
+//        that.table.css('left', offset.left + winWidth);
+//        
+//        that.visibleWindows.dec();
+//        ilex.applySize();
+//      },
+//      'callbackOff': function(event) {
+//        var width = that.container.data('ilex-width'),
+//            frozenWidth = that.frozenContainer.data('ilex-width'),
+//            offset = that.table.offset();
+//        
+//        that.addWindowBefore(that.froozenWindow, that.windowPointer);
+//        that.froozenWindow = null;
+//        
+//        that.visibleWindows.inc();
+//        
+//        that.superTable.setColumnWidth(0, 0);
+//        
+//        that.container.data('ilex-width', width + frozenWidth);
+//        that.table.css('left', offset.left - frozenWidth);
+//        
+//        //applyWindowPosition();
+//        ilex.applySize();
+//      }
+//    }
   ]);
 
   ilex.widgetsCollection.verticalToolbar(that.rightButtons, [

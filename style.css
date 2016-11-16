@@ -38,7 +38,7 @@ strong {
   background-color: #ffffff;
   border: 1px #d9d9d9 solid;
   color: #262626;
-  cursor: pointer;
+  cursor: default;
   display: inline-block;
   font-size: 12px;
   font-family: IlexSans;
@@ -162,3 +162,23 @@ strong {
   background-color: #ddd;
 }
 
+.ilex-popupMenuElement {
+  padding-left: 15px;
+  vertical-align: middle;
+  background-color: #ffffff;
+  border: 1px #d9d9d9 solid;
+  color: #262626;
+  cursor: default;
+  height: 25px;
+  line-height: 25px;
+  font-size: 12px;
+  font-family: IlexSans;
+}
+
+.ilex-popupMenuElement:hover {
+  border-color: #787878;
+}
+
+.ilex-popupMenuElement:active {
+  background-color: #eaeaea;
+}

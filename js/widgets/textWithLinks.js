@@ -30,20 +30,20 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   //that.dock.toolbar = ilex.widgetsCollection.textToolbar(that.dock.container, that, canvas);
   
   that.dock.toolbarTop = ilex.widgetsCollection.toolbar(that.dock);
-  that.dock.toolbarSeparator = $('<div>').appendTo(that.dock.container)
-                                  .height('5px');
-  that.dock.toolbarBottom = ilex.widgetsCollection.toolbar(that.dock);
-  
-  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf00d;</span>', //<span class="ilex-awesome">&#xf00d;</span>
-    function(event) {
-      windowObject.closeTab();
-  });
-
-  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf016;</span>', //<span class="ilex-awesome">&#xf00d;</span>
-    function(event) {
-      windowObject.closeDocument();
-      ilex.tools.mime.createDocument(windowObject, 'plain text');
-  });
+//  that.dock.toolbarSeparator = $('<div>').appendTo(that.dock.container)
+//                                  .height('5px');
+//  that.dock.toolbarBottom = ilex.widgetsCollection.toolbar(that.dock);
+//  
+//  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf00d;</span>', //<span class="ilex-awesome">&#xf00d;</span>
+//    function(event) {
+//      windowObject.closeTab();
+//  });
+//
+//  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf016;</span>', //<span class="ilex-awesome">&#xf00d;</span>
+//    function(event) {
+//      windowObject.closeDocument();
+//      ilex.tools.mime.createDocument(windowObject, 'plain text');
+//  });
   
   that.getFileInfo = function (attr) {
     return ilex.documents.get(documentObject.getId())[attr];
@@ -58,25 +58,25 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     return version.get();
   };
   
-  that.documentNameInput =
-    ilex.widgetsCollection.blockInput(that.dock.toolbarTop.container, 'Untitled document');
-  that.documentNameInput.element
-    .width('200px')
-    .css('display', 'inline-block')
-    .css('vertical-align', 'middle');
-  
-  //set name
-  that.documentNameInput.val(that.getFileInfo('name'));
-  
-  that.documentNameInput.element.on('blur', function () {
-    var val = that.documentNameInput.val();
-    if (val !==  that.getFileInfo('name')) {
-      documentObject.changeName(val);
-    }
-  });
-  
-  
-  that.dock.toolbarTop.addSeparator();
+//  that.documentNameInput =
+//    ilex.widgetsCollection.blockInput(that.dock.toolbarTop.container, 'Untitled document');
+//  that.documentNameInput.element
+//    .width('200px')
+//    .css('display', 'inline-block')
+//    .css('vertical-align', 'middle');
+//  
+//  //set name
+//  that.documentNameInput.val(that.getFileInfo('name'));
+//  
+//  that.documentNameInput.element.on('blur', function () {
+//    var val = that.documentNameInput.val();
+//    if (val !==  that.getFileInfo('name')) {
+//      documentObject.changeName(val);
+//    }
+//  });
+//  
+//  
+//  that.dock.toolbarTop.addSeparator();
   
   that.loadVersion = function(v, callback) {
     if (v === version.get()) {
@@ -102,6 +102,32 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
       }
     );
   };
+  
+    
+  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf032;</span>', //bold
+    function(event) {
+      
+  });
+  
+  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf033;</span>', //italic
+    function(event) {
+      
+  });
+  
+  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf0cd;</span>', //underline
+    function(event) {
+      
+  });
+  
+  that.dock.toolbarTop.addSeparator('15px');
+  
+  
+  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf127;</span>', function () {
+    let $spans = that.textEditor.getSelectionSpans();
+    $spans.css('text-decoration', 'underline').css('color', 'blue');
+  });
+  
+  that.dock.toolbarTop.addSeparator('30px');
   
   that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf104;</span>', //<
     function(event) {
@@ -237,31 +263,6 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
       $(this).find('span').html('&#xf070;');//eye
       $(this).removeClass('ilex-active');
     });
-  
-  
-  that.dock.toolbarBottom.addButton('<span class="ilex-awesome">&#xf032;</span>', //bold
-    function(event) {
-      
-  });
-  
-  that.dock.toolbarBottom.addButton('<span class="ilex-awesome">&#xf033;</span>', //italic
-    function(event) {
-      
-  });
-  
-  that.dock.toolbarBottom.addButton('<span class="ilex-awesome">&#xf0cd;</span>', //underline
-    function(event) {
-      
-  });
-  
-  that.dock.toolbarBottom.addSeparator('15px');
-  
-  that.dock.toolbarBottom.addButton('<span class="ilex-awesome">&#xf127;</span>', function () {
-    let $spans = that.textEditor.getSelectionSpans();
-    $spans.css('text-decoration', 'underline').css('color', 'blue');
-  });
-
-
   
   that.textEditor.content.on('documentAddText', function(event, data) {
     documentObject.addText(data.absStart - 1, data.value);
