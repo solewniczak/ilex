@@ -542,7 +542,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     
   };
 
-  that.slideLeft = function (callback) {
+  that.slideLeft = function (callback, winInd) {
     if (that.windowPointer + that.visibleWindows.get() >= that.windows.length) {
       return;
     }
@@ -551,17 +551,26 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       return;
     }
     
-    var leftWidth = that.windows.get(that.windowPointer ).getWidth(),
-        tablePos = that.table.position(),
-        slide = tablePos.left - (leftWidth + ilex.widgetsCollection.handlerSize);
-        
-    //move to next window
-    that.windowPointer += 1;
-    $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
+    if (winInd === undefined) {
+      winInd = that.windowPointer + 1;
+    }
     
-    //swap positions
-    that.visibleWindows.shiftLeft();
-    ilex.applySize();
+    var flyOver = winInd - that.windowPointer,
+        tablePos = that.table.position();
+        
+    var slide = tablePos.left;
+    for (let i = 0; i < flyOver; i++) {
+      //move to next window
+      that.windowPointer += 1;
+      //swap positions
+      that.visibleWindows.shiftLeft();
+      //add slide
+      slide -= that.windows.get(that.windowPointer).getWidth() + ilex.widgetsCollection.handlerSize,
+      
+      ilex.applySize();
+    }
+    
+    $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
     
     that.table.animate({'left': slide}, {
       'progress': function () {
@@ -573,6 +582,14 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
         }
       }
     });
+  };
+  
+  that.slideTo = function (winInd, callback) {
+    if (winInd > that.windowPointer) {
+      that.slideLeft(callback, winInd);
+    } else if (winInd < that.windowPointer) {
+      
+    }
   };
 
   that.slideRight = function (callback) {
@@ -769,10 +786,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     if (windowPointer + that.visibleWindows.get() >= that.windows.length) {
         windowPointer = that.windows.length - that.visibleWindows.get();
     }
-    console.log(windowPointer);
-//    that.windowPointer = windowPointer;
-//    that.visibleWindows.applyWindowPosition();
-//    ilex.applySize();
+    that.slideTo(windowPointer);
   });
   
   
