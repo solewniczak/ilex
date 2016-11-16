@@ -633,11 +633,19 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     });
   };
   
-  that.slideTo = function (winInd, callback) {
-    if (winInd > that.windowPointer) {
-      that.slideLeft(callback, winInd);
-    } else if (winInd < that.windowPointer) {
-      that.slideRight(callback, winInd);
+  that.slideTo = function (windowPointer, callback) {
+    if (windowPointer < 0 || windowPointer >= that.windows.length) {
+      console.log('on ilex-slider-setWindowPointer: windowPointer ' + windowPointer + ' out of bound');
+      return;
+    }
+    //last windows
+    if (windowPointer + that.visibleWindows.get() >= that.windows.length) {
+        windowPointer = that.windows.length - that.visibleWindows.get();
+    }
+    if (windowPointer > that.windowPointer) {
+      that.slideLeft(callback, windowPointer);
+    } else if (windowPointer < that.windowPointer) {
+      that.slideRight(callback, windowPointer);
     }
   };
   
@@ -789,15 +797,18 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
   });
   
   $(document).on('ilex-slider-setWindowPointer', function (event, windowPointer) {
-    if (windowPointer < 0 || windowPointer >= that.windows.length) {
-      console.log('on ilex-slider-setWindowPointer: windowPointer ' + windowPointer + ' out of bound');
-      return;
-    }
-    //last windows
-    if (windowPointer + that.visibleWindows.get() >= that.windows.length) {
-        windowPointer = that.windows.length - that.visibleWindows.get();
-    }
     that.slideTo(windowPointer);
+  });
+  
+  $(document).on('ilex-slider-goToNewDocumentTab', function (event) {
+    var starterWidget = that.windows.last().widget.children(':first');
+
+    if (!starterWidget.hasClass('ilex-starterWidget')) {
+      //check if starter widget visible on the right
+      let win = that.createStarterWindow();
+      that.addWindowAfter(win);
+    }
+    that.slideTo(that.windows.last().getInd());
   });
   
   
