@@ -116,6 +116,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
     $tab.on('click', function () {
       $(document).trigger('ilex-slider-setWindowPointer', [$tab.index()]);
     });
+    
 
     $tab.on('mousedown', function () {
       var startX = event.pageX,
