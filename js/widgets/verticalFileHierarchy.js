@@ -20,6 +20,15 @@ ilex.widgetsCollection.verticalFileHierarchy = function ($parentWidget) {
                   .data('ilex-height', height);
   $parentWidget.html(that.container);
   
+    
+  //main menu
+  var $menuButton = $('<div class="ilex-menuButton-container">')
+                      .css('float', 'right')
+                      .appendTo(that.container);
+  
+  ilex.widgetsCollection.globalMenu($menuButton);
+  //end main menu
+  
   //marting to - fix strange chorme bug
   $('<div>').height('5px').html('&nbsp;').appendTo(that.container)
   
@@ -40,6 +49,7 @@ ilex.widgetsCollection.verticalFileHierarchy = function ($parentWidget) {
   }
   
   that.filterInput.element.on('input', filterFiles);
+  
   
   that.fileContainer = $('<div class="ilex-fileContainer">').appendTo(that.container);
 

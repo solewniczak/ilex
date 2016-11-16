@@ -89,6 +89,25 @@ ilex.documents.get = function(id) {
   return ilex.documents.map.get(id);
 };
 
+//CONFIG
+ilex.conf = function () {
+  var conf = {};
+  //defaults
+  conf['nelson mode'] = false;
+  
+  return {
+    'get': function (name) {
+      return conf[name];
+    },
+    'set': function (name, value) {
+      conf[name] = value;
+      if (name === 'nelson mode') {
+        $(document).trigger('canvasRedraw');
+      }
+    }
+  };
+}();
+
 
 ilex.symHash = function (a,b) {
   var len = a.length < b.length ? a.length : b.length,
