@@ -142,15 +142,15 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
 
   that.visibleWindows = function() {
     var visWindows = 0,
-        position = [],
-      setEqualWindowPositions = function() {
+        position = [];
+    return {
+      'setEqualWindowPositions': function() {
         position = [];
         let ratio = 1.0/visWindows;
         for (let i = 0; i < visWindows; i++) {
           position.push(ratio);
         }
-      };
-    return {
+      },
       'get': function() {
         return visWindows;
       },
@@ -159,7 +159,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
           console.log('visibleWindows cannot be greater than windows.length');
         }
         visWindows += 1;
-        setEqualWindowPositions();
+        this.setEqualWindowPositions();
         this.applyWindowPosition();
         $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, visWindows]);
       },
@@ -168,7 +168,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
           return false;
         }
         visWindows -= 1;
-        setEqualWindowPositions();
+        this.setEqualWindowPositions();
         this.applyWindowPosition();
         $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, visWindows]);
       },
@@ -551,6 +551,9 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       return;
     }
     
+    that.visibleWindows.setEqualWindowPositions();
+    ilex.applySize();
+    
     if (winInd === undefined) {
       winInd = that.windowPointer + 1;
     }
@@ -565,12 +568,58 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       //swap positions
       that.visibleWindows.shiftLeft();
       //add slide
-      slide -= that.windows.get(that.windowPointer).getWidth() + ilex.widgetsCollection.handlerSize,
-      
-      ilex.applySize();
+      slide -= that.windows.get(that.windowPointer).getWidth() + ilex.widgetsCollection.handlerSize;      
+    }
+    ilex.applySize();
+    
+    $(document).trigger('ilex-slider-viewChanged',
+                        [that.windowPointer, that.visibleWindows.get()]);
+    
+    that.table.animate({'left': slide}, {
+      'progress': function () {
+        $(document).trigger('canvasRedraw');
+      },
+      'done': function () {
+        if (callback) {
+          callback();
+        }
+      }
+    });
+  };
+
+  that.slideRight = function (callback, winInd) {
+    if (that.windowPointer === 0) {
+      return;
+    }
+    //break if some animation in progress
+    if (that.table.is(':animated')) {
+      return;
     }
     
-    $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
+    that.visibleWindows.setEqualWindowPositions();
+    ilex.applySize();
+    
+    if (winInd === undefined) {
+      winInd = that.windowPointer - 1;
+    }
+    
+    var flyOver = that.windowPointer - winInd,
+      tablePos = that.table.position();
+    
+    var slide = that.table.position().left;
+    for (let i = 0; i < flyOver; i++) {
+      //move to next window
+      that.windowPointer -= 1;
+      //swap positions
+      that.visibleWindows.shiftRight();
+      slide += that.windows.get(that.windowPointer).getWidth() +
+                  ilex.widgetsCollection.handlerSize
+    }
+    
+    ilex.applySize();
+    
+    $(document).trigger('ilex-slider-viewChanged',
+                        [that.windowPointer, that.visibleWindows.get()]);
     
     that.table.animate({'left': slide}, {
       'progress': function () {
@@ -588,46 +637,8 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     if (winInd > that.windowPointer) {
       that.slideLeft(callback, winInd);
     } else if (winInd < that.windowPointer) {
-      
+      that.slideRight(callback, winInd);
     }
-  };
-
-  that.slideRight = function (callback) {
-    if (that.windowPointer === 0) {
-      return;
-    }
-    //break if some animation in progress
-    if (that.table.is(':animated')) {
-      return;
-    }
-
-    that.windowPointer -= 1;
-    $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
-    
-    var windowToShow = that.windows.get(that.windowPointer),
-        windowToShowPreviousWidth = windowToShow.getWidth();
-
-    //set positions to new windows
-    that.visibleWindows.shiftRight();
-
-    //align left position after resizing right window
-    let widthDelta = windowToShowPreviousWidth - windowToShow.getWidth();
-    that.table.css('left', that.table.position().left + widthDelta);
-    
-    ilex.applySize();
-
-    let slide = that.table.position().left + (windowToShow.getWidth() +
-                                            ilex.widgetsCollection.handlerSize);
-    that.table.animate({'left': slide}, {
-      'progress': function () {
-        $(document).trigger('canvasRedraw');
-      },
-      'done': function () {
-        if (callback) {
-          callback();
-        }
-      }
-    });
   };
   
   $(document).on('ilex-linkClicked', function(event, windowObject, link) {
