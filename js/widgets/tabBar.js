@@ -24,6 +24,10 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
                       .css('transform', 'skewX(20deg)');
   
   $parentWidget.html(that.container);
+  
+  $createNewTabButton.on('click', function () {
+    $(document).trigger('ilex-slider-goToNewDocumentTab');
+  });
 
   that.tabWidth = function () {
     var maxTabWidth = 200,
@@ -116,6 +120,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
     $tab.on('click', function () {
       $(document).trigger('ilex-slider-setWindowPointer', [$tab.index()]);
     });
+    
 
     $tab.on('mousedown', function () {
       var startX = event.pageX,
@@ -162,7 +167,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
               rightTabInd = $rightTab.index();
           
           $tab.insertAfter($rightTab);
-          $rightTab.animate({left: getStartLeft($rightTab.index())}, 200);
+          $rightTab.animate({left: $rightTab.index() * that.tabWidth.getLeft()}, 200);
           
           leftOnSwitch = newTabLeft;
           
@@ -175,7 +180,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
               leftTabInd = $leftTab.index();
           
           $tab.insertBefore($leftTab);
-          $leftTab.animate({left: getStartLeft($leftTab.index())}, 200);
+          $leftTab.animate({left: $leftTab.index() * that.tabWidth.getLeft()}, 200);
           
           leftOnSwitch = newTabLeft;
           
