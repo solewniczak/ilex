@@ -224,54 +224,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     //dropable regions for opening new documents
     newWindow.droppableRegion = {};
     
-            
-    newWindow.droppableRegion.left = $('<div class="ilex-dropableRegion">')
-                              .appendTo(newWindow.element)
-                              .css('position', 'absolute')
-                              .hide();
-                              //width is set by applyWindowPosition
-                              //height and top set by window resize
-    
-     newWindow.droppableRegion.left.on('drop', function (event) {
-      event.preventDefault();
-      var file = JSON.parse(event.originalEvent.dataTransfer.getData('ilex/file'));
-
-      //by default newest version
-      //get new document
-      var win = that.createWindow();
-      that.addWindowBefore(win, newWindow.getInd());
-      
-      that.visibleWindows.inc();
-       
-      ilex.tools.mime.loadDocument(win, file.id);
-      ilex.applySize();
-    });
-    
-    
-    newWindow.droppableRegion.right = $('<div class="ilex-dropableRegion">')
-                              .appendTo(newWindow.element)
-                              .css('position', 'absolute')
-                              //width is set by applyWindowPosition
-                              //height set by window resize
-                              .css('right', 0)
-                              .hide();
-    
-    newWindow.droppableRegion.right.on('drop', function (event) {
-      event.preventDefault();
-      var file = JSON.parse(event.originalEvent.dataTransfer.getData('ilex/file'));
-
-      //by default newest version
-      //get new document
-      var win = that.createWindow();
-      that.addWindowAfter(win, newWindow.getInd());
-      
-      that.visibleWindows.inc();
-      
-      ilex.tools.mime.loadDocument(win, file.id);
-      ilex.applySize();
-      
-    });
-    
     newWindow.droppableRegion.top = $('<div class="ilex-dropableRegion">')
                               .appendTo(newWindow.element)
                               .css('position', 'absolute')
@@ -344,8 +296,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       newWindow.widget.data('ilex-width', width);
       
       newWindow.droppableRegion.top.data('ilex-width', width);
-      newWindow.droppableRegion.left.data('ilex-width', width*0.5);
-      newWindow.droppableRegion.right.data('ilex-width', width*0.5);
     };
     
     newWindow.getHeight = function () {
@@ -356,9 +306,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
         newWindow.element.data('ilex-height', height);
         newWindow.widget.data('ilex-height', height);
       
-        newWindow.droppableRegion.top.height(height*0.2);
-        newWindow.droppableRegion.left.height(height);
-        newWindow.droppableRegion.right.height(height);
+        newWindow.droppableRegion.top.height(height);
       
         newWindow.rightSideHandler.data('ilex-height', height);
     };
