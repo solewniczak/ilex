@@ -91,17 +91,54 @@ ilex.documents.get = function(id) {
 
 //CONFIG
 ilex.conf = function () {
-  var conf = {};
+  var defaults = {}, types = {};
   //defaults
-  conf['nelson mode'] = false;
+  defaults['nelson mode'] = false;
+  types['nelson mode'] = 'Boolean';
+  
+  var populateStorage = function () {
+    for (let key in defaults) {
+      if (defaults.hasOwnProperty(key)) {
+        var value = defaults[key],
+            serial = serialisation[types[key]];
+        localStorage.setItem(key, serial.set(value));
+      }
+    }
+  };
+  
+  var serialisation = {
+    'Boolean': {
+      'get': function (value) {
+        if (value === '0') {
+          return false;
+        } else {
+          return true;
+        }
+      },
+      'set': function (value) {
+        if (value === false) {
+          return '0';
+        } else {
+          return '1';
+        }
+      }
+    }
+  };
   
   return {
-    'get': function (name) {
-      return conf[name];
+    'get': function (key) {
+      if(!localStorage.getItem(key)) {
+        populateStorage();
+      }
+      var value = localStorage.getItem(key),
+          serial = serialisation[types[key]];
+      return serial.get(value);
     },
-    'set': function (name, value) {
-      conf[name] = value;
-      if (name === 'nelson mode') {
+    'set': function (key, value) {
+      var serial = serialisation[types[key]];
+      localStorage.setItem(key, serial.set(value));
+      
+      if (key === 'nelson mode') {
         $(document).trigger('canvasRedraw');
       }
     }
