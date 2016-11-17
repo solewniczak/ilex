@@ -168,13 +168,17 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     
     $spans.addClass('ilex-textLink').addClass(linkClass);
     
+    if (ilex.conf.get('browsing mode') === 1) {
+      $spans.addClass('ilex-textLinkNavigationMode');
+    }
+    
     that.textEditor.content.on('click', '.'+linkClass, function () {
-      if (ilex.navigationMode) {
+      if (ilex.conf.get('browsing mode') === 1) {
         $(document).trigger('ilex-linkClicked', [windowObject, link]);
       }
     });
     that.textEditor.content.on('mouseover', '.'+linkClass, function (event) {
-      if (ilex.navigationMode) {
+      if (ilex.conf.get('browsing mode') === 1) {
         var file = ilex.documents.get(link.to.documentId);
         ilex.view.popupNote.show(file.name + ' | <strong>'+link.to.versionNo+'</strong>');
       }

@@ -91,71 +91,45 @@ ilex.documents.get = function(id) {
 
 //CONFIG
 ilex.conf = function () {
-  var defaults = {}, types = {};
+  var defaults = {}, types = {}, callbacks = {};
   //defaults
   defaults['nelson mode'] = false;
   types['nelson mode'] = 'Boolean';
+  callbacks['nelson mode'] = function(value) {
+     $(document).trigger('canvasRedraw');
+  };
   
   defaults['browsing mode'] = 0;
   types['browsing mode'] = 'Integer';
-  
-  var populateStorage = function () {
-    for (let key in defaults) {
-      if (defaults.hasOwnProperty(key)) {
-        var value = defaults[key],
-            serial = serialisation[types[key]];
-        localStorage.setItem(key, serial.set(value));
-      }
+  callbacks['browsing mode'] = function(value) {
+    if (value === 0) {
+     $(document).trigger('ilex-navigationModeOff');
+    } else if(value === 1) {
+       $(document).trigger('ilex-navigationModeOn');
     }
   };
-  
-  var serialisation = {
-    'String': {
-      'get': function(value) {return value;},
-      'set': function(value) {return value;}
-    },
-    'Integer': {
-      'get': function (value) {
-        return Number.parseInt(value);
-      },
-      'set': function (value) {
-        return value.toString();
+    
+  //run callbacks 
+  for (let key in defaults) {
+    if (defaults.hasOwnProperty(key)) {
+      if(!localStorage.getItem(key)) {
+        localStorage.setItem(key, JSON.stringify(value));
       }
-    },
-    'Boolean': {
-      'get': function (value) {
-        if (value === '0') {
-          return false;
-        } else {
-          return true;
-        }
-      },
-      'set': function (value) {
-        if (value === false) {
-          return '0';
-        } else {
-          return '1';
-        }
-      }
+      //get value
+      var value = JSON.parse(localStorage.getItem(key));
+      callbacks[key](value);
     }
-  };
+  }
+  
   
   return {
     'get': function (key) {
-      if(!localStorage.getItem(key)) {
-        populateStorage();
-      }
-      var value = localStorage.getItem(key),
-          serial = serialisation[types[key]];
-      return serial.get(value);
+      var value = localStorage.getItem(key);
+      return JSON.parse(value);
     },
     'set': function (key, value) {
-      var serial = serialisation[types[key]];
-      localStorage.setItem(key, serial.set(value));
-      
-      if (key === 'nelson mode') {
-        $(document).trigger('canvasRedraw');
-      }
+      localStorage.setItem(key, JSON.stringify(value));
+      callbacks[key](value);
     }
   };
 }();
@@ -186,28 +160,6 @@ $(document).on('ilex-newVersionAvailable', function (event, data) {
   $(document).trigger('ilex-fileInfoUpdated', file.id);
 });
 
-  //Navigation mode
-  ilex.navigationMode = false;
-  $(window).on('keydown', function(event) {
-    if (event.ctrlKey && event.altKey) {
-      ilex.navigationMode = true;
-      $(document).trigger('ilex-navigationModeOn');
-    };
-  });
-  
-  $(window).on('keyup', function(event) {
-    if (ilex.navigationMode) {
-      ilex.navigationMode = false;
-      $(document).trigger('ilex-navigationModeOff');
-    }
-  });
-
-  $(window).on('focus', function(event) {
-    if (ilex.navigationMode) {
-      ilex.navigationMode = false;
-      $(document).trigger('ilex-navigationModeOff');
-    }
-  });
 
 //apply sizes to elements
 ilex.applySize = function(animateWidth, animateHeight, selector) {
