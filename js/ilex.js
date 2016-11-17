@@ -96,6 +96,9 @@ ilex.conf = function () {
   defaults['nelson mode'] = false;
   types['nelson mode'] = 'Boolean';
   
+  defaults['browsing mode'] = 0;
+  types['browsing mode'] = 'Integer';
+  
   var populateStorage = function () {
     for (let key in defaults) {
       if (defaults.hasOwnProperty(key)) {
@@ -107,6 +110,18 @@ ilex.conf = function () {
   };
   
   var serialisation = {
+    'String': {
+      'get': function(value) {return value;},
+      'set': function(value) {return value;}
+    },
+    'Integer': {
+      'get': function (value) {
+        return Number.parseInt(value);
+      },
+      'set': function (value) {
+        return value.toString();
+      }
+    },
     'Boolean': {
       'get': function (value) {
         if (value === '0') {

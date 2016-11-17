@@ -11,6 +11,7 @@ if (ilex.widgetsCollection.popupMenu !== undefined)
 ilex.widgetsCollection.popupMenu = function ($parentWidget, zIndex) {
   var that = {},
     menuWidth = 180,
+    elementHeight = 25,
     zIndex = zIndex || 3,
     elements = [];
 
@@ -21,6 +22,8 @@ ilex.widgetsCollection.popupMenu = function ($parentWidget, zIndex) {
   
   var createMenuElement = function () {
     var $elm = $('<div class="ilex-popupMenuElement">')
+                  .height(elementHeight)
+                  .css('line-height', elementHeight+'px')
                   .css('display', 'flex')
                   .width(menuWidth);
     $('<div>').width(15).appendTo($elm);
@@ -29,31 +32,36 @@ ilex.widgetsCollection.popupMenu = function ($parentWidget, zIndex) {
   
   that.buttons = {};
 
-  that.buttons.standardButton = function(html, onclick) {
-    var $elm = createMenuElement().append(html).appendTo(that.menu);
+  that.buttons.standardButton = function(callback, text, icon) {
+    var $elm = createMenuElement().append(icon).append('&nbsp;&nbsp;').append(text);
     $elm.on('click', function (event) {
-      onclick(event);
+      var ind = $elm.index();
+      callback(event, ind);
       that.menu.hide();
     });
+    return $elm;
   };
   
   that.buttons.separator = function () {
-    var $div = $('<div>').width(menuWidth).css('background', '#fff');
-    $div.clone().height(5).appendTo(that.menu);
-    $div.clone().width(menuWidth).appendTo(that.menu)
+    var $elm = $('<div>'),
+        $div = $('<div>').width(menuWidth).css('background', '#fff');
+    $div.clone().height(5).appendTo($elm);
+    $div.clone().width(menuWidth).appendTo($elm)
               .css('border-top', '1px solid #000');
-    $div.width(menuWidth).height(5).appendTo(that.menu);
+    $div.width(menuWidth).height(5).appendTo($elm);
+    
+    return $elm;
   };
   
-  that.buttons.toggleButton = function(html, defaultVal, callback) {
+  that.buttons.toggleButton = function(callback, text, defaultVal) {
     var toggle;
     if (typeof defaultVal === 'function') {
       toggle = defaultVal();
     } else {
       toggle = defaultVal;
     }
-    var $elm = createMenuElement().appendTo(that.menu),
-        $text = $('<div>').appendTo($elm).html(html)
+    var $elm = createMenuElement(),
+        $text = $('<div>').appendTo($elm).text(text)
                   .width(menuWidth - 40),
         $toggle = $('<div class="ilex-awesome">').appendTo($elm)
                     .css('font-size', '16px');
@@ -71,9 +79,22 @@ ilex.widgetsCollection.popupMenu = function ($parentWidget, zIndex) {
       setToggle(toggle);
       callback(toggle);
     });
+    
+    return $elm;
   };
   
+  //elem: ['function', 'callback', 'function params']
+  that.createMenuElement = function (elm) {
+    var fn_name = elm[0],
+        params = elm.slice(1),
+        fn = that.buttons[fn_name];
+      if (typeof fn === 'function') {
+        let $elm = fn.apply(that, params);
+        return $elm;
+      }
+  };
   
+  //elements: ['functin', 'callback', 'function params']
   that.show = function(top, left, elements) {
     if (left > $(window).width() - menuWidth) {
       left = $(window).width() - menuWidth;
@@ -81,12 +102,8 @@ ilex.widgetsCollection.popupMenu = function ($parentWidget, zIndex) {
     
     that.menu.html('');
     for (let elm of elements) {
-      let fn_name = elm[0],
-          params = elm.slice(1),
-          fn = that.buttons[fn_name];
-      if (typeof fn === 'function') {
-        fn.apply(that, params);
-      }
+      let $elm = that.createMenuElement(elm);
+      $elm.appendTo(that.menu);
     }
     
     that.menu.css({'top': top, 'left': left}).show();
