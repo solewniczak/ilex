@@ -23,18 +23,26 @@ ilex.widgetsCollection.popupMenu = function ($parentWidget, zIndex) {
     var $elm = $('<div class="ilex-popupMenuElement">')
                   .css('display', 'flex')
                   .width(menuWidth);
+    $('<div>').width(15).appendTo($elm);
     return $elm;
   };
   
   that.buttons = {};
 
   that.buttons.standardButton = function(html, onclick) {
-    var $elm = $('<div>').html(html).appendTo(that.menu);
+    var $elm = createMenuElement().append(html).appendTo(that.menu);
     $elm.on('click', function (event) {
       onclick(event);
       that.menu.hide();
-      that.clean();
     });
+  };
+  
+  that.buttons.separator = function () {
+    var $div = $('<div>').width(menuWidth).css('background', '#fff');
+    $div.clone().height(5).appendTo(that.menu);
+    $div.clone().width(menuWidth).appendTo(that.menu)
+              .css('border-top', '1px solid #000');
+    $div.width(menuWidth).height(5).appendTo(that.menu);
   };
   
   that.buttons.toggleButton = function(html, defaultVal, callback) {
@@ -71,6 +79,7 @@ ilex.widgetsCollection.popupMenu = function ($parentWidget, zIndex) {
       left = $(window).width() - menuWidth;
     }
     
+    that.menu.html('');
     for (let elm of elements) {
       let fn_name = elm[0],
           params = elm.slice(1),
@@ -91,7 +100,7 @@ ilex.widgetsCollection.popupMenu = function ($parentWidget, zIndex) {
   that.buttonBind = function ($button, elements) {
     $button.on('click', function (event) {
       if (that.menu.is(':visible')) {
-        that.hide(); 
+        that.menu.hide();
       } else {
         var buttonOffset = $button.offset();
         that.show(buttonOffset.top + $button.outerHeight(),
@@ -108,7 +117,7 @@ ilex.widgetsCollection.popupMenu = function ($parentWidget, zIndex) {
   
   $(document).on('click.ilex-popup', function () {
     if (that.menu.is(':visible')) {
-      that.hide();
+      that.menu.hide();
     }
   });
   

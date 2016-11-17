@@ -277,6 +277,19 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     startVersion = that.getFileInfo('totalVersions');
   }
   that.loadVersion(startVersion, firstLoadCallback);  
+  
+  that.textEditor.content.on('contextmenu', '.ilex-textLink', function (event) {
+    event.preventDefault();
+    ilex.popupMenu.show(event.pageY, event.pageX, [
+      ['standardButton', 'mongo', function() {
+        alert('jump');
+      }],
+      ['separator'],
+      ['standardButton', 'mongo2', function() {
+        alert('jump2');
+      }]
+    ]);
+  });
 
   
 //  that.loadText = function (params) {
