@@ -318,7 +318,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     newWindow.closeTab = function(event) {
       let mostRightId = that.windows.length - 1;
       let rightVisible = that.windowPointer + that.visibleWindows.get() - 1;
-      console.log(mostRightId, rightVisible);
+
       //we have tab on the right
       if (rightVisible < mostRightId) {
         newWindow.remove();
@@ -590,6 +590,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     if (windowPointer + that.visibleWindows.get() >= that.windows.length) {
         windowPointer = that.windows.length - that.visibleWindows.get();
     }
+    
     if (windowPointer > that.windowPointer) {
       that.slideLeft(callback, windowPointer);
     } else if (windowPointer < that.windowPointer) {

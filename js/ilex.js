@@ -109,10 +109,11 @@ ilex.conf = function () {
     }
   };
     
-  //run callbacks 
+  //run callbacks
   for (let key in defaults) {
     if (defaults.hasOwnProperty(key)) {
-      if(!localStorage.getItem(key)) {
+      if(localStorage.getItem(key) === null) {
+        var value = defaults[key];
         localStorage.setItem(key, JSON.stringify(value));
       }
       //get value
