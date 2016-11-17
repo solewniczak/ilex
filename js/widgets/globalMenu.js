@@ -21,11 +21,13 @@ ilex.widgetsCollection.globalMenu = function($parent) {
   
   ilex.popupMenu.buttonBind(that.button,
         [
-          ['toggleButton', 'Nelson mode',
-           function () { return ilex.conf.get('nelson mode'); },
+          ['toggleButton',
            function (toggle) {
-            ilex.conf.set('nelson mode', toggle);
-          }]
+              ilex.conf.set('nelson mode', toggle);
+            },
+           'Nelson mode',
+           function () { return ilex.conf.get('nelson mode'); }
+           ]
         ]);
     
   return that;

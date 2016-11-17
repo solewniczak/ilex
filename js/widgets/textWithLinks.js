@@ -281,13 +281,14 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   that.textEditor.content.on('contextmenu', '.ilex-textLink', function (event) {
     event.preventDefault();
     ilex.popupMenu.show(event.pageY, event.pageX, [
-      ['standardButton', 'mongo', function() {
+      ['standardButton', 
+       function() {
         alert('jump');
-      }],
+      }, 'mongo'],
       ['separator'],
-      ['standardButton', 'mongo2', function() {
+      ['standardButton', function() {
         alert('jump2');
-      }]
+      }, 'mongo2']
     ]);
   });
 

@@ -171,8 +171,6 @@ strong {
   background-color: #ffffff;
   color: #262626;
   cursor: default;
-  height: 25px;
-  line-height: 25px;
   font-size: 12px;
   font-family: IlexSans;
 }
@@ -183,11 +181,4 @@ strong {
 
 .ilex-popupMenuElement:active {
   background-color: #eaeaea;
-}
-
-.ilex-popupMenuSeparator {
-  height: 15px;
-  padding-bottom: 7px;
-  border-top: 1px solid #000;
-  background-color: #ffffff;
 }
