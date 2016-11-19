@@ -27,9 +27,12 @@ const (
 type SimpleLink [][2]string
 
 func documentGetDump(request *IlexMessage, ws *websocket.Conn) error {
-	requestedTextId := request.Parameters[TEXT].(string)
-
 	response := NewIlexResponse(request)
+
+	requestedTextId, ok := request.Parameters[TEXT].(string)
+	if !ok {
+		respond_with_nak(ws, response, "No document id supplied!")
+	}
 
 	db_session, err := mgo.Dial("localhost")
 	if err != nil {
