@@ -168,13 +168,17 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     
     $spans.addClass('ilex-textLink').addClass(linkClass);
     
+    if (ilex.conf.get('browsing mode') === 1) {
+      $spans.addClass('ilex-textLinkNavigationMode');
+    }
+    
     that.textEditor.content.on('click', '.'+linkClass, function () {
-      if (ilex.navigationMode) {
+      if (ilex.conf.get('browsing mode') === 1) {
         $(document).trigger('ilex-linkClicked', [windowObject, link]);
       }
     });
     that.textEditor.content.on('mouseover', '.'+linkClass, function (event) {
-      if (ilex.navigationMode) {
+      if (ilex.conf.get('browsing mode') === 1) {
         var file = ilex.documents.get(link.to.documentId);
         ilex.view.popupNote.show(file.name + ' | <strong>'+link.to.versionNo+'</strong>');
       }
@@ -277,6 +281,20 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     startVersion = that.getFileInfo('totalVersions');
   }
   that.loadVersion(startVersion, firstLoadCallback);  
+  
+  that.textEditor.content.on('contextmenu', '.ilex-textLink', function (event) {
+    event.preventDefault();
+    ilex.popupMenu.show(event.pageY, event.pageX, [
+      ['standardButton', 
+       function() {
+        alert('jump');
+      }, 'mongo'],
+      ['separator'],
+      ['standardButton', function() {
+        alert('jump2');
+      }, 'mongo2']
+    ]);
+  });
 
   
 //  that.loadText = function (params) {
