@@ -21,13 +21,7 @@ ilex.widgetsCollection.verticalFileHierarchy = function ($parentWidget) {
   $parentWidget.html(that.container);
   
     
-  //main menu
-  var $menuButton = $('<div class="ilex-menuButton-container">')
-                      .css('float', 'right')
-                      .appendTo(that.container);
-  
-  ilex.widgetsCollection.globalMenu($menuButton);
-  //end main menu
+  var globalTools = ilex.widgetsCollection.globalTools(that.container);
   
   //marting to - fix strange chorme bug
   $('<div>').height('5px').html('&nbsp;').appendTo(that.container)

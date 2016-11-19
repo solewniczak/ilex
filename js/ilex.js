@@ -91,19 +91,46 @@ ilex.documents.get = function(id) {
 
 //CONFIG
 ilex.conf = function () {
-  var conf = {};
+  var defaults = {}, types = {}, callbacks = {};
   //defaults
-  conf['nelson mode'] = false;
+  defaults['nelson mode'] = false;
+  types['nelson mode'] = 'Boolean';
+  callbacks['nelson mode'] = function(value) {
+     $(document).trigger('canvasRedraw');
+  };
+  
+  defaults['browsing mode'] = 0;
+  types['browsing mode'] = 'Integer';
+  callbacks['browsing mode'] = function(value) {
+    if (value === 0) {
+     $(document).trigger('ilex-navigationModeOff');
+    } else if(value === 1) {
+       $(document).trigger('ilex-navigationModeOn');
+    }
+  };
+    
+  //run callbacks
+  for (let key in defaults) {
+    if (defaults.hasOwnProperty(key)) {
+      if(localStorage.getItem(key) === null) {
+        var value = defaults[key];
+        localStorage.setItem(key, JSON.stringify(value));
+      }
+      //get value
+      var value = JSON.parse(localStorage.getItem(key));
+      callbacks[key](value);
+    }
+  }
+  
   
   return {
-    'get': function (name) {
-      return conf[name];
+    'get': function (key) {
+      var value = localStorage.getItem(key);
+      return JSON.parse(value);
     },
-    'set': function (name, value) {
-      conf[name] = value;
-      if (name === 'nelson mode') {
-        $(document).trigger('canvasRedraw');
-      }
+    'set': function (key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+      callbacks[key](value);
     }
   };
 }();
@@ -134,28 +161,6 @@ $(document).on('ilex-newVersionAvailable', function (event, data) {
   $(document).trigger('ilex-fileInfoUpdated', file.id);
 });
 
-  //Navigation mode
-  ilex.navigationMode = false;
-  $(window).on('keydown', function(event) {
-    if (event.ctrlKey && event.altKey) {
-      ilex.navigationMode = true;
-      $(document).trigger('ilex-navigationModeOn');
-    };
-  });
-  
-  $(window).on('keyup', function(event) {
-    if (ilex.navigationMode) {
-      ilex.navigationMode = false;
-      $(document).trigger('ilex-navigationModeOff');
-    }
-  });
-
-  $(window).on('focus', function(event) {
-    if (ilex.navigationMode) {
-      ilex.navigationMode = false;
-      $(document).trigger('ilex-navigationModeOff');
-    }
-  });
 
 //apply sizes to elements
 ilex.applySize = function(animateWidth, animateHeight, selector) {

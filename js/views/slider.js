@@ -28,7 +28,7 @@ ilex.views.slider = function(canvas) {
   
   
   $(document).on('canvasRedraw', function () {
-    if (!ilex.navigationMode && !ilex.conf.get('nelson mode')) {
+    if (!ilex.conf.get('nelson mode')) {
       return;
     }
     var colorId = 0,
@@ -38,7 +38,12 @@ ilex.views.slider = function(canvas) {
          i += 1) {
       let leftWindow = view.slider.windows.get(i),
           rightWindow = view.slider.windows.get(i + 1);
-
+      
+      if (leftWindow.contentWidget === undefined ||
+          rightWindow.contentWidget === undefined) {
+        //windows not ready yet
+        return;
+      }
 
       if (typeof leftWindow.contentWidget.getFileInfo === 'function' &&
           typeof rightWindow.contentWidget.getFileInfo === 'function') {
