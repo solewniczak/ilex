@@ -56,5 +56,7 @@ func init() {
 		GET_ALL_DOCUMENTS_INFO:     getAllDocumentsInfo,
 		TAB_CLOSE:                  tabClose,
 		CREATE_DOCUMENT:            createDocument,
+		LINK_GET_LEFT:              linkGetF(true),
+		LINK_GET_RIGHT:             linkGetF(false),
 	}
 }

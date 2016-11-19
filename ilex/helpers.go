@@ -164,6 +164,14 @@ func CurrentTime() string {
 	return time.Now().Format(time.RFC3339)
 }
 
+func (link *TwoWayLink) GetLeft() HalfLink {
+	return HalfLink{link.Left, link.Id, link.Lineage, true}
+}
+
+func (link *TwoWayLink) GetRight() HalfLink {
+	return HalfLink{link.Right, link.Id, link.Lineage, false}
+
+}
 func GetLinksForDoc(database *mgo.Database, documentId *bson.ObjectId, version int) (error, []HalfLink) {
 	links := database.C(LINKS)
 	var leftLinks []TwoWayLink
@@ -181,10 +189,10 @@ func GetLinksForDoc(database *mgo.Database, documentId *bson.ObjectId, version i
 		return err, nil
 	}
 	for _, link := range leftLinks {
-		halfLinks = append(halfLinks, HalfLink{link.Left, link.Id, true})
+		halfLinks = append(halfLinks, link.GetLeft())
 	}
 	for _, link := range rightLinks {
-		halfLinks = append(halfLinks, HalfLink{link.Right, link.Id, false})
+		halfLinks = append(halfLinks, link.GetRight())
 	}
 	return nil, halfLinks
 }

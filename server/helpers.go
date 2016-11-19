@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"github.com/fatih/structs"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"ilex/ilex"
@@ -72,4 +73,13 @@ func CreateFirstVersion(database *mgo.Database, doc *ilex.Document, message *New
 func LowerFirst(s string) string {
 	r, n := utf8.DecodeRuneInString(s)
 	return string(unicode.ToLower(r)) + s[n:]
+}
+
+func ToMap(value interface{}) map[string]interface{} {
+	resp := make(map[string]interface{})
+	upper := structs.Map(value)
+	for _, name := range structs.Names(value) {
+		resp[LowerFirst(name)] = upper[name]
+	}
+	return resp
 }

@@ -1,5 +1,6 @@
 package ilex
 
+const DEFAULT_HOST = "localhost"
 const DEFAULT_DB = "default"
 const PERMASCROLL = "permascroll"
 const VERSIONS = "versions"

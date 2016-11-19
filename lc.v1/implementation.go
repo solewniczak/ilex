@@ -105,7 +105,6 @@ func (lc *HalfLinkContainer) RemoveRunes(position, length int) {
 
 func (lc *HalfLinkContainer) Persist(db *mgo.Database) error {
 	var err error
-	fmt.Println("Persist phase 1.")
 	links := db.C(ilex.LINKS)
 	bulk := links.Bulk()
 	updates := make([]interface{}, 2*len(lc.Links))
@@ -123,7 +122,6 @@ func (lc *HalfLinkContainer) Persist(db *mgo.Database) error {
 	if _, err = bulk.Run(); err != nil && len(err.(*mgo.BulkError).Cases()) > 0 {
 		return err
 	}
-	fmt.Println("Persist phase 2.")
 	deletes := make([]interface{}, len(lc.ToDelete))
 	for i, link := range lc.ToDelete {
 		deletes[i] = bson.M{"_id": link.LinkId}
