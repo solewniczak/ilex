@@ -19,6 +19,15 @@ func (c HalfLinkContainer) Less(i, j int) bool {
 	return c.Links[i].Anchor.Range.Position < c.Links[j].Anchor.Range.Position
 }
 
+func (lc *HalfLinkContainer) Get(linkId string) (ilex.HalfLink, error) {
+	for _, link := range lc.Links {
+		if link.LinkId.Hex() == linkId {
+			return link, nil
+		}
+	}
+	return ilex.HalfLink{}, errors.New("Link with id " + linkId + " was not found in the links container.")
+}
+
 func (lc *HalfLinkContainer) GetCurrent() []ilex.HalfLink {
 	return lc.Links
 }

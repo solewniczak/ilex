@@ -12,12 +12,15 @@ var Globals = struct {
 	AllDocumentRequests      chan *AllDocumentsRequest
 	DocumentUpdatedMessages  chan *DocumentUpdate
 	NewDocumentRequests      chan *NewDocumentRequest
+	IsLatestRequests         chan *Text
+	IsLatestResponses        chan bool
 	DocAddTextMessages       map[string](chan *AddTextMessage)
 	DocRemoveTextMessages    map[string](chan *RemoveTextMessage)
 	DocChangeNameMessages    map[string](chan *ChangeNameMessage)
 	DocTabControlMessages    map[string](chan *ClientTabMessage)
 	DocGetDumpMessages       map[string](chan *GetDumpMessage)
 	DocGetVersionsMessages   map[string](chan *GetVersionsMessage)
+	DocGetHalfLinkMessages   map[string](chan *GetHalfLinkMessage)
 	DocStopContollerMessages map[string](chan interface{})
 	Controllers              map[string]bool
 	ContollerGroup           *sync.WaitGroup
@@ -32,12 +35,15 @@ var Globals = struct {
 	AllDocumentRequests:      make(chan *AllDocumentsRequest),
 	DocumentUpdatedMessages:  make(chan *DocumentUpdate),
 	NewDocumentRequests:      make(chan *NewDocumentRequest),
+	IsLatestRequests:         make(chan *Text),
+	IsLatestResponses:        make(chan bool),
 	DocAddTextMessages:       make(map[string](chan *AddTextMessage)),
 	DocRemoveTextMessages:    make(map[string](chan *RemoveTextMessage)),
 	DocChangeNameMessages:    make(map[string](chan *ChangeNameMessage)),
 	DocTabControlMessages:    make(map[string](chan *ClientTabMessage)),
 	DocGetDumpMessages:       make(map[string](chan *GetDumpMessage)),
 	DocGetVersionsMessages:   make(map[string](chan *GetVersionsMessage)),
+	DocGetHalfLinkMessages:   make(map[string](chan *GetHalfLinkMessage)),
 	DocStopContollerMessages: make(map[string](chan interface{})),
 	Controllers:              make(map[string]bool),
 	ContollerGroup:           &sync.WaitGroup{},

@@ -49,6 +49,16 @@ func linkGet(request *IlexMessage, ws *websocket.Conn, isLeft bool) error {
 		halfLink = link.GetRight()
 	}
 
+	text := Text{halfLink.Anchor.DocumentId.Hex(), halfLink.Anchor.VersionNo}
+
+	Globals.IsLatestRequests <- &text
+	isLatest := <-Globals.IsLatestResponses
+	if isLatest && Globals.Controllers[text.Document] {
+		// the link leads to a document, which is currently being edited
+		Globals.DocGetHalfLinkMessages[text.Document] <- &GetHalfLinkMessage{requestedLinkId, ws, request.Id}
+		return nil
+	}
+
 	response.Action = LINK_GET_RESPONSE
 	response.Parameters = ToMap(halfLink)
 
