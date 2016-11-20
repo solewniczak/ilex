@@ -87,6 +87,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
     
     that.openTabsContainer.children().each(function (ind) {
       var $tab = $(this);
+      $tab.stop(true);
       if (animate) {
         $tab.animate({'left': ind * that.tabWidth.getLeft()});
       } else {
@@ -94,6 +95,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
       }
     });
     
+    $createNewTabButton.stop(true);
     if (animate) {
       $createNewTabButton.animate({'left': addTabButtonLeft()});
     } else {
@@ -117,7 +119,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
             .css('border-top-left-radius', '20px 90px')
             .css('cursor', 'default');
     
-    $tab.on('click', function () {
+    $tab.on('mousedown', function () {
       $(document).trigger('ilex-slider-setWindowPointer', [$tab.index()]);
     });
     
@@ -202,7 +204,11 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
     
     
     $closeButton.html('<span class="ilex-awesome">&#xf00d;</span>');
-    $closeButton.on('click', function () {
+    //don't switch tab on close
+    $closeButton.on('mousedown', function (event) {
+      event.stopPropagation();
+    });
+    $closeButton.on('click', function (event) {
       $tab.remove();
       setTabsLeft();
       windowObject.closeTab();
