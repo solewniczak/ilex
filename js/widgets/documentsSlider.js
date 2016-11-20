@@ -185,6 +185,13 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
         position[id] = val;
         this.applyWindowPosition();
       },
+      'isVisible': function(winInd) {
+        if (winInd >= that.windowPointer &&
+            winInd < that.windowPointer + visWindows) {
+          return true;
+        }
+        return false;
+      },
       'shiftRight': function () {
         var tmp = position[position.length - 1];
         for (let i = position.length - 1; i >= 1; i--) {
@@ -315,24 +322,67 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       return newWindow.element.data('ilex-window');
     };
     
+    //Close tab behaviour when closing visible windows:
+    //1. get window from the right
+    //2. if no window on the right, scroll left
+    //3. if we are most left, decrease visibleWindows
+    //4. if last winodow, close open starter window
     newWindow.closeTab = function(event) {
       let mostRightId = that.windows.length - 1;
       let rightVisible = that.windowPointer + that.visibleWindows.get() - 1;
+      
+      //close window on the left of our view
+      if (newWindow.getInd() < that.windowPointer) {
+        var width = newWindow.getWidth(),
+            newLeft = that.table.position().left + width +
+                        ilex.widgetsCollection.handlerSize;
+        
+        that.windowPointer -= 1;
 
-      //we have tab on the right
-      if (rightVisible < mostRightId) {
+        that.table.css('left', newLeft);
         newWindow.remove();
-      //we close most right window
-      } else if (rightVisible === mostRightId) {
+      
+      //Ad. 4 we have closed last window
+      } else if (that.windows.length === 1) {
+        newWindow.remove();
+        let win = that.createStarterWindow();
+        that.addWindowAfter(win);
+        $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
+        
+      //Ad. 3 we have less windows than visibleWindows
+      } else if (that.visibleWindows.get() === that.windows.length) {
+        that.visibleWindows.dec();
+        newWindow.remove();
+      //Ad. 2 closed last visible window and we don't have window on the right
+      } else if (that.visibleWindows.isVisible(newWindow.getInd()) &&
+                rightVisible === mostRightId) {
         that.slideRight(function () {
           newWindow.remove();
         });
-      } else if (that.windows.length === 0) {
-        let win = that.createStarterWindow();
-        that.addWindowAfter(win);
+                  
+      //Ad. 1 we've closed visible window but we have the window on the right
+      //OR we close window on the left of visible windows
       } else {
         newWindow.remove();
       }
+
+//      console.log(that.windows.length, that.visibleWindows.get());
+//      if (that.windows.length === 1) {
+//        newWindow.remove();
+//        let win = that.createStarterWindow();
+//        that.addWindowAfter(win);
+//        $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
+//      } else if (that.windows.length === that.visibleWindows.get()) {
+//        that.visibleWindows.dec();
+//        newWindow.remove();
+//      //we close most right window
+//      } else if (newWindow.getInd() === mostRightId) {
+//        that.slideRight(function () {
+//          newWindow.remove();
+//        });
+//      } else {
+//        newWindow.remove();
+//      }
       
       ilex.applySize();
     };
@@ -551,6 +601,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       winInd = that.windowPointer - 1;
     }
     
+    
     var flyOver = that.windowPointer - winInd,
       tablePos = that.table.position();
     
@@ -558,10 +609,13 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     for (let i = 0; i < flyOver; i++) {
       //move to next window
       that.windowPointer -= 1;
+      let prev_width = that.windows.get(that.windowPointer).getWidth();
+      console.log(prev_width);
       //swap positions
       that.visibleWindows.shiftRight();
+      let diff = that.windows.get(that.windowPointer).getWidth() - prev_width;
       slide += that.windows.get(that.windowPointer).getWidth() +
-                  ilex.widgetsCollection.handlerSize
+                  ilex.widgetsCollection.handlerSize - diff;
     }
     
     ilex.applySize();
@@ -848,7 +902,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
    //remove
    {'html': '<span class="ilex-awesome" style="font-size: '+fontSize+'">&#xf068;</span>',
     'callback': function(event) {
-      if (this.visibleWindows === 1) {
+      if (that.visibleWindows.get() === 1) {
         return;
       }
   
