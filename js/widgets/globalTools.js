@@ -14,7 +14,7 @@ if (ilex.widgetsCollection.globalTools !== undefined)
 ilex.widgetsCollection.globalTools = function($parent) {
   var that = {};
   
-  that.container = $('<div class="ilex-globalTools">').appendTo($parent)
+  that.container = $('<div class="ilex-resize ilex-globalTools">').appendTo($parent)
                       .width($parent.data('ilex-width'))
                       .css('display', 'flex');
                         
