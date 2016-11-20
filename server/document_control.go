@@ -38,6 +38,12 @@ type GetVersionsMessage struct {
 	RequestId int
 }
 
+type GetHalfLinkMessage struct {
+	LinkId    string
+	WS        *websocket.Conn
+	RequestId int
+}
+
 func control_document(documentId string, subscriptions *ControllerSubscriptions) {
 	fmt.Println("Document controller for ", documentId, " is starting up.")
 
@@ -163,6 +169,19 @@ loop:
 				versions = append(versions, controllerData.Version)
 			}
 			response.Parameters[VERSIONS] = versions
+			respond(message.WS, response)
+
+		case message := <-subscriptions.GetHalfLinkMessages:
+			response := NewIlexMessage()
+			response.Id = message.RequestId
+
+			halfLink, err := controllerData.LinksContainter.Get(message.LinkId)
+			if err != nil {
+				fmt.Println("Could not find link " + err.Error())
+				break
+			}
+			response.Action = LINK_GET_RESPONSE
+			response.Parameters = ToMap(halfLink)
 			respond(message.WS, response)
 
 		case <-subscriptions.StopControllerMessages:

@@ -9,6 +9,7 @@ import (
 )
 
 type LinkContainer interface {
+	Get(linkId string) (ilex.HalfLink, error)
 	GetCurrent() []ilex.HalfLink
 	AddRunes(position, length int, linkIds []string) error
 	RemoveRunes(position, length int)

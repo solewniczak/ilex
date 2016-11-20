@@ -88,17 +88,31 @@ type GlobalView struct {
 	stopView chan interface{}
 }
 
-func (gv *GlobalView) isLatest(text Text) bool {
-	return gv.texts[text.Document].Document.TotalVersions == text.Version
+func (gv *GlobalView) isLatest(text *Text) bool {
+	docWithName, ok := gv.texts[text.Document]
+	if ok {
+		return docWithName.Document.TotalVersions == text.Version
+	}
+	fmt.Println("GlobalView received a question about an unknown document!")
+	return false
 }
 
 func (gv *GlobalView) clearAllDataForSocket(ws *websocket.Conn) {
 	for client_tab, text := range Globals.ClientDoc {
 		if client_tab.WS == ws {
-			if gv.isLatest(text) {
+			if gv.isLatest(&text) {
 				Globals.DocTabControlMessages[text.Document] <- ClientTabClosed(client_tab)
 			}
 			delete(Globals.ClientDoc, client_tab)
+		}
+	}
+}
+
+func (gv *GlobalView) updateClientDocs(updated *Text) {
+	for client_tab, text := range Globals.ClientDoc {
+		if text == *updated {
+			text.Version++
+			Globals.ClientDoc[client_tab] = text
 		}
 	}
 }
@@ -110,14 +124,14 @@ func (gv *GlobalView) registerOpening(message *ClientTabMessage) {
 		return
 	}
 
-	if gv.isLatest(text) {
+	if gv.isLatest(&text) {
 		if !Globals.Controllers[message.DocumentId] {
 			start_document_controller(message.DocumentId)
 		}
 		Globals.DocTabControlMessages[message.DocumentId] <- message
 	}
 
-	if ok && gv.isLatest(previous_text) {
+	if ok && gv.isLatest(&previous_text) {
 		// the client tab no longer uses the previous document
 		Globals.DocTabControlMessages[previous_text.Document] <- ClientTabClosed(message.ClientTab)
 	}
@@ -172,6 +186,7 @@ func NewGlobalView() *GlobalView {
 					fmt.Println("Document", message.DocumentId, "'s versions are out of sync!")
 					break
 				} else if text.Document.TotalVersions+1 == message.Version {
+					gv.updateClientDocs(&Text{text.Document.Id.Hex(), text.Document.TotalVersions})
 					text.Document.TotalVersions++
 					fmt.Println("Document", message.DocumentId, "total versions updated to", message.Version)
 					NotifyClientsNewVersion(message)
@@ -228,11 +243,14 @@ func NewGlobalView() *GlobalView {
 						fmt.Println("Received an unexpected tab closing message. ")
 						break
 					}
-					if gv.isLatest(currentText) {
+					if gv.isLatest(&currentText) {
 						Globals.DocTabControlMessages[currentText.Document] <- ClientTabClosed(message.ClientTab)
 					}
 					delete(Globals.ClientDoc, message.ClientTab)
 				}
+
+			case message := <-Globals.IsLatestRequests:
+				Globals.IsLatestResponses <- gv.isLatest(message)
 
 			case message := <-Globals.SocketControlMessages:
 				gv.clearAllDataForSocket(message)
