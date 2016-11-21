@@ -269,7 +269,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     });
   
   that.textEditor.content.on('documentAddText', function(event, data) {
-    //documentObject.addText(data.absStart - 1, data.value);
+    documentObject.addText(data.absStart - 1, data.value);
   });
   
   that.textEditor.content.on('documentRemoveText', function(event, data) {  
