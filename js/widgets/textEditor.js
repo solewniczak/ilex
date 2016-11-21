@@ -473,6 +473,10 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     'needsUpdate': false,
     'update': function () {
       var selection = window.getSelection();
+      if (selection.anchorNode === null) {
+        console.log('cursor.update: no selection avalible');
+        return;
+      }
       //we are in main div
       if (selection.anchorNode === that.content[0]) {
         this.setSpan(that.content.find('span')[0]);
