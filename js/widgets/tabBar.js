@@ -284,6 +284,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
       height = that.container.parent().data('ilex-height');
     
     that.container.data('ilex-width', width).data('ilex-height', height);
+    setTabsLeft(false);
   });
   
   return that;

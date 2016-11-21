@@ -26,14 +26,25 @@ ilex.widgetsCollection.popupMenu = function ($parentWidget, zIndex) {
                   .css('line-height', elementHeight+'px')
                   .css('display', 'flex')
                   .width(menuWidth);
-    $('<div>').width(15).appendTo($elm);
+    $('<div>').css('min-width', 15).appendTo($elm);
     return $elm;
   };
+  
+  var createTextElement = function (text) {
+    return $('<div>').text(text)
+                      .css('white-space', 'nowrap')
+                      .css('overflow', 'hidden')
+                      .css('text-overflow', 'ellipsis');
+  }
   
   that.buttons = {};
 
   that.buttons.standardButton = function(callback, text, icon) {
-    var $elm = createMenuElement().append(icon).append('&nbsp;&nbsp;').append(text);
+    var $elm = createMenuElement()
+      .append(icon)
+      .append($('<div>').css('min-width', 10))
+      .append(createTextElement(text))
+      .append($('<div>').css('min-width', 10));
     $elm.on('click', function (event) {
       var ind = $elm.index();
       callback(event, ind);
