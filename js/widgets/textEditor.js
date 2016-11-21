@@ -96,7 +96,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
       if (notify) {
         let absStart = this.absPosition($span, relPos);
         that.content.trigger('documentAddText',[{
-                                'absStart': absStart,
+                                'absStart': absStart + 1,
                                 'value': text,
                                 'span': $span[0]
                               }]);
@@ -456,7 +456,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
       if (notify) {
         //send removal event  
         that.content.trigger('documentRemoveText',[{
-                      'absStart': absStart,
+                      'absStart': absStart + 1,
                       'length': length,
                       'removedSpanClasses': removedSpanClasses
                     }]);
@@ -832,7 +832,14 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     //selection finished, used by finishLinkButton
     //that.container.trigger('selectend');
   });
+  that.content.on('paste', function (event) {
+    event.preventDefault();
+  });
   that.content.on('mousedown', function (event) {
+    //only when left button pressed (allow contextmenu)
+    if (event.button !== 0) {
+      return;
+    }
     //we have to clear entire container to avoid 1 px artifact between
     //toolbar and content
     var containerOffset = that.container.offset(),

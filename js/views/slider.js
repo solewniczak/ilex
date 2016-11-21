@@ -65,7 +65,9 @@ ilex.views.slider = function(canvas) {
               link.to.versionNo === rightDocumentVersion) {
             var $leftSpans = leftWindow.contentWidget.container.find('span.ilex-linkId-'+link.linkId),
                 $rightSpans = rightWindow.contentWidget.container.find('span.ilex-linkId-'+link.linkId);
-            ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans, ilex.tools.colors.htmlToRgba(ilex.linksColors[colorId], 0.8), true);
+            ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans, ilex.tools.colors.htmlToRgba(ilex.linksColors[colorId], 0.6), true);
+            
+            ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans, ilex.tools.colors.htmlToRgba(ilex.linksColors[colorId], 0.1), false);
             
             colorId = (colorId + 1) % ilex.linksColors.length;
             drawnLinks.push(link.linkId);
