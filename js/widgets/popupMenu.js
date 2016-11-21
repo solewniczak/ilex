@@ -47,7 +47,7 @@ ilex.widgetsCollection.popupMenu = function ($parentWidget, zIndex) {
         $div = $('<div>').width(menuWidth).css('background', '#fff');
     $div.clone().height(5).appendTo($elm);
     $div.clone().width(menuWidth).appendTo($elm)
-              .css('border-top', '1px solid #000');
+              .css('border-top', '1px solid #afafaf');
     $div.width(menuWidth).height(5).appendTo($elm);
     
     return $elm;
