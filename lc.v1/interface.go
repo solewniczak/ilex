@@ -14,7 +14,7 @@ type LinkContainer interface {
 	AddRunes(position, length int, linkIds []string) error
 	RemoveRunes(position, length int)
 	Persist(db *mgo.Database) error
-	Propagate(db *mgo.Database) //should return new links for document and its neighbours
+	Propagate(db *mgo.Database) ([]ilex.HalfLink, error)
 }
 
 func NewLinkContainer(documentId *bson.ObjectId, version int, db *mgo.Database) LinkContainer {

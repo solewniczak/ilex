@@ -143,4 +143,68 @@ func (lc *HalfLinkContainer) Persist(db *mgo.Database) error {
 	return nil
 }
 
-func (lc *HalfLinkContainer) Propagate(db *mgo.Database) {}
+func verifyLink(halfLink *ilex.HalfLink, link *ilex.TwoWayLink) bool {
+	var anchor ilex.Anchor
+	if halfLink.IsLeft {
+		anchor = link.Left
+	} else {
+		anchor = link.Right
+	}
+	return halfLink.Anchor == anchor
+}
+
+func updateLink(halfLink *ilex.HalfLink, link *ilex.TwoWayLink) (newHalf, newOtherHalf ilex.HalfLink) {
+	link.Id = bson.NewObjectId()
+
+	newHalf.LinkId = link.Id
+	newHalf.Lineage = link.Lineage
+
+	newOtherHalf.LinkId = link.Id
+	newOtherHalf.Lineage = link.Lineage
+
+	if halfLink.IsLeft {
+		link.Left.VersionNo++
+		newHalf.IsLeft = true
+		newHalf.Anchor = link.Left
+		newOtherHalf.IsLeft = false
+		newOtherHalf.Anchor = link.Right
+	} else {
+		link.Right.VersionNo++
+		newHalf.IsLeft = false
+		newHalf.Anchor = link.Right
+		newOtherHalf.IsLeft = true
+		newOtherHalf.Anchor = link.Left
+	}
+	return newHalf, newOtherHalf
+}
+
+func (lc *HalfLinkContainer) Propagate(db *mgo.Database) ([]ilex.HalfLink, error) {
+	links := db.C(ilex.LINKS)
+	var err error
+	newFullLinks := make([]interface{}, 0)
+	newHalfLinks := make([]ilex.HalfLink, 0)
+	otherHalfLinks := make([]ilex.HalfLink, 0)
+
+	for _, halfLink := range lc.Links {
+		var link ilex.TwoWayLink
+		if err := links.Find(
+			bson.M{"_id": halfLink.LinkId}).One(&link); err != nil {
+			return nil, errors.New("LinkContainer could not find link in database: " + err.Error())
+		}
+		if !verifyLink(&halfLink, &link) {
+			fmt.Println("WARNING! Links Persisting must have failed - mismatch with database.")
+		}
+		newHalf, newOtherHalf := updateLink(&halfLink, &link)
+		newFullLinks = append(newFullLinks, link)
+		newHalfLinks = append(newHalfLinks, newHalf)
+		otherHalfLinks = append(otherHalfLinks, newOtherHalf)
+	}
+
+	bulk := links.Bulk()
+	bulk.Insert(newFullLinks...)
+	if _, err = bulk.Run(); err != nil && len(err.(*mgo.BulkError).Cases()) > 0 {
+		return nil, err
+	}
+	lc.Links = newHalfLinks
+	return otherHalfLinks, nil
+}
