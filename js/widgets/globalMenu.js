@@ -27,7 +27,11 @@ ilex.widgetsCollection.globalMenu = function($parent) {
             },
            'Nelson mode',
            function () { return ilex.conf.get('nelson mode'); }
-           ]
+           ],
+          ['separator'],
+          ['standardButton', function() {
+            window.close();
+          }, 'Exit']
         ]);
     
   return that;
