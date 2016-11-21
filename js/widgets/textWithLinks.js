@@ -343,11 +343,13 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
         linkJumps = [];
     if (links !== undefined) {
       for (let link of links) {
-        console.log(link);
+        var file = ilex.documents.get(link.to.documentId);
+//        ilex.view.popupNote.show(file.name + ' | <strong>'+link.to.versionNo+'</strong>');
+        
         linkJumps.push([
           'standardButton', function() {
             alert('jump2');
-          }, 'Jmp', '<span class="ilex-awesome">&#xf0c1;</span>'
+          }, file.name, '<span class="ilex-awesome">&#xf0c1;</span>'
         ]);
       }
     }
