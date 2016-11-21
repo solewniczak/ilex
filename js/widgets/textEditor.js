@@ -96,7 +96,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
       if (notify) {
         let absStart = this.absPosition($span, relPos);
         that.content.trigger('documentAddText',[{
-                                'absStart': absStart,
+                                'absStart': absStart + 1,
                                 'value': text,
                                 'span': $span[0]
                               }]);
@@ -456,7 +456,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
       if (notify) {
         //send removal event  
         that.content.trigger('documentRemoveText',[{
-                      'absStart': absStart,
+                      'absStart': absStart + 1,
                       'length': length,
                       'removedSpanClasses': removedSpanClasses
                     }]);
