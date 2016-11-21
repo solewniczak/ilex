@@ -365,81 +365,10 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       } else {
         newWindow.remove();
       }
-
-//      console.log(that.windows.length, that.visibleWindows.get());
-//      if (that.windows.length === 1) {
-//        newWindow.remove();
-//        let win = that.createStarterWindow();
-//        that.addWindowAfter(win);
-//        $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
-//      } else if (that.windows.length === that.visibleWindows.get()) {
-//        that.visibleWindows.dec();
-//        newWindow.remove();
-//      //we close most right window
-//      } else if (newWindow.getInd() === mostRightId) {
-//        that.slideRight(function () {
-//          newWindow.remove();
-//        });
-//      } else {
-//        newWindow.remove();
-//      }
       
       ilex.applySize();
     };
-    
-    newWindow.oldCloseTab = function(event) {
-      var windowHeight = $(window).height();
-      //cannot close last tab
-      if (that.windows.length === 1) {
-        let lastWin = that.windows.get(0);
-        lastWin.closeDocument();
-        lastWin.setContentWidget(createStarterWidget(lastWin));
-        ilex.applySize();
-        return;
-      }
-      
-      //bakground for animanito purposes
-      newWindow.contentWidget.container.css('position', 'relative');
-                                       
-      newWindow.contentWidget.container.animate({'top': windowHeight}, function() {
-        if (that.windows.get(that.windowPointer + 1) !== undefined) {
-          var nextWidgetIsStarter = that.windows.get(that.windowPointer + 1)
-                                          .widget.children(':first')
-                                          .hasClass('ilex-starterWidget');
-        } else {
-          var nextWidgetIsStarter = false;
-        }
         
-        //slide right window
-        if (that.visibleWindows.get() === 1
-            && !nextWidgetIsStarter
-            && that.windowPointer < that.windows.length - 1) {
-          that.slideLeft(function () {
-            var removedWidth = newWindow.getWidth();
-            newWindow.remove();
-            //remember about decresing window pointar after removing window
-            that.windowPointer -= 1;
-            //align left slide
-            that.table.css('left', that.table.position().left + removedWidth + 
-                          ilex.widgetsCollection.handlerSize);
-            ilex.applySize();
-          });
-        //slide left window
-        } else if (that.visibleWindows.get() === 1
-            && that.windowPointer > 0) {
-          that.slideRight(function () {
-            newWindow.remove();
-            ilex.applySize();
-          }); 
-        //just remove window
-        } else {
-          newWindow.remove();
-          that.visibleWindows.dec();
-          ilex.applySize();
-        }
-      });
-    };
-    
     newWindow.closeDocument = function(event) {
       ilex.server.tabClose(newWindow.tabId);
       newWindow.tabId = tabId;
