@@ -446,19 +446,10 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
           focus;
       that.content.find('span').each(function () {
         if (absPos < $(this).text().length) {
-          let text = this.textContent;
-          if (text.charAt(absPos) === '\n' && line.nextElementSibling !== null) {
-            let line = this.parentElement,
-                nextLine = line.nextElementSibling,
-                span = nextLine.firstElementChild;
-              focus = {};
-              focus.span = span;
-              focus.position = 0;
-          } else {
-            focus = {};
-            focus.span = this;
-            focus.position = absPos + 1;
-          }
+          focus = {};
+          focus.span = this;
+          focus.position = absPos;
+          
           return false;
         } else {
           absPos -= $(this).text().length;
