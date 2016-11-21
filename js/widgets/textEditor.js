@@ -152,42 +152,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
       }
       
       this.insertLineAfter($newLine, $oldLine);
-        
-          
-      //if we are on the boundary of spans => we don't need to create new span
-      //ALA|[AS]
-//      if (textBeforePos === '' && $span.prev().length > 0) {
-//        let $prev = $span.prev(),
-//            $line = this.createEmptyLine();
-//        
-//        $prev.append('\n');
-//        
-//        $line.append($span);
-//        $line.append($spansAfterCursor);
-//        this.insertLineAfter($line, $oldLine);
-//        
-//        $newLineSpan = $span;
-//        
-//      //[ALA]|AS
-//      } else if (textAfterPos === 0 && $span.next().length > 0) {
-//        let $line = this.createEmptyLine();
-//        $span.text(textBeforePos + '\n');
-//        $line.append($spansAfterCursor);
-//        this.insertLineAfter($line, $oldLine);
-//        
-//        $newLineSpan = $line.find("span");
-//      } else {
-//        //update old line
-//        $span.text(textBeforePos + '\n');
-//        let $newLine = this.createLineAfter($oldLine, $span);
-//        
-//        $newLineSpan = $newLine.find("span");
-//        $newLineSpan.text(textAfterPos);
-//        //cloning should be done another way
-//        //$newLineSpan.addClass(cursor.span.className);
-//        $newLineSpan.after($spansAfterCursor);
-//      }
-      
+            
       if (notify) {
         let absStart = this.absPosition($span, relPos);
         that.content.trigger('documentAddText',[{
