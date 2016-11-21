@@ -50,20 +50,39 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
   //Span := {elm: $jQueryElm, absStart: int, absEnd: int}
   
   that.textDocument = {
-    'createLine': function () {
+    'createEmptyLine': function() {
       var $line = $('<div class="ilex-line">')
-                    .width(countLineWidth()),
-          $span = ilex.tools.markup.createIlexSpan().appendTo($line);
+                    .width(countLineWidth());
       return $line;
     },
-    'insertLineAfter': function($after) {
-      var $line = this.createLine();
+    //$cloneSpan will be cloned as new line span
+    'createLine': function ($cloneSpan) {
+      if ($cloneSpan === undefined) {
+        var $span = ilex.tools.markup.createIlexSpan();
+      } else {
+        var $span = $cloneSpan.clone()
+              .attr('id', ilex.tools.markup.generateIlexSpanId());
+      }
+      var $line = this.createEmptyLine();
+      $span.appendTo($line);
+      return $line;
+    },
+    'insertLineAfter': function($line, $after) {
       if ($after === undefined) {
         $line.appendTo(that.content);
       } else {
         $line.insertAfter($after);
       }
       return $line;
+    },
+    'createLineAfter': function($after, $cloneSpan) {
+      var $line = this.createLine($cloneSpan);
+      this.insertLineAfter($line, $after);
+      return $line;
+    },
+    'spanClone': function($span) {
+      return $span.clone()
+              .attr('id', ilex.tools.markup.generateIlexSpanId());
     },
     //relPos - position in span
     'insertText': function($span, relPos, text, notify) {
@@ -97,18 +116,43 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
           text = $span.text(),
           textBeforePos = text.slice(0, relPos),
           textAfterPos = text.slice(relPos),
+          $newLine = this.createEmptyLine(),
           $oldLine = $span.parent(),
-          $spansAfterCursor = $span.nextAll("span").detach();
-    
-      //update old line
-      $span.text(textBeforePos + "\n");
-      let $newLine = that.textDocument.insertLineAfter($oldLine),
-          $newLineSpan = $newLine.find("span");
-      $newLineSpan.text(textAfterPos);
-      //cloning should be done another way
-      //$newLineSpan.addClass(cursor.span.className);
-      $newLineSpan.after($spansAfterCursor);
+          $spansAfterCursor = $span.nextAll('span'),
+          $newLineSpan;
+        
+      //I, II, V
+      if (
+          ($span.is($oldLine.find('span:first')) && relPos === 0) ||
+          ($span.is($oldLine.find('span:last')) &&
+                 relPos === text.length - 1) ||
+          (textBeforePos !== '' && textAfterPos !== '')
+         ) {
+        $newLineSpan = this.spanClone($span);
+        $span.text(textBeforePos + '\n');
+        $newLineSpan.text(textAfterPos);
+        
+        $newLine.append($newLineSpan, $spansAfterCursor);
+      //III
+      } else if (textAfterPos === '' && $span.next().length > 0) {
+         $span.text(textBeforePos + '\n');
+         $newLine.append($spansAfterCursor);
+         $newLineSpan = $newLine.find('span:first');
+      //IV
+      } else if (textBeforePos === '' && $span.prev().length > 0)   {
+        $span = $span.prev();
+        $spansAfterCursor = $span.nextAll('span')
+        $span.text(textBeforePos + '\n');
+        
+        $newLine.append($spansAfterCursor);
+        $newLineSpan = $newLine.find('span:first');
+        
+      } else {
+        console.log('textDocument.breakLine: unknow sytuation');
+      }
       
+      this.insertLineAfter($newLine, $oldLine);
+            
       if (notify) {
         let absStart = this.absPosition($span, relPos);
         that.content.trigger('documentAddText',[{
@@ -296,7 +340,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
           $startLine = $startSpan.parent(),
           $endLine = $endSpan.parent();
       
-      //Backspace and Delece can produce out ofr range relPositions
+      //Backspace and Delece can produce out of range relPositions
       //Deal with it here
       //I assume that you can remove only one charter at once => $startSpan == $endSpan
       
@@ -446,19 +490,10 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
           focus;
       that.content.find('span').each(function () {
         if (absPos < $(this).text().length) {
-          let text = this.textContent;
-          if (text.charAt(absPos) === '\n' && line.nextElementSibling !== null) {
-            let line = this.parentElement,
-                nextLine = line.nextElementSibling,
-                span = nextLine.firstElementChild;
-              focus = {};
-              focus.span = span;
-              focus.position = 0;
-          } else {
-            focus = {};
-            focus.span = this;
-            focus.position = absPos + 1;
-          }
+          focus = {};
+          focus.span = this;
+          focus.position = absPos;
+          
           return false;
         } else {
           absPos -= $(this).text().length;
@@ -482,6 +517,10 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     'needsUpdate': false,
     'update': function () {
       var selection = window.getSelection();
+      if (selection.anchorNode === null) {
+        console.log('cursor.update: no selection avalible');
+        return;
+      }
       //we are in main div
       if (selection.anchorNode === that.content[0]) {
         this.setSpan(that.content.find('span')[0]);
@@ -610,7 +649,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     that.content.html('');
     
     for (let line of text.match(/.*\n/g)) {
-      let $line = that.textDocument.insertLineAfter();
+      let $line = that.textDocument.createLineAfter();
       //that.textEditor.textDocument.insertText($line.find("span"), 0, line + "\n");
       $line.find("span").text(line);
     }

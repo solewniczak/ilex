@@ -147,6 +147,32 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     that.container.find('.ilex-textLink').removeClass('ilex-textLinkNavigationMode');
   });
   
+  var linkTools = function() {
+    var prefix = 'ilex-linkId-';
+    return {
+      'createLinkClassName': function(link) {
+        return prefix + link.linkId;
+      },
+      'getLinkIdsFromClassNames': function (classNames) {
+        if (classNames === undefined) {
+          return [];
+        }
+        if (typeof classNames === 'string' || classNames instanceof String) {
+          var classList = classNames.split(' ');
+        } else {
+          var classList = classNames;
+        }
+        var linksList = [];
+        for (let class_name of classList) {
+          if (class_name.indexOf(prefix) !== -1) {
+            linksList.push(class_name.slice(prefix.length));
+          }
+        }
+        return linksList;
+      }
+    };
+  }();
+  
   that.textEditor = ilex.widgetsCollection.textEdiotr(that.container);
     
   that.setLink = function (link) {
@@ -164,7 +190,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     
     let $spans = that.textEditor.getRangeSpans(linkRange);
     
-    let linkClass = 'ilex-linkId-' + link.linkId;
+    let linkClass = linkTools.createLinkClassName(link);
     
     $spans.addClass('ilex-textLink').addClass(linkClass);
     
@@ -269,7 +295,8 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     });
   
   that.textEditor.content.on('documentAddText', function(event, data) {
-    documentObject.addText(data.absStart - 1, data.value);
+    var links = linkTools.getLinkIdsFromClassNames(data.span.classList);
+    documentObject.addText(data.absStart - 1, data.value, links);
   });
   
   that.textEditor.content.on('documentRemoveText', function(event, data) {  

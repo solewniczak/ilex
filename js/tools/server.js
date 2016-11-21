@@ -123,13 +123,14 @@ ilex.tools.server.create = function (host) {
       return documentId;
     };
       
-    thatDocument.addText = function(position, str) {
+    thatDocument.addText = function(position, str, links) {
       sendAction('documentAddText', {
           'document': documentId,
           'tab': tabId,
           'position': position,
           'string': str,
-          'length': str.length
+          'length': str.length,
+          'linkIds': links
       });
     };
     
