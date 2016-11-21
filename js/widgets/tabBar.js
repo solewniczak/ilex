@@ -119,12 +119,39 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
             .css('border-top-left-radius', '20px 90px')
             .css('cursor', 'default');
     
-    $tab.on('mousedown', function () {
-      $(document).trigger('ilex-slider-setWindowPointer', [$tab.index()]);
+    var closeTabAndDocument = function () {
+        $tab.remove();
+        setTabsLeft();
+        windowObject.closeTab();
+    };
+    
+    $tab.on('contextmenu', function (event) {
+      ilex.popupMenu.show(event.pageY, event.pageX,  [
+        ['standardButton', function() {
+            $(document).trigger('ilex-slider-goToNewDocumentTab');
+          }, 'New tab'],
+        ['separator'],
+        ['standardButton', function() {
+           closeTabAndDocument();
+          }, 'Close tab'],
+        ['standardButton', function() {
+            alert('Close other tabs');
+          }, 'Close other tabs'],
+        ['standardButton', function() {
+            alert('Close tabs to the right');
+          }, 'Close tabs to the right'],
+      ]);
     });
     
-
-    $tab.on('mousedown', function () {
+    $tab.on('mousedown', function (event) {
+      //middle mouse button - close tab
+      if (event.button === 1) {
+        closeTabAndDocument();
+      } else if (event.button === 2) {
+        //contextmenu
+        return false; 
+      }
+      $(document).trigger('ilex-slider-setWindowPointer', [$tab.index()]);
       var startX = event.pageX,
           tabStartLeft = $tab.offset().left;
       
@@ -209,9 +236,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
       event.stopPropagation();
     });
     $closeButton.on('click', function (event) {
-      $tab.remove();
-      setTabsLeft();
-      windowObject.closeTab();
+      closeTabAndDocument();
     });
         
     if (afterInd === -1) {
