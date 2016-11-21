@@ -539,7 +539,6 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       //move to next window
       that.windowPointer -= 1;
       let prev_width = that.windows.get(that.windowPointer).getWidth();
-      console.log(prev_width);
       //swap positions
       that.visibleWindows.shiftRight();
       let diff = that.windows.get(that.windowPointer).getWidth() - prev_width;
