@@ -832,9 +832,12 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     //selection finished, used by finishLinkButton
     //that.container.trigger('selectend');
   });
+  that.content.on('paste', function (event) {
+    event.preventDefault();
+  });
   that.content.on('mousedown', function (event) {
     //only when left button pressed (allow contextmenu)
-    if (event.button !== 1) {
+    if (event.button !== 0) {
       return;
     }
     //we have to clear entire container to avoid 1 px artifact between

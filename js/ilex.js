@@ -153,6 +153,18 @@ ilex.linkHash = function (link) {
   return ilex.symHash(x, y);
 };
 
+//$(document).on('mousedown', function (event) {
+//  //prevent Linux clippboard
+//  if (event.button === 1) {
+//    event.preventDefault();
+//    event.stopPropagation();
+//  }
+//});
+
+$(document).on('contextmenu', function (event) {
+  event.preventDefault();
+});
+
 //notifications
 $(document).on('ilex-newVersionAvailable', function (event, data) {
   var file = ilex.documents.get(data.document);
