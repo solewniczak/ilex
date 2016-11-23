@@ -178,7 +178,7 @@ func updateLink(halfLink *ilex.HalfLink, link *ilex.TwoWayLink) (newHalf, newOth
 	return newHalf, newOtherHalf
 }
 
-func (lc *HalfLinkContainer) Propagate(db *mgo.Database) ([]ilex.HalfLink, error) {
+func (lc *HalfLinkContainer) Propagate(db *mgo.Database) ([]ilex.HalfLink, []ilex.HalfLink, error) {
 	links := db.C(ilex.LINKS)
 	var err error
 	newFullLinks := make([]interface{}, 0)
@@ -189,7 +189,7 @@ func (lc *HalfLinkContainer) Propagate(db *mgo.Database) ([]ilex.HalfLink, error
 		var link ilex.TwoWayLink
 		if err := links.Find(
 			bson.M{"_id": halfLink.LinkId}).One(&link); err != nil {
-			return nil, errors.New("LinkContainer could not find link in database: " + err.Error())
+			return nil, nil, errors.New("LinkContainer could not find link in database: " + err.Error())
 		}
 		if !verifyLink(&halfLink, &link) {
 			fmt.Println("WARNING! Links Persisting must have failed - mismatch with database.")
@@ -203,8 +203,8 @@ func (lc *HalfLinkContainer) Propagate(db *mgo.Database) ([]ilex.HalfLink, error
 	bulk := links.Bulk()
 	bulk.Insert(newFullLinks...)
 	if _, err = bulk.Run(); err != nil && len(err.(*mgo.BulkError).Cases()) > 0 {
-		return nil, err
+		return nil, nil, err
 	}
 	lc.Links = newHalfLinks
-	return otherHalfLinks, nil
+	return newHalfLinks, otherHalfLinks, nil
 }
