@@ -91,7 +91,7 @@ func (cd *ControllerData) TryUpdateVersion(database *mgo.Database, root *tree.Ro
 		// save work in progress and start a new version
 		cd.DidEditorJustLeave = false
 		cd.IsEditionFromNewEditor = false
-		var newLinks, newOtherLinks []ilex.HalfLink
+		var newLinks []ilex.HalfLink
 		var err error
 
 		docs := database.C(ilex.DOCS)
@@ -102,7 +102,7 @@ func (cd *ControllerData) TryUpdateVersion(database *mgo.Database, root *tree.Ro
 			cd.Version.No++
 			cd.Version.Created = ilex.CurrentTime()
 			fmt.Println("New version number created for "+cd.DocumentId+": ", cd.Version.No)
-			if newLinks, newOtherLinks, err = cd.LinksContainter.Propagate(database); err != nil {
+			if newLinks, _, err = cd.LinksContainter.Propagate(database); err != nil {
 				fmt.Println("Link propagation failed with error: " + err.Error())
 			}
 			if err = UpdateDocument(docs, &cd.Document, &cd.Version); err != nil {
@@ -122,7 +122,7 @@ func (cd *ControllerData) TryUpdateVersion(database *mgo.Database, root *tree.Ro
 			cd.Version.Id = bson.NewObjectId()
 			cd.Version.No++
 			cd.Version.Created = ilex.CurrentTime()
-			if newLinks, newOtherLinks, err = cd.LinksContainter.Propagate(database); err != nil {
+			if newLinks, _, err = cd.LinksContainter.Propagate(database); err != nil {
 				fmt.Println("Link propagation failed with error: " + err.Error())
 			}
 			if err = UpdateDocument(docs, &cd.Document, &cd.Version); err != nil {
