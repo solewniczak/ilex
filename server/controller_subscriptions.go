@@ -8,6 +8,7 @@ type ControllerSubscriptions struct {
 	DocDumpMessages        chan *GetDumpMessage
 	GetVersionsMessages    chan *GetVersionsMessage
 	GetHalfLinkMessages    chan *GetHalfLinkMessage
+	NewHalfLinkMessages    chan *NewHalfLinkMessage
 	StopControllerMessages chan interface{}
 }
 
@@ -20,6 +21,7 @@ func NewControllerSubscriptions() *ControllerSubscriptions {
 		make(chan *GetDumpMessage),
 		make(chan *GetVersionsMessage),
 		make(chan *GetHalfLinkMessage),
+		make(chan *NewHalfLinkMessage, 100),
 		make(chan interface{}),
 	}
 }
@@ -32,6 +34,7 @@ func (s *ControllerSubscriptions) Subscribe(documentId string) {
 	Globals.DocGetDumpMessages[documentId] = s.DocDumpMessages
 	Globals.DocGetVersionsMessages[documentId] = s.GetVersionsMessages
 	Globals.DocGetHalfLinkMessages[documentId] = s.GetHalfLinkMessages
+	Globals.DocNewHalfLinkMessages[documentId] = s.NewHalfLinkMessages
 	Globals.DocStopContollerMessages[documentId] = s.StopControllerMessages
 }
 
@@ -44,5 +47,6 @@ func (s *ControllerSubscriptions) Close() {
 	close(s.DocDumpMessages)
 	close(s.GetVersionsMessages)
 	close(s.GetHalfLinkMessages)
+	close(s.NewHalfLinkMessages)
 	close(s.StopControllerMessages)
 }
