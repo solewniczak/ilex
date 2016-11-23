@@ -21,6 +21,7 @@ var Globals = struct {
 	DocGetDumpMessages       map[string](chan *GetDumpMessage)
 	DocGetVersionsMessages   map[string](chan *GetVersionsMessage)
 	DocGetHalfLinkMessages   map[string](chan *GetHalfLinkMessage)
+	DocNewHalfLinkMessages   map[string](chan *NewHalfLinkMessage)
 	DocStopContollerMessages map[string](chan interface{})
 	Controllers              map[string]bool
 	ContollerGroup           *sync.WaitGroup
@@ -44,6 +45,7 @@ var Globals = struct {
 	DocGetDumpMessages:       make(map[string](chan *GetDumpMessage)),
 	DocGetVersionsMessages:   make(map[string](chan *GetVersionsMessage)),
 	DocGetHalfLinkMessages:   make(map[string](chan *GetHalfLinkMessage)),
+	DocNewHalfLinkMessages:   make(map[string](chan *NewHalfLinkMessage)),
 	DocStopContollerMessages: make(map[string](chan interface{})),
 	Controllers:              make(map[string]bool),
 	ContollerGroup:           &sync.WaitGroup{},

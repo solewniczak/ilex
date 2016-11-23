@@ -6,6 +6,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"ilex/ilex"
+	"sort"
 )
 
 type HalfLinkContainer struct {
@@ -30,6 +31,11 @@ func (lc *HalfLinkContainer) Get(linkId string) (ilex.HalfLink, error) {
 
 func (lc *HalfLinkContainer) GetCurrent() []ilex.HalfLink {
 	return lc.Links
+}
+
+func (lc *HalfLinkContainer) AddHalfLink(new *ilex.HalfLink) {
+	lc.Links = append(lc.Links, *new)
+	sort.Sort(*lc)
 }
 
 func isAmongLinks(link *ilex.HalfLink, linkIds []string) bool {
@@ -178,7 +184,7 @@ func updateLink(halfLink *ilex.HalfLink, link *ilex.TwoWayLink) (newHalf, newOth
 	return newHalf, newOtherHalf
 }
 
-func (lc *HalfLinkContainer) Propagate(db *mgo.Database) ([]ilex.HalfLink, []ilex.HalfLink, error) {
+func (lc *HalfLinkContainer) Propagate(db *mgo.Database) ([]ilex.HalfLink, error) {
 	links := db.C(ilex.LINKS)
 	var err error
 	newFullLinks := make([]interface{}, 0)
@@ -189,7 +195,7 @@ func (lc *HalfLinkContainer) Propagate(db *mgo.Database) ([]ilex.HalfLink, []ile
 		var link ilex.TwoWayLink
 		if err := links.Find(
 			bson.M{"_id": halfLink.LinkId}).One(&link); err != nil {
-			return nil, nil, errors.New("LinkContainer could not find link in database: " + err.Error())
+			return nil, errors.New("LinkContainer could not find link in database: " + err.Error())
 		}
 		if !verifyLink(&halfLink, &link) {
 			fmt.Println("WARNING! Links Persisting must have failed - mismatch with database.")
@@ -203,8 +209,8 @@ func (lc *HalfLinkContainer) Propagate(db *mgo.Database) ([]ilex.HalfLink, []ile
 	bulk := links.Bulk()
 	bulk.Insert(newFullLinks...)
 	if _, err = bulk.Run(); err != nil && len(err.(*mgo.BulkError).Cases()) > 0 {
-		return nil, nil, err
+		return nil, err
 	}
 	lc.Links = newHalfLinks
-	return newHalfLinks, otherHalfLinks, nil
+	return otherHalfLinks, nil
 }
