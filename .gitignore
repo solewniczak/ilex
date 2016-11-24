@@ -4,3 +4,6 @@ server/server
 try/try
 *.swp
 *.swo
+
+build/*
+nwbuild/*
