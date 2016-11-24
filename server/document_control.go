@@ -189,6 +189,7 @@ loop:
 			respond(message.WS, response)
 
 		case message := <-subscriptions.NewHalfLinkMessages:
+			//fmt.Println("Received notification about new link")
 			controllerData.LinksContainter.AddHalfLink(&message.HalfLink)
 			controllerData.NotifyClientsNewLink(&message.HalfLink)
 
@@ -228,12 +229,13 @@ func NotifyNeighbourDocuments(newNeigbourLinks []ilex.HalfLink) {
 		fmt.Println("Notifying neighbour documents about their new links")
 	}
 	for _, link := range newNeigbourLinks {
-		text := Text{link.Anchor.DocumentId.Hex(), link.Anchor.VersionNo}
+		docId := link.Anchor.DocumentId.Hex()
+		text := Text{docId, link.Anchor.VersionNo}
 
 		Globals.IsLatestRequests <- &text
 		isLatest := <-Globals.IsLatestResponses
-		if isLatest {
-			Globals.DocNewHalfLinkMessages[link.Anchor.DocumentId.Hex()] <- &NewHalfLinkMessage{link}
+		if isLatest && Globals.Controllers[docId] {
+			Globals.DocNewHalfLinkMessages[docId] <- &NewHalfLinkMessage{link}
 		}
 	}
 }
