@@ -58,6 +58,15 @@ ilex.transclusionsColors = [
   '#232C16', //Dark Olive Green
 ];
 
+//http://stackoverflow.com/questions/31968355/detect-if-web-app-is-running-in-nwjs
+ilex.in_nwjs = function() {
+    try{
+        return (typeof require('nw.gui') !== "undefined");
+    } catch (e) {
+        return false;
+    }
+};
+
 //views represenst user views in application
 ilex.views = {};
 

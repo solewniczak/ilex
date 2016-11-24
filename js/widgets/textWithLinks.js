@@ -189,9 +189,9 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     
   that.setLink = function (link) {
     var linkRange = document.createRange(),
-        start = that.textEditor.textDocument.relPosition(link.from.range.position),
-        end = that.textEditor.textDocument.relPosition(link.from.range.position +
-                                                          link.from.range.length);
+        start = that.textEditor.textDocument.relPosition(link.range.position),
+        end = that.textEditor.textDocument.relPosition(link.range.position +
+                                                          link.range.length);
     
     if (start === false || end === false) {
       return;
@@ -217,8 +217,8 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     });
     that.textEditor.content.on('mouseover', '.'+linkClass, function (event) {
       if (ilex.conf.get('browsing mode') === 1) {
-        var file = ilex.documents.get(link.to.documentId);
-        ilex.view.popupNote.show(file.name + ' | <strong>'+link.to.versionNo+'</strong>');
+        var file = ilex.documents.get(link.documentId);
+        ilex.view.popupNote.show(file.name + ' | <strong>'+link.versionNo+'</strong>');
       }
     });
     that.textEditor.content.on('mouseleave', '.'+linkClass, function (event) {
@@ -324,17 +324,33 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   var textTools = [
     ['standardButton', function() {
         alert('cut');
-      }, 'Cut', '<span class="ilex-awesome">&#xf0c4;</span>'],
+      }, {
+          'text': 'Cut',
+          'icon': '<span class="ilex-awesome">&#xf0c4;</span>',
+          'shortcutLabel': 'Ctrl+X'
+      }],
     ['standardButton', function() {
         alert('jump2');
-      }, 'Copy', '<span class="ilex-awesome">&#xf0c5;</span>'],
+      }, {
+          'text': 'Copy',
+          'icon': '<span class="ilex-awesome">&#xf0c5;</span>',
+          'shortcutLabel': 'Ctrl+C'
+      }],
     ['standardButton', function() {
         alert('jump2');
-      }, 'Paste', '<span class="ilex-awesome">&#xf0ea;</span>'],
+      }, {
+          'text': 'Paste',
+          'icon': '<span class="ilex-awesome">&#xf0ea;</span>',
+          'shortcutLabel': 'Ctrl+V'
+      }],
     ['separator'],
     ['standardButton', function() {
         alert('jump2');
-      }, 'Comment', '<span class="ilex-awesome">&#xf27b;</span>'],
+      }, {
+          'text': 'Comment',
+          'icon': '<span class="ilex-awesome">&#xf27b;</span>',
+          'shortcutLabel': 'Ctrl+Alt+M'
+      }],
   ];
   
   that.textEditor.content.on('contextmenu', '.ilex-textLink', function (event) {
@@ -349,13 +365,16 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
         linkJumps.push([
           'standardButton', function() {
             alert('jump2');
-          }, file.name, '<span class="ilex-awesome">&#xf0c1;</span>'
+          }, {
+            'text': file.name,
+            'icon': '<span class="ilex-awesome">&#xf0c1;</span>'
+          }
         ]);
       }
     }
     
     let menu = linkJumps.concat([['separator']], textTools);
-    ilex.popupMenu.show(event.pageY, event.pageX, menu);
+    ilex.popupMenu.show(event.pageY, event.pageX, menu, 220);
   });
 
   that.textEditor.content.on('contextmenu', 'span:not(.ilex-textLink)',

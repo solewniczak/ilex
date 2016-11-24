@@ -20,8 +20,8 @@ ilex.widgetsCollection.globalTools = function($parent) {
                         
    //main menu
   var modesMenu = ilex.widgetsCollection.selectMenu(that.container, [
-    ['Editing', '<span class="ilex-awesome">&#xF044;</span>'],
-    ['Viewing', '<span class="ilex-awesome">&#xF06E;</span>']
+    {'text': 'Editing', 'icon': '<span class="ilex-awesome">&#xF044;</span>'},
+    {'text': 'Viewing', 'icon': '<span class="ilex-awesome">&#xF06E;</span>'}
   ], function (ind) {
     ilex.conf.set('browsing mode', ind);
   },
