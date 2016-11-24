@@ -24,6 +24,10 @@ ilex.widgetsCollection.textStarter = function (windowObject) {
                         .css('display', 'block')
                         .append($ico);
   
+  that.canLink = function () {
+    return false;
+  };
+  
   //create new document
   that.newDocButton.on('click', function () {
     ilex.tools.mime.createDocument(windowObject, 'plain text');

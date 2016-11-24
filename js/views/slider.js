@@ -26,6 +26,9 @@ ilex.views.slider = function(canvas) {
   view.slider = ilex.widgetsCollection.documentsSlider(view.browser.columns[1],
                                                   ilex.widgetsCollection.textStarter);
   
+  view.sliderFinishLinkButton =
+    ilex.widgetsCollection.sliderFinishLinkButton($('body'), view.slider);
+  
   
   $(document).on('canvasRedraw', function () {
     if (!ilex.conf.get('nelson mode')) {

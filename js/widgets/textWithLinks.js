@@ -186,6 +186,15 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   };
   
   that.textEditor = ilex.widgetsCollection.textEdiotr(that.container);
+  
+  that.canLink = function() {
+    var $selectedSpans = that.textEditor.getSelectedSpans();
+    if ($selectedSpans.length === 0 ||
+        $selectedSpans.hasClass('ilex-textLink')) {
+      return false;
+    }
+    return true;
+  }
     
   that.setLink = function (link) {
     var linkRange = document.createRange(),
