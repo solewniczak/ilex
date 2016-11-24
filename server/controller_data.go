@@ -13,6 +13,7 @@ import (
 const (
 	VERSION_NUMBER_INCREMENTED = "versionNumberIncremented"
 	NEW_LINKS                  = "newLinks"
+	NEW_LINK_ADDED             = "newLinkAdded"
 )
 
 type ControllerData struct {
@@ -91,7 +92,7 @@ func (cd *ControllerData) TryUpdateVersion(database *mgo.Database, root *tree.Ro
 		// save work in progress and start a new version
 		cd.DidEditorJustLeave = false
 		cd.IsEditionFromNewEditor = false
-		var newLinks []ilex.HalfLink
+		var newNeighboursLinks []ilex.HalfLink
 		var err error
 
 		docs := database.C(ilex.DOCS)
@@ -102,7 +103,7 @@ func (cd *ControllerData) TryUpdateVersion(database *mgo.Database, root *tree.Ro
 			cd.Version.No++
 			cd.Version.Created = ilex.CurrentTime()
 			fmt.Println("New version number created for "+cd.DocumentId+": ", cd.Version.No)
-			if newLinks, _, err = cd.LinksContainter.Propagate(database); err != nil {
+			if newNeighboursLinks, err = cd.LinksContainter.Propagate(database); err != nil {
 				fmt.Println("Link propagation failed with error: " + err.Error())
 			}
 			if err = UpdateDocument(docs, &cd.Document, &cd.Version); err != nil {
@@ -122,7 +123,7 @@ func (cd *ControllerData) TryUpdateVersion(database *mgo.Database, root *tree.Ro
 			cd.Version.Id = bson.NewObjectId()
 			cd.Version.No++
 			cd.Version.Created = ilex.CurrentTime()
-			if newLinks, _, err = cd.LinksContainter.Propagate(database); err != nil {
+			if newNeighboursLinks, err = cd.LinksContainter.Propagate(database); err != nil {
 				fmt.Println("Link propagation failed with error: " + err.Error())
 			}
 			if err = UpdateDocument(docs, &cd.Document, &cd.Version); err != nil {
@@ -130,7 +131,8 @@ func (cd *ControllerData) TryUpdateVersion(database *mgo.Database, root *tree.Ro
 			}
 			Globals.DocumentUpdatedMessages <- &DocumentUpdate{cd.DocumentId, cd.Version.No, cd.Version.Name}
 		}
-		cd.NotifyClientsNewVersion(newLinks)
+		cd.NotifyClientsNewVersion(cd.LinksContainter.GetCurrent())
+		NotifyNeighbourDocuments(newNeighboursLinks)
 	}
 }
 
@@ -195,6 +197,17 @@ func (cd *ControllerData) NotifyClientsNewVersion(newLinks []ilex.HalfLink) {
 			n.Notification = VERSION_NUMBER_INCREMENTED
 			n.Parameters[VERSION] = cd.Version.No
 			n.Parameters[NEW_LINKS] = newLinks
+			n.SendTo(client.WS)
+		}
+	}
+}
+
+func (cd *ControllerData) NotifyClientsNewLink(link *ilex.HalfLink) {
+	for client, is_present := range cd.Clients {
+		if is_present {
+			n := NewTabNotification(client.TabId)
+			n.Notification = NEW_LINK_ADDED
+			n.Parameters[VERSION] = ToMap(link)
 			n.SendTo(client.WS)
 		}
 	}
