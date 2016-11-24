@@ -189,9 +189,9 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     
   that.setLink = function (link) {
     var linkRange = document.createRange(),
-        start = that.textEditor.textDocument.relPosition(link.from.range.position),
-        end = that.textEditor.textDocument.relPosition(link.from.range.position +
-                                                          link.from.range.length);
+        start = that.textEditor.textDocument.relPosition(link.range.position),
+        end = that.textEditor.textDocument.relPosition(link.range.position +
+                                                          link.range.length);
     
     if (start === false || end === false) {
       return;
@@ -217,8 +217,8 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     });
     that.textEditor.content.on('mouseover', '.'+linkClass, function (event) {
       if (ilex.conf.get('browsing mode') === 1) {
-        var file = ilex.documents.get(link.to.documentId);
-        ilex.view.popupNote.show(file.name + ' | <strong>'+link.to.versionNo+'</strong>');
+        var file = ilex.documents.get(link.documentId);
+        ilex.view.popupNote.show(file.name + ' | <strong>'+link.versionNo+'</strong>');
       }
     });
     that.textEditor.content.on('mouseleave', '.'+linkClass, function (event) {
