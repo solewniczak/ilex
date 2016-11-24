@@ -19,20 +19,26 @@ ilex.widgetsCollection.globalMenu = function($parent) {
                       .html('<span class="ilex-awesome" style="font-size:20px;">&#xf0c9</span>')
                       .appendTo($parent);
   
-  ilex.popupMenu.buttonBind(that.button,
-        [
+  let mainMenu =  [
           ['toggleButton',
            function (toggle) {
               ilex.conf.set('nelson mode', toggle);
             },
-           'Nelson mode',
+           {'text': 'Nelson mode'},
            function () { return ilex.conf.get('nelson mode'); }
-           ],
-          ['separator'],
-          ['standardButton', function() {
-            window.close();
-          }, 'Exit']
-        ]);
+           ]
+    ];
+  
+  if (ilex.in_nwjs()) {
+    mainMenu.push(
+      ['separator'],
+      ['standardButton', function() {
+          window.close();
+        }, {'text': 'Exit', 'shortcutLabel': 'Ctrl+Shift+Q'}]
+    );
+  }
+  
+  ilex.popupMenu.buttonBind(that.button, mainMenu);
     
   return that;
 }
