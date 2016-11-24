@@ -92,6 +92,22 @@ ilex.tools.server.create = function (host) {
             'linkCreated': function() {}
           });
   };
+	
+  that.linkGetLR = function(halfLink, callback) {
+	  if (halfLink.isLeft) {
+		  var action = 'linkGetRight';
+	  } else {
+		  var action = 'linkGetLeft';
+	  }
+	  that.sendAndRecieve(action, {
+            'linkId': halfLink.linkId
+          },
+          {
+            'linkGetResponse': function(msg) {
+				callback(msg);
+			}
+	  	  });
+  }
   
   that.tabClose = function(tabId) {
     that.sendAndRecieve('tabClose', {

@@ -47,36 +47,58 @@ ilex.views.slider = function(canvas) {
         //windows not ready yet
         return;
       }
-
-      if (typeof leftWindow.contentWidget.getFileInfo === 'function' &&
-          typeof rightWindow.contentWidget.getFileInfo === 'function') {
-        var leftWidget = leftWindow.contentWidget,
-            rightWidget = rightWindow.contentWidget,
-            leftLinks = leftWidget.getLinks();
-        
-        if (leftLinks === null) {
-          //no links in this window
-          continue;
-        }
-        
-        var rightDocumentVersion = rightWidget.getVersion(),
-            rightDocumentId = rightWidget.getFileInfo('id');
-
-        for (let link of leftLinks) {
-          if (drawnLinks.indexOf(link.linkId) === -1 &&
-              link.documentId === rightDocumentId &&
-              link.versionNo === rightDocumentVersion) {
-            var $leftSpans = leftWindow.contentWidget.container.find('span.ilex-linkId-'+link.linkId),
-                $rightSpans = rightWindow.contentWidget.container.find('span.ilex-linkId-'+link.linkId);
+      
+      let leftHalfLinks = leftWindow.contentWidget.getHalfLinks();
+      for (let halfLink of leftHalfLinks) {
+        if (drawnLinks.indexOf(halfLink.linkId) === -1) {
+          var $leftSpans = leftWindow.contentWidget.container
+                            .find('span.ilex-linkId-'+halfLink.linkId),
+              $rightSpans = rightWindow.contentWidget.container
+                            .find('span.ilex-linkId-'+halfLink.linkId);
+          
+            if ($leftSpans.length === 0 || $rightSpans.length === 0) {
+              continue;
+            }
+          
             ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans, ilex.tools.colors.htmlToRgba(ilex.linksColors[colorId], 0.6), true);
             
             ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans, ilex.tools.colors.htmlToRgba(ilex.linksColors[colorId], 0.1), false);
             
             colorId = (colorId + 1) % ilex.linksColors.length;
-            drawnLinks.push(link.linkId);
-          }
+            drawnLinks.push(halfLink.linkId);
         }
       }
+      
+
+//      if (typeof leftWindow.contentWidget.getFileInfo === 'function' &&
+//          typeof rightWindow.contentWidget.getFileInfo === 'function') {
+//        var leftWidget = leftWindow.contentWidget,
+//            rightWidget = rightWindow.contentWidget,
+//            leftLinks = leftWidget.getLinks();
+//        
+//        if (leftLinks === null) {
+//          //no links in this window
+//          continue;
+//        }
+//        
+//        var rightDocumentVersion = rightWidget.getVersion(),
+//            rightDocumentId = rightWidget.getFileInfo('id');
+//
+//        for (let link of leftLinks) {
+//          if (drawnLinks.indexOf(link.linkId) === -1 &&
+//              link.documentId === rightDocumentId &&
+//              link.versionNo === rightDocumentVersion) {
+//            var $leftSpans = leftWindow.contentWidget.container.find('span.ilex-linkId-'+link.linkId),
+//                $rightSpans = rightWindow.contentWidget.container.find('span.ilex-linkId-'+link.linkId);
+//            ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans, ilex.tools.colors.htmlToRgba(ilex.linksColors[colorId], 0.6), true);
+//            
+//            ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans, ilex.tools.colors.htmlToRgba(ilex.linksColors[colorId], 0.1), false);
+//            
+//            colorId = (colorId + 1) % ilex.linksColors.length;
+//            drawnLinks.push(link.linkId);
+//          }
+//        }
+//      }
     }
 
   });

@@ -584,23 +584,41 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     }
   };
   
-  $(document).on('ilex-linkClicked', function(event, windowObject, link) {
-    var getWindowDocumentId = function(windowObject) {
-      if (windowObject !== undefined &&
-          windowObject.contentWidget !== undefined &&
-          typeof windowObject.contentWidget.getFileInfo === 'function') {
-        return windowObject.contentWidget.getFileInfo('id');
-      }
-      return null;
-    };
-    var loadAndScroll = function(win, documentId, version, callback) {
-      if (getWindowDocumentId(win) === documentId) {
-        win.contentWidget.loadVersion(version, callback);
-      } else {
-        win.closeDocument();
-        ilex.tools.mime.loadDocument(win, documentId, version, callback);
-      }
-    };
+  $(document).on('ilex-linkClicked', function(event, windowObject, halfLink) {
+    
+    ilex.server.linkGetLR(halfLink, function (msg) {
+      let newWindow = that.createWindow();
+      that.addWindowAfter(newWindow, windowObject.getInd());
+      ilex.tools.mime.loadDocument(newWindow,
+                                   msg.anchor.DocumentId,
+                                   msg.anchor.VersionNo, function () {
+        $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
+      });
+    });
+    
+//    var getWindowDocumentId = function(windowObject) {
+//      if (windowObject !== undefined &&
+//          windowObject.contentWidget !== undefined &&
+//          typeof windowObject.contentWidget.getFileInfo === 'function') {
+//        return windowObject.contentWidget.getFileInfo('id');
+//      }
+//      return null;
+//    };
+//    var loadAndScroll = function(win, documentId, version, callback) {
+//      if (getWindowDocumentId(win) === documentId) {
+//        win.contentWidget.loadVersion(version, callback);
+//      } else {
+//        win.closeDocument();
+//        ilex.tools.mime.loadDocument(win, documentId, version, callback);
+//      }
+//    };
+//    let newWindow = that.createWindow();
+//    that.addWindowAfter(newWindow, windowObject.getInd());
+//
+//    loadAndScroll(newWindow,
+//      haflLink.DocumentId,
+//      haflLink.versionNo);
+    
 //    var closeWindowsAfter = function (windowObj) {
 //      if (windowObj === undefined) {
 //        return;
