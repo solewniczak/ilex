@@ -545,8 +545,25 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     }
   };
   
-  var selectionRange = document.createRange();
-  
+  that.selectionRange = function () {
+    var range = document.createRange();
+    return {
+      'clear': function () {
+        range = document.createRange();
+        $(document).trigger('canvasRedraw');
+        $(document).trigger('ilex-textEditor-selectionchange');
+      },
+      'update': function (r) {
+        range = r;
+        $(document).trigger('canvasRedraw');
+        $(document).trigger('ilex-textEditor-selectionchange');   
+      },
+      'get': function () {
+        return range;
+      }
+    };
+  }();
+    
   var getSingleSpanSpans = function(span, relStart, relEnd) {
     var line = span.parentElement;
     //II.9
@@ -641,10 +658,50 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
   
   //Returns spans that covers selection or create new ones if needed
   that.getSelectionSpans = function () {
-    return that.getRangeSpans(selectionRange);
+    return that.getRangeSpans(that.selectionRange.get());
+  };
+  
+  var getRangeSelectedSpans = function (range) {
+    if (range.collapsed === true) {
+      return $();
+    }
+    var startSpan = range.startContainer.parentElement,
+        startLine = startSpan.parentElement,
+        endSpan =  range.endContainer.parentElement,
+        endLine = endSpan.parentElement;
+    
+    var $spans = $(startSpan);
+    if (startSpan === endSpan) {
+      return $spans;
+    } else if (startLine === endLine) {
+      $spans = $spans.add($(startSpan).nextUntil(endSpan));
+      $spans = $spans.add(endSpan);
+    } else {
+      $spans = $spans.add($(startSpan).nextAll());
+      let line = startLine.nextElementSibling;
+      while (line !== endLine) {
+        $spans = $spans.add($(line).children());
+        line = line.nextElementSibling;
+      }
+      
+      let span = endLine.firstElementChild;
+      while (span !== endSpan) {
+        $spans = $spans.add(span);
+        span = span.nextElementSibling;
+      }
+      $spans = $spans.add(endSpan);
+      
+    }
+    return $spans;
+  }
+  //Returns spans that covers selection - only check, do NOT create
+  that.getSelectedSpans = function () {
+    return getRangeSelectedSpans(that.selectionRange.get());
   };
   
   that.setContent = function (text) {
+    //clear selection
+    that.selectionRange.clear();
     //clean content
     that.content.html('');
     
@@ -736,23 +793,26 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
       cursor.position = info.focus.position;
     };
     var removeSelectedText = function () {
-      if (selectionRange.collapsed === false) {
-        let $startSpan = $(selectionRange.startContainer.parentElement),
-            $endSpan = $(selectionRange.endContainer.parentElement);
+      if (that.selectionRange.get().collapsed === false) {
+        let $startSpan = $(that.selectionRange.get().startContainer.parentElement),
+            $endSpan = $(that.selectionRange.get().endContainer.parentElement);
 
-        let info = that.textDocument.removeText($startSpan, selectionRange.startOffset,
-                                    $endSpan, selectionRange.endOffset);
+        let info = that.textDocument.removeText(
+                                    $startSpan,
+                                    that.selectionRange.get().startOffset,
+                                    $endSpan,
+                                    that.selectionRange.get().endOffset);
         
         cursor.setSpan(info.focus.span);
         cursor.position = info.focus.position;
         
         //remove selection
-        selectionRange = document.createRange();
+        that.selectionRange.clear();
       }
     };
     
     //Delete selection
-    if (selectionRange.collapsed === false &&
+    if (that.selectionRange.get().collapsed === false &&
         (event.key === 'Backspace' || event.key === 'Delete')) {
       removeSelectedText();
     } else if (event.key === 'Backspace') {
@@ -784,6 +844,21 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     event.preventDefault();
   });
   
+  //start and end container are always span texts.
+  var normalizeRange = function (range) {
+    var hasSpanParent = function (node) {
+      return node.parentNode && node.parentNode.nodeName === 'SPAN';
+    };
+
+    //we have selected line <div>
+    if (!hasSpanParent(range.startContainer)) {
+        range.setStart(
+          range.startContainer.childNodes[range.startOffset].childNodes[0], 0);
+    }
+    
+    return range;
+  };
+  
   //draw selection
   $(document).on('selectionchange.ilex.text', function(event) {
     var selection = window.getSelection(),
@@ -791,11 +866,10 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     if (active.length > 0 && selection.rangeCount >= 1) {
       $('.ilex-content').each(function () {
         if ($(this).is(that.content) && $(this).is(active)) {
-          selectionRange = ilex.tools.range.normalize(selection.getRangeAt(0));
+          that.selectionRange.update(normalizeRange(selection.getRangeAt(0)));
         }
       });
     }
-    $(document).trigger('canvasRedraw');
   });
   
   that.container.on('windowResize', function(event) {
@@ -848,9 +922,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
                                             that.container.data('ilex-height'));
 
     //create new range only when previously created is not collapsed
-    selectionRange = document.createRange();
-
-    $(document).trigger('canvasRedraw');
+    that.selectionRange.clear();
   });
 
   $(document).on('canvasRedraw', function(event) {
@@ -861,7 +933,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
                                             that.content.data('ilex-width'),
                                             that.content.data('ilex-height'));
 
-    var rects = ilex.tools.range.getClientRects(selectionRange, that),
+    var rects = ilex.tools.range.getClientRects(that.selectionRange.get(), that),
         clientRects = ilex.canvas.clipClientRectList(clipRect, rects);
 
     for (let i = 0; i < clientRects.length; i++) {
