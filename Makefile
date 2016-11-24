@@ -1,6 +1,11 @@
 BIN=server/server dbtool/dbtool
 
-all: $(BIN)
+all: deps $(BIN)
+
+deps:
+	go get golang.org/x/net/websocket
+	go get gopkg.in/mgo.v2
+	go get github.com/fatih/structs
 
 $(BIN):
 	cd $(shell dirname "$@"); go build -o $(shell basename "$@")
@@ -8,4 +13,4 @@ $(BIN):
 clean:
 	rm $(BIN)
   
-.PHONY: all clean
+.PHONY: all deps clean
