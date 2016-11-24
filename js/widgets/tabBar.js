@@ -129,18 +129,18 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
       ilex.popupMenu.show(event.pageY, event.pageX,  [
         ['standardButton', function() {
             $(document).trigger('ilex-slider-goToNewDocumentTab');
-          }, 'New tab'],
+          }, {'text': 'New tab', 'shortcutLabel': 'Ctrl+T'}],
         ['separator'],
         ['standardButton', function() {
            closeTabAndDocument();
-          }, 'Close tab'],
+          }, {'text': 'Close tab', 'shortcutLabel': 'Ctrl+W'}],
         ['standardButton', function() {
             alert('Close other tabs');
-          }, 'Close other tabs'],
+          }, {'text': 'Close other tabs'}],
         ['standardButton', function() {
             alert('Close tabs to the right');
-          }, 'Close tabs to the right'],
-      ]);
+          }, {'text': 'Close tabs to the right'}],
+      ], 220);
     });
     
     $tab.on('mousedown', function (event) {
@@ -284,7 +284,6 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
       height = that.container.parent().data('ilex-height');
     
     that.container.data('ilex-width', width).data('ilex-height', height);
-    setTabsLeft(false);
   });
   
   return that;
