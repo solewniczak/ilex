@@ -86,58 +86,58 @@ func fill_database(database *mgo.Database) {
 		log.Fatal(err)
 	}
 
-	var linkIds []bson.ObjectId
+	var lineages []bson.ObjectId
 	for i := 0; i < 7; i++ {
-		linkIds = append(linkIds, bson.NewObjectId())
+		lineages = append(lineages, bson.NewObjectId())
 	}
 
-	// pair documents with links and assign linkIds
+	// pair documents with links and assign lineages
 	// (this is a hardcoded mapping)
-	sample_links[0].From.DocumentId = sample_docs[0].Id
-	sample_links[0].To.DocumentId = sample_docs[3].Id
-	sample_links[0].LinkId = linkIds[0]
-	sample_links[1].From.DocumentId = sample_docs[1].Id
-	sample_links[1].To.DocumentId = sample_docs[3].Id
-	sample_links[1].LinkId = linkIds[1]
-	sample_links[2].From.DocumentId = sample_docs[1].Id
-	sample_links[2].To.DocumentId = sample_docs[3].Id
-	sample_links[2].LinkId = linkIds[1]
-	sample_links[3].From.DocumentId = sample_docs[3].Id
-	sample_links[3].To.DocumentId = sample_docs[4].Id
-	sample_links[3].LinkId = linkIds[2]
-	sample_links[4].From.DocumentId = sample_docs[3].Id
-	sample_links[4].To.DocumentId = sample_docs[4].Id
-	sample_links[4].LinkId = linkIds[2]
-	sample_links[5].From.DocumentId = sample_docs[3].Id
-	sample_links[5].To.DocumentId = sample_docs[4].Id
-	sample_links[5].LinkId = linkIds[2]
-	sample_links[6].From.DocumentId = sample_docs[3].Id
-	sample_links[6].To.DocumentId = sample_docs[4].Id
-	sample_links[6].LinkId = linkIds[2]
-	sample_links[7].From.DocumentId = sample_docs[3].Id
-	sample_links[7].To.DocumentId = sample_docs[4].Id
-	sample_links[7].LinkId = linkIds[3]
-	sample_links[8].From.DocumentId = sample_docs[3].Id
-	sample_links[8].To.DocumentId = sample_docs[4].Id
-	sample_links[8].LinkId = linkIds[3]
-	sample_links[9].From.DocumentId = sample_docs[3].Id
-	sample_links[9].To.DocumentId = sample_docs[4].Id
-	sample_links[9].LinkId = linkIds[3]
-	sample_links[10].From.DocumentId = sample_docs[3].Id
-	sample_links[10].To.DocumentId = sample_docs[4].Id
-	sample_links[10].LinkId = linkIds[3]
-	sample_links[11].From.DocumentId = sample_docs[4].Id
-	sample_links[11].To.DocumentId = sample_docs[2].Id
-	sample_links[11].LinkId = linkIds[4]
-	sample_links[12].From.DocumentId = sample_docs[4].Id
-	sample_links[12].To.DocumentId = sample_docs[2].Id
-	sample_links[12].LinkId = linkIds[4]
-	sample_links[13].From.DocumentId = sample_docs[3].Id
-	sample_links[13].To.DocumentId = sample_docs[2].Id
-	sample_links[13].LinkId = linkIds[5]
-	sample_links[14].From.DocumentId = sample_docs[0].Id
-	sample_links[14].To.DocumentId = sample_docs[4].Id
-	sample_links[14].LinkId = linkIds[6]
+	sample_links[0].Left.DocumentId = sample_docs[0].Id
+	sample_links[0].Right.DocumentId = sample_docs[3].Id
+	sample_links[0].Lineage = lineages[0]
+	sample_links[1].Left.DocumentId = sample_docs[1].Id
+	sample_links[1].Right.DocumentId = sample_docs[3].Id
+	sample_links[1].Lineage = lineages[1]
+	sample_links[2].Left.DocumentId = sample_docs[1].Id
+	sample_links[2].Right.DocumentId = sample_docs[3].Id
+	sample_links[2].Lineage = lineages[1]
+	sample_links[3].Left.DocumentId = sample_docs[3].Id
+	sample_links[3].Right.DocumentId = sample_docs[4].Id
+	sample_links[3].Lineage = lineages[2]
+	sample_links[4].Left.DocumentId = sample_docs[3].Id
+	sample_links[4].Right.DocumentId = sample_docs[4].Id
+	sample_links[4].Lineage = lineages[2]
+	sample_links[5].Left.DocumentId = sample_docs[3].Id
+	sample_links[5].Right.DocumentId = sample_docs[4].Id
+	sample_links[5].Lineage = lineages[2]
+	sample_links[6].Left.DocumentId = sample_docs[3].Id
+	sample_links[6].Right.DocumentId = sample_docs[4].Id
+	sample_links[6].Lineage = lineages[2]
+	sample_links[7].Left.DocumentId = sample_docs[3].Id
+	sample_links[7].Right.DocumentId = sample_docs[4].Id
+	sample_links[7].Lineage = lineages[3]
+	sample_links[8].Left.DocumentId = sample_docs[3].Id
+	sample_links[8].Right.DocumentId = sample_docs[4].Id
+	sample_links[8].Lineage = lineages[3]
+	sample_links[9].Left.DocumentId = sample_docs[3].Id
+	sample_links[9].Right.DocumentId = sample_docs[4].Id
+	sample_links[9].Lineage = lineages[3]
+	sample_links[10].Left.DocumentId = sample_docs[3].Id
+	sample_links[10].Right.DocumentId = sample_docs[4].Id
+	sample_links[10].Lineage = lineages[3]
+	sample_links[11].Left.DocumentId = sample_docs[4].Id
+	sample_links[11].Right.DocumentId = sample_docs[2].Id
+	sample_links[11].Lineage = lineages[4]
+	sample_links[12].Left.DocumentId = sample_docs[4].Id
+	sample_links[12].Right.DocumentId = sample_docs[2].Id
+	sample_links[12].Lineage = lineages[4]
+	sample_links[13].Left.DocumentId = sample_docs[3].Id
+	sample_links[13].Right.DocumentId = sample_docs[2].Id
+	sample_links[13].Lineage = lineages[5]
+	sample_links[14].Left.DocumentId = sample_docs[0].Id
+	sample_links[14].Right.DocumentId = sample_docs[4].Id
+	sample_links[14].Lineage = lineages[6]
 
 	for _, link := range sample_links {
 		if err = links.Insert(link); err != nil {

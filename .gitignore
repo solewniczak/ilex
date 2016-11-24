@@ -1,4 +1,6 @@
 tags
 dbtool/dbtool
 server/server
+try/try
 *.swp
+*.swo

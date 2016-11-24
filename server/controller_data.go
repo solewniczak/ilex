@@ -1,21 +1,25 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"ilex/ilex"
+	"ilex/lc.v1"
 	"ilex/tree.v1"
 )
 
 const (
 	VERSION_NUMBER_INCREMENTED = "versionNumberIncremented"
+	NEW_LINKS                  = "newLinks"
 )
 
 type ControllerData struct {
 	Document               ilex.Document
 	DocumentId             string
 	Version                ilex.Version
+	LinksContainter        lc.LinkContainer
 	Clients                map[ClientTab]bool
 	TotalClients           int
 	Editors                map[ClientTab]bool
@@ -40,7 +44,13 @@ func (cd *ControllerData) GetDocumentData(database *mgo.Database) error {
 	if err := docs.Find(bson.M{"_id": bson.ObjectIdHex(cd.DocumentId)}).One(&cd.Document); err != nil {
 		return err
 	}
-	return GetLatestVersion(database, &cd.Document, &cd.Version)
+	if err := GetLatestVersion(database, &cd.Document, &cd.Version); err != nil {
+		return err
+	}
+	if cd.LinksContainter = lc.NewLinkContainer(&cd.Document.Id, cd.Version.No, database); cd.LinksContainter == nil {
+		return errors.New("Could not create links container")
+	}
+	return nil
 }
 
 func (cd *ControllerData) RegisterNewClientTab(clientTab *ClientTab) {
@@ -81,6 +91,8 @@ func (cd *ControllerData) TryUpdateVersion(database *mgo.Database, root *tree.Ro
 		// save work in progress and start a new version
 		cd.DidEditorJustLeave = false
 		cd.IsEditionFromNewEditor = false
+		var newLinks []ilex.HalfLink
+		var err error
 
 		docs := database.C(ilex.DOCS)
 		if cd.IsFirstEdition {
@@ -90,26 +102,35 @@ func (cd *ControllerData) TryUpdateVersion(database *mgo.Database, root *tree.Ro
 			cd.Version.No++
 			cd.Version.Created = ilex.CurrentTime()
 			fmt.Println("New version number created for "+cd.DocumentId+": ", cd.Version.No)
-			if err := UpdateDocument(docs, &cd.Document, &cd.Version); err != nil {
+			if newLinks, _, err = cd.LinksContainter.Propagate(database); err != nil {
+				fmt.Println("Link propagation failed with error: " + err.Error())
+			}
+			if err = UpdateDocument(docs, &cd.Document, &cd.Version); err != nil {
 				fmt.Println("Could not update document: " + err.Error())
 			}
 			Globals.DocumentUpdatedMessages <- &DocumentUpdate{cd.DocumentId, cd.Version.No, cd.Version.Name}
 		} else {
 			cd.Version.Finished = ilex.CurrentTime()
 			// save current work in progress and start a new version
-			if err := tree.PersistTree(root, &cd.Version); err != nil {
-				fmt.Println("Could not save changes: " + err.Error() + ". Database may be corrupted!")
+			if err = cd.LinksContainter.Persist(database); err != nil {
+				fmt.Println("Could not save links: " + err.Error() + ". Database may be corrupted!")
+			}
+			if err = tree.PersistTree(root, &cd.Version); err != nil {
+				fmt.Println("Could not save editions: " + err.Error() + ". Database may be corrupted!")
 			}
 			cd.HasUnsavedChanges = false
 			cd.Version.Id = bson.NewObjectId()
 			cd.Version.No++
 			cd.Version.Created = ilex.CurrentTime()
-			if err := UpdateDocument(docs, &cd.Document, &cd.Version); err != nil {
+			if newLinks, _, err = cd.LinksContainter.Propagate(database); err != nil {
+				fmt.Println("Link propagation failed with error: " + err.Error())
+			}
+			if err = UpdateDocument(docs, &cd.Document, &cd.Version); err != nil {
 				fmt.Println("Could not update document: " + err.Error())
 			}
 			Globals.DocumentUpdatedMessages <- &DocumentUpdate{cd.DocumentId, cd.Version.No, cd.Version.Name}
 		}
-		cd.NotifyClientsNewVersion()
+		cd.NotifyClientsNewVersion(newLinks)
 	}
 }
 
@@ -118,8 +139,11 @@ func (cd *ControllerData) TryFinalUpdate(database *mgo.Database, root *tree.Root
 	if cd.HasUnsavedChanges {
 		cd.Version.Finished = ilex.CurrentTime()
 		// save current work in progress
+		if err := cd.LinksContainter.Persist(database); err != nil {
+			fmt.Println("Could not save links: " + err.Error() + ". Database may be corrupted!")
+		}
 		if err := tree.PersistTree(root, &cd.Version); err != nil {
-			fmt.Println("Could not save changes: " + err.Error() + ". Database may be corrupted!")
+			fmt.Println("Could not save editions: " + err.Error() + ". Database may be corrupted!")
 		}
 		if err := UpdateDocument(docs, &cd.Document, &cd.Version); err != nil {
 			fmt.Println("Could not update document: " + err.Error())
@@ -135,6 +159,7 @@ func (cd *ControllerData) NotifyClientsAddText(message *AddTextMessage) {
 			n.Parameters[POSITION] = message.Position
 			n.Parameters[STRING] = message.String
 			n.Parameters[LENGTH] = message.Length
+			n.Parameters[LINK_IDS] = message.LinkIds
 			n.SendTo(client.WS)
 		}
 	}
@@ -163,12 +188,13 @@ func (cd *ControllerData) NotifyClientsNameChange(message *ChangeNameMessage) {
 	}
 }
 
-func (cd *ControllerData) NotifyClientsNewVersion() {
+func (cd *ControllerData) NotifyClientsNewVersion(newLinks []ilex.HalfLink) {
 	for client, is_present := range cd.Clients {
 		if is_present {
 			n := NewTabNotification(client.TabId)
 			n.Notification = VERSION_NUMBER_INCREMENTED
 			n.Parameters[VERSION] = cd.Version.No
+			n.Parameters[NEW_LINKS] = newLinks
 			n.SendTo(client.WS)
 		}
 	}

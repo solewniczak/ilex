@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"github.com/fatih/structs"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"ilex/ilex"
@@ -32,28 +33,6 @@ func UpdateDocument(docs *mgo.Collection, doc *ilex.Document, version *ilex.Vers
 		doc.Modified = version.Created
 	}
 	return docs.UpdateId(doc.Id, bson.M{"$set": bson.M{"Modified": doc.Modified, "TotalVersions": version.No}})
-}
-
-func GetLinksForDoc(database *mgo.Database, documentId *bson.ObjectId, version int) (error, []ilex.TwoWayLink) {
-	links := database.C(LINKS)
-	var linksToDoc []ilex.TwoWayLink
-	var linksFromDoc []ilex.TwoWayLink
-	//	pointsHere := bson.M{"DocumentId": *documentId, "VersionNo": version}
-	if err := links.Find(
-		bson.M{"From.DocumentId": *documentId, "From.VersionNo": version},
-	).All(&linksFromDoc); err != nil {
-		return nil, nil
-	}
-	if err := links.Find(
-		bson.M{"To.DocumentId": *documentId, "To.VersionNo": version},
-	).All(&linksToDoc); err != nil {
-		return nil, nil
-	}
-	for i, _ := range linksToDoc {
-		linksToDoc[i].Reverse()
-	}
-	linksFromDoc = append(linksFromDoc, linksToDoc...)
-	return nil, linksFromDoc
 }
 
 func CreateNewDocument(docs *mgo.Collection, message *NewDocumentRequest) (error, *ilex.Document) {
@@ -94,4 +73,13 @@ func CreateFirstVersion(database *mgo.Database, doc *ilex.Document, message *New
 func LowerFirst(s string) string {
 	r, n := utf8.DecodeRuneInString(s)
 	return string(unicode.ToLower(r)) + s[n:]
+}
+
+func ToMap(value interface{}) map[string]interface{} {
+	resp := make(map[string]interface{})
+	upper := structs.Map(value)
+	for _, name := range structs.Names(value) {
+		resp[LowerFirst(name)] = upper[name]
+	}
+	return resp
 }

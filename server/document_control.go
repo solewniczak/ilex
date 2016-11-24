@@ -13,6 +13,7 @@ type AddTextMessage struct {
 	Position int
 	Length   int
 	String   string
+	LinkIds  []string
 }
 
 type RemoveTextMessage struct {
@@ -33,6 +34,12 @@ type GetDumpMessage struct {
 }
 
 type GetVersionsMessage struct {
+	WS        *websocket.Conn
+	RequestId int
+}
+
+type GetHalfLinkMessage struct {
+	LinkId    string
 	WS        *websocket.Conn
 	RequestId int
 }
@@ -74,6 +81,10 @@ loop:
 			controllerData.CheckForNewEditor(&message.Client)
 			controllerData.TryUpdateVersion(database, root)
 
+			if err = controllerData.LinksContainter.AddRunes(message.Position+1, message.Length, message.LinkIds); err != nil {
+				fmt.Println("Adding text failed because of link container error:", err.Error())
+				continue
+			}
 			i := 0
 			for _, char := range message.String {
 				root.AddRune(char, message.Position+i+1)
@@ -82,8 +93,8 @@ loop:
 			}
 			controllerData.HasUnsavedChanges = true
 			controllerData.NotifyClientsAddText(message)
-			root.Print(0)
-			fmt.Println(tree.GetTreeDump(root))
+			//root.Print(0)
+			//fmt.Println(tree.GetTreeDump(root))
 
 		case message := <-subscriptions.RemoveTextMessages:
 			fmt.Println("text removed", *message)
@@ -94,10 +105,11 @@ loop:
 				root.RemoveRune(message.Position)
 				controllerData.Version.Size--
 			}
+			controllerData.LinksContainter.RemoveRunes(message.Position, message.Length)
 			controllerData.HasUnsavedChanges = true
 			controllerData.NotifyClientsRemoveText(message)
-			root.Print(0)
-			fmt.Println(tree.GetTreeDump(root))
+			//root.Print(0)
+			//fmt.Println(tree.GetTreeDump(root))
 
 		case message := <-subscriptions.ChangeNameMessages:
 			fmt.Println("name changed", *message)
@@ -131,13 +143,13 @@ loop:
 				break
 			}
 
-			err, doc_links := GetLinksForDoc(database, &controllerData.Document.Id, controllerData.Version.No)
-			if err != nil {
-				fmt.Println(err.Error())
-				break
-			}
+			//err, doc_links := ilex.GetLinksForDoc(database, &controllerData.Document.Id, controllerData.Version.No)
+			//if err != nil {
+			//	fmt.Println(err.Error())
+			//	break
+			//}
 			response.Parameters[TAB] = message.Client.TabId
-			response.Parameters[LINKS] = doc_links
+			response.Parameters[LINKS] = controllerData.LinksContainter.GetCurrent()
 			response.Parameters[IS_EDITABLE] = true
 			response.Parameters[NAME] = controllerData.Version.Name
 			response.Parameters[ID] = documentId
@@ -157,6 +169,19 @@ loop:
 				versions = append(versions, controllerData.Version)
 			}
 			response.Parameters[VERSIONS] = versions
+			respond(message.WS, response)
+
+		case message := <-subscriptions.GetHalfLinkMessages:
+			response := NewIlexMessage()
+			response.Id = message.RequestId
+
+			halfLink, err := controllerData.LinksContainter.Get(message.LinkId)
+			if err != nil {
+				fmt.Println("Could not find link " + err.Error())
+				break
+			}
+			response.Action = LINK_GET_RESPONSE
+			response.Parameters = ToMap(halfLink)
 			respond(message.WS, response)
 
 		case <-subscriptions.StopControllerMessages:
