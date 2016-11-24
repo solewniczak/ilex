@@ -1,0 +1,10 @@
+[
+{"action":"getAllDocumentsInfo","parameters":{},"id":0},
+
+{"action":"documentGetDump","parameters":{"tab":0,"text":"5831d076cb6ab3549f0f7326","version":1},"id":1},
+
+{"action":"documentRemoveText","parameters":{"document":"5831d076cb6ab3549f0f7326","length":1,"position":355,"tab":0},"id":5},
+
+{"action":"tabClose","parameters":{"tab":0},"id":4}
+
+]

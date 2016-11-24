@@ -7,6 +7,7 @@ type ControllerSubscriptions struct {
 	TabControlMessages     chan *ClientTabMessage
 	DocDumpMessages        chan *GetDumpMessage
 	GetVersionsMessages    chan *GetVersionsMessage
+	GetHalfLinkMessages    chan *GetHalfLinkMessage
 	StopControllerMessages chan interface{}
 }
 
@@ -18,6 +19,7 @@ func NewControllerSubscriptions() *ControllerSubscriptions {
 		make(chan *ClientTabMessage),
 		make(chan *GetDumpMessage),
 		make(chan *GetVersionsMessage),
+		make(chan *GetHalfLinkMessage),
 		make(chan interface{}),
 	}
 }
@@ -29,6 +31,7 @@ func (s *ControllerSubscriptions) Subscribe(documentId string) {
 	Globals.DocTabControlMessages[documentId] = s.TabControlMessages
 	Globals.DocGetDumpMessages[documentId] = s.DocDumpMessages
 	Globals.DocGetVersionsMessages[documentId] = s.GetVersionsMessages
+	Globals.DocGetHalfLinkMessages[documentId] = s.GetHalfLinkMessages
 	Globals.DocStopContollerMessages[documentId] = s.StopControllerMessages
 }
 
@@ -40,5 +43,6 @@ func (s *ControllerSubscriptions) Close() {
 	close(s.TabControlMessages)
 	close(s.DocDumpMessages)
 	close(s.GetVersionsMessages)
+	close(s.GetHalfLinkMessages)
 	close(s.StopControllerMessages)
 }

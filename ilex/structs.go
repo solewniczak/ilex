@@ -38,16 +38,25 @@ type Range struct {
 	Length   int `bson:"Length"        json:"length"`
 }
 
-type HalfLink struct {
+type Anchor struct {
 	DocumentId bson.ObjectId `bson:"DocumentId" json:"documentId"`
 	VersionNo  int           `bson:"VersionNo"  json:"versionNo"`
 	Range      Range         `bson:"Range"      json:"range"`
+	Type       string        `bson:"Type"       json:"type"`
 }
 
+// a TwoWayLink consists of two Anchors
 type TwoWayLink struct {
-	Id     bson.ObjectId `bson:"_id,omitempty" json:"id"`
-	LinkId bson.ObjectId `bson:"LinkId"        json:"linkId"`
-	From   HalfLink      `bson:"From"          json:"from"`
-	To     HalfLink      `bson:"To"            json:"to"`
-	Type   string        `bson:"Type"          json:"type"`
+	Id      bson.ObjectId `bson:"_id,omitempty" json:"id"`
+	Lineage bson.ObjectId `bson:"Lineage"        json:"lineage"`
+	Left    Anchor        `bson:"Left"          json:"left"`
+	Right   Anchor        `bson:"Right"         json:"right"`
+}
+
+// A HalfLink is a standalone Anchor
+type HalfLink struct {
+	Anchor
+	LinkId  bson.ObjectId `json:"linkId"`
+	Lineage bson.ObjectId `json:"lineage"`
+	IsLeft  bool          `json:"isLeft"`
 }

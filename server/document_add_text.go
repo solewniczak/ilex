@@ -11,6 +11,7 @@ const (
 	LENGTH            = "length"
 	STRING            = "string"
 	DOCUMENT          = "document"
+	LINK_IDS          = "linkIds"
 	NAK               = "nak"
 )
 
@@ -37,6 +38,19 @@ func documentAddText(request *IlexMessage, ws *websocket.Conn) error {
 		return respond_with_nak(ws, response, "No string supplied!")
 	}
 
+	linksArray, ok := request.Parameters[LINK_IDS].([]interface{})
+	if !ok {
+		return respond_with_nak(ws, response, "LinkIds are supplied or are not an array!")
+	}
+	linkIds := make([]string, 0, len(linksArray))
+	for _, link := range linksArray {
+		linkAsString, ok := link.(string)
+		if !ok {
+			return respond_with_nak(ws, response, "LinkIds in array should be strings!")
+		}
+		linkIds = append(linkIds, linkAsString)
+	}
+
 	client_tab_id := int(client_tab_float)
 	client := ClientTab{ws, client_tab_id}
 	position := int(position_float)
@@ -51,7 +65,7 @@ func documentAddText(request *IlexMessage, ws *websocket.Conn) error {
 		return respond_with_nak(ws, response, "The tab did not have any document opened!")
 	}
 
-	Globals.DocAddTextMessages[text.Document] <- &AddTextMessage{client, position, length, addedText}
+	Globals.DocAddTextMessages[text.Document] <- &AddTextMessage{client, position, length, addedText, linkIds}
 	response.Action = ACK
 
 	return respond(ws, response)

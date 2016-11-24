@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"golang.org/x/net/websocket"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -43,9 +44,15 @@ func ActionServer(ws *websocket.Conn) {
 		err := websocket.JSON.Receive(ws, &request)
 
 		if err != nil {
-			log.Print(err)
-			DisconnectClient(ws)
-			break
+			if err == io.EOF {
+				DisconnectClient(ws)
+				break
+			} else {
+				log.Print("Websocket reading error: ", err)
+				response := IlexMessage{"Invalid JSON message", map[string]interface{}{"error": err.Error()}, -1}
+				respond(ws, &response)
+
+			}
 		} else {
 			js, _ := json.Marshal(request)
 			fmt.Println("received request: ", string(js))
