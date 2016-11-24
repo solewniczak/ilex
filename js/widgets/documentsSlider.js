@@ -502,11 +502,13 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     $(document).trigger('ilex-slider-viewChanged',
                         [that.windowPointer, that.visibleWindows.get()]);
     
+    $(document).trigger('ilex-slider-slidingStarted');
     that.table.animate({'left': slide}, {
       'progress': function () {
         $(document).trigger('canvasRedraw');
       },
       'done': function () {
+        $(document).trigger('ilex-slider-slidingFinished');
         if (callback) {
           callback();
         }
@@ -551,11 +553,13 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     $(document).trigger('ilex-slider-viewChanged',
                         [that.windowPointer, that.visibleWindows.get()]);
     
+    $(document).trigger('ilex-slider-slidingStarted');
     that.table.animate({'left': slide}, {
       'progress': function () {
         $(document).trigger('canvasRedraw');
       },
       'done': function () {
+        $(document).trigger('ilex-slider-slidingFinished');
         if (callback) {
           callback();
         }
@@ -824,7 +828,10 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
          }
       }
       that.visibleWindows.inc();
-      ilex.applySize(true);
+      $(document).trigger('ilex-slider-slidingStarted');
+      ilex.applySize(true, false, '*', function () {
+        $(document).trigger('ilex-slider-slidingFinished');
+      });
      }
    },
    //remove
@@ -835,7 +842,10 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       }
   
       that.visibleWindows.dec();
-      ilex.applySize(true);
+      $(document).trigger('ilex-slider-slidingStarted');
+      ilex.applySize(true, false, '*', function () {
+        $(document).trigger('ilex-slider-slidingFinished');
+      });
     }
   }
   ]);

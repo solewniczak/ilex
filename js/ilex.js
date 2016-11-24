@@ -184,10 +184,11 @@ $(document).on('ilex-newVersionAvailable', function (event, data) {
 
 
 //apply sizes to elements
-ilex.applySize = function(animateWidth, animateHeight, selector) {
+ilex.applySize = function(animateWidth, animateHeight, selector, callback) {
   animateWidth = animateWidth || false;
   animateHeight = animateHeight || false;
   selector = selector || '*';
+  callback = callback || function () {};
   
   $.when($('.ilex-resize').trigger('windowResize'))
   .done(function () {
@@ -198,7 +199,8 @@ ilex.applySize = function(animateWidth, animateHeight, selector) {
           $(this).animate({'width': $(this).data('ilex-width')}, {
             'progress': function () {
               $(document).trigger('canvasRedraw');
-            }
+            },
+            'done': callback
           });
         } else {
           $(this).width($(this).data('ilex-width'));
@@ -210,7 +212,8 @@ ilex.applySize = function(animateWidth, animateHeight, selector) {
           $(this).animate({'height': $(this).data('ilex-height')}, {
             'progress': function () {
               $(document).trigger('canvasRedraw');
-            }
+            },
+            'done': callback
           });
         } else {
           $(this).height($(this).data('ilex-height'));

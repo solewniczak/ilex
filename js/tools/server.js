@@ -82,6 +82,17 @@ ilex.tools.server.create = function (host) {
               });
   };
   
+  that.addLink = function(from, to) {
+    that.sendAndRecieve('tabClose', {
+            'from': from,
+            'to': to,
+            'type': 'HH'
+          },
+          {
+            'linkCreated': function() {}
+          });
+  };
+  
   that.tabClose = function(tabId) {
     that.sendAndRecieve('tabClose', {
             'tab': tabId
