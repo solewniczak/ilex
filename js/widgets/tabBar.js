@@ -283,7 +283,11 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
     var width = that.container.parent().data('ilex-width'),
       height = that.container.parent().data('ilex-height');
     
-    that.container.data('ilex-width', width).data('ilex-height', height);
+	if (width !== that.container.data('ilex-width') ||
+	   	height !== that.container.data('ilex-height')) {
+		that.container.data('ilex-width', width).data('ilex-height', height);
+		setTabsLeft(false);
+	}	 
   });
   
   return that;
