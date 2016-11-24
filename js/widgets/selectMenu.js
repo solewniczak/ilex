@@ -42,23 +42,22 @@ ilex.widgetsCollection.selectMenu = function($parent, elements, callback, select
                       .appendTo($parent);
   
   var setSelected = function () {
-    let $selectedElement = ilex.popupMenu.createMenuElement(popupElements[selected]);
-    $selectedElement.width(elementWidth);
+    let $selectedElement =
+        ilex.popupMenu.createMenuElement(popupElements[selected], elementWidth);
     $selectedElement.off('click');
     $selectedElement.removeClass('ilex-popupMenuElement');
     $selectedOption.html($selectedElement);
   };
   
   var popupElements = [];
-  for (let elm of elements) {
+  for (let params of elements) {
     let popupElm = [
       'standardButton', function(event, ind) {
         selected = ind;
         setSelected(selected);
         callback(selected);
-      }
+      }, params
     ];
-    popupElm = popupElm.concat(elm);
     popupElements.push(popupElm);
   }
   ilex.popupMenu.buttonBind(that.button, popupElements);
