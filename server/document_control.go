@@ -44,6 +44,10 @@ type GetHalfLinkMessage struct {
 	RequestId int
 }
 
+type NewHalfLinkMessage struct {
+	HalfLink ilex.HalfLink
+}
+
 func control_document(documentId string, subscriptions *ControllerSubscriptions) {
 	fmt.Println("Document controller for ", documentId, " is starting up.")
 
@@ -184,6 +188,11 @@ loop:
 			response.Parameters = ToMap(halfLink)
 			respond(message.WS, response)
 
+		case message := <-subscriptions.NewHalfLinkMessages:
+			//fmt.Println("Received notification about new link")
+			controllerData.LinksContainter.AddHalfLink(&message.HalfLink)
+			controllerData.NotifyClientsNewLink(&message.HalfLink)
+
 		case <-subscriptions.StopControllerMessages:
 			// @TODO: notify clients about the server going offline
 			break loop
@@ -213,6 +222,22 @@ func CleanUpAfterController(documentId string, subscriptions *ControllerSubscrip
 	Globals.Controllers[documentId] = false
 	subscriptions.Close()
 	Globals.ContollerGroup.Done()
+}
+
+func NotifyNeighbourDocuments(newNeigbourLinks []ilex.HalfLink) {
+	if len(newNeigbourLinks) > 0 {
+		fmt.Println("Notifying neighbour documents about their new links")
+	}
+	for _, link := range newNeigbourLinks {
+		docId := link.Anchor.DocumentId.Hex()
+		text := Text{docId, link.Anchor.VersionNo}
+
+		Globals.IsLatestRequests <- &text
+		isLatest := <-Globals.IsLatestResponses
+		if isLatest && Globals.Controllers[docId] {
+			Globals.DocNewHalfLinkMessages[docId] <- &NewHalfLinkMessage{link}
+		}
+	}
 }
 
 func CloseAllControllers() {
