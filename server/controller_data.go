@@ -207,7 +207,7 @@ func (cd *ControllerData) NotifyClientsNewLink(link *ilex.HalfLink) {
 		if is_present {
 			n := NewTabNotification(client.TabId)
 			n.Notification = NEW_LINK_ADDED
-			n.Parameters[VERSION] = ToMap(link)
+			n.Parameters = ToMap(link)
 			n.SendTo(client.WS)
 		}
 	}
