@@ -6,23 +6,45 @@ if (ilex === undefined)
 if (ilex.widgetsCollection === undefined)
   throw 'ilex.widgetsCollection undefined';
 
-//doc1, doc2 must have .selectionRange property which indicates currently
-//selected part of the document and .container which triggers 'selectend' event
-//handler is element on which show finish link button.
-//the position of link button will be intersesion of handler and link ray
+
 ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documentSlider) {
   var that = {};
   
-  var createButton = function () {
+  var createButton = function (leftWindow, rightWindow) {
     var $button = $('<div class="ilex-finishLinkButton ilex-button ilex-cycle">')
                     .appendTo($parentWidget)
                     .html('<span class="ilex-awesome">&#xf0c1;</span>')
                     .css('position', 'absolute')
                     .css('z-index', 100);
     
-    $button.on('mouseenter mouseleave', function(event) {
-      $(document).trigger('canvasRedraw');
+//    $button.on('mouseenter mouseleave', function(event) {
+//      $(document).trigger('canvasRedraw');
+//    });
+    
+    $button.on('click', function(event) {
+      var leftWidget = leftWindow.contentWidget,
+          leftId = leftWidget.getFileInfo('id'),
+          leftV = leftWidget.getVersion(),
+          rightWidget = rightWindow.contentWidget,
+          rightId = rightWidget.getFileInfo('id'),
+          rightV = rightWidget.getVersion();
+      
+      console.log(leftId);return;
+      
+      leftWidget.createHalfLink(rightWindow);
+      rightWidget.createHalfLink(leftWindow);
+      ilex.server.addLink({
+        'id':  leftId,
+        'version': leftV,
+        'range': {
+          'position': leftWidget
+        }
+      },
+      {
+        
+      })
     });
+    
     return $button;
   };
   
@@ -44,7 +66,7 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
         
         if (leftWindow.contentWidget.canLink() &&
             rightWindow.contentWidget.canLink()) {
-          let $button = createButton();
+          let $button = createButton(leftWindow, rightWindow);
           $button.css('left', $handler.offset().left - $button.width()/2);
           $button.css('top', $handler.offset().top + $handler.height()/2 - $button.height()/2);
         }
