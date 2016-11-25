@@ -7,4 +7,7 @@
 
 {"action":"tabClose","parameters":{"tab":0},"id":4}
 
+
+{"action":"linkGetLeft","parameters":{"linkId":"5837531c3e5399c77598e5fa"},"id":4}
+
 ]
