@@ -12,7 +12,8 @@ if (ilex.widgetsCollection.verticalFileHierarchy !== undefined)
 ilex.widgetsCollection.verticalFileHierarchy = function ($parentWidget) {
   var that = {},
     width = $parentWidget.data('ilex-width'),
-    height = $parentWidget.data('ilex-height');
+    height = $parentWidget.data('ilex-height'),
+    filterMargin = 7;
 
   that.container = $('<div class="ilex-resize ilex-fileSelector">')
                   .css('background-color', '#fff')
@@ -28,7 +29,7 @@ ilex.widgetsCollection.verticalFileHierarchy = function ($parentWidget) {
   
 
   that.filterInput = ilex.widgetsCollection.blockInput(that.container, 'Filter documents');
-  that.filterInput.element.css('margin', '0 7px');
+  that.filterInput.element.css('margin-left', filterMargin+'px');
   
   var filterFiles = function (query) {
     var query = that.filterInput.val();
@@ -121,6 +122,7 @@ ilex.widgetsCollection.verticalFileHierarchy = function ($parentWidget) {
     height = that.container.parent().data('ilex-height');
     
     that.container.data('ilex-width', width).data('ilex-height', height);
+    that.filterInput.element.data('ilex-width', width - 3*filterMargin);
   });
 
 
