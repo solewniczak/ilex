@@ -28,6 +28,15 @@ ilex.widgetsCollection.textStarter = function (windowObject) {
     return false;
   };
   
+  //-1 for all attributtes
+  that.getFileInfo = function (attr) {
+    return -1;
+  };
+  
+  that.getVersion = function () {
+    return -1;
+  };
+  
   //create new document
   that.newDocButton.on('click', function () {
     ilex.tools.mime.createDocument(windowObject, 'plain text');

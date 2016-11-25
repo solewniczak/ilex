@@ -322,6 +322,19 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       return newWindow.element.data('ilex-window');
     };
     
+    newWindow.isVisible = function () {
+      var visWin = that.visibleWindows.get(),
+          winPtr = that.windowPointer;
+      if (this.getInd() >= winPtr && this.getInd() < winPtr + visWin) {
+        return true;
+      }
+      return false;
+    };
+    
+    newWindow.scrollTo = function (halfLink) {
+      
+    };
+    
     //Close tab behaviour when closing visible windows:
     //1. get window from the right
     //2. if no window on the right, scroll left
@@ -584,23 +597,120 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     }
   };
   
-  $(document).on('ilex-linkClicked', function(event, windowObject, link) {
-    var getWindowDocumentId = function(windowObject) {
-      if (windowObject !== undefined &&
-          windowObject.contentWidget !== undefined &&
-          typeof windowObject.contentWidget.getFileInfo === 'function') {
-        return windowObject.contentWidget.getFileInfo('id');
+  $(document).on('ilex-linkClicked', function(event, windowObject, halfLink) {
+    var createDocInfoObj = function(docId, ver) {
+      return {
+        'docId': docId,
+        'ver': ver,
+        'equals': function (b) {
+          if (this.docId === b.docId && this.ver === b.ver) {
+            return true;
+          }
+          return false;
+        }
       }
-      return null;
     };
-    var loadAndScroll = function(win, documentId, version, callback) {
-      if (getWindowDocumentId(win) === documentId) {
-        win.contentWidget.loadVersion(version, callback);
+    var docInfo = function(winObj) {
+      if (winObj === undefined) {
+        return createDocInfoObj(-1, -1);
       } else {
-        win.closeDocument();
-        ilex.tools.mime.loadDocument(win, documentId, version, callback);
+        var contentWidget = winObj.contentWidget,
+            docId = contentWidget.getFileInfo('id'),
+            ver = contentWidget.getVersion();
+        return createDocInfoObj(docId, ver);
       }
     };
+    ilex.server.linkGetLR(halfLink, function (msg) {
+      var docId = msg.documentId,
+          ver = msg.versionNo,
+          leftWindow = that.windows.get(windowObject.getInd() - 1),
+          rightWindow = that.windows.get(windowObject.getInd() + 1),
+          leftInfo = docInfo(leftWindow),
+          halfLinkInfo = createDocInfoObj(docId, ver),
+          rightInfo = docInfo(rightWindow);
+      
+      //document to the right
+      if (halfLinkInfo.equals(rightInfo)) {
+        if (!rightWindow.isVisible()) {
+          if (that.visibleWindows.get() === 1) {
+            that.visibleWindows.inc();
+            ilex.applySize(true, false, '*', function () {
+              rightWindow.scrollTo(halfLink);
+            });
+          } else {
+            that.slideLeft(function () {
+              rightWindow.scrollTo(halfLink);
+            });
+          }
+        } else {
+          rightWindow.scrollTo(halfLink);
+        }
+      } else if (halfLinkInfo.equals(leftInfo)) {
+        if (!leftWindow.isVisible()) {
+          if (that.visibleWindows.get() === 1) {
+            that.visibleWindows.inc();
+            ilex.applySize(false, false, '*', function () {
+              that.slideRight(function () {
+                leftWindow.scrollTo(halfLink);
+              });
+            });
+          } else {
+            that.slideRight(function () {
+              leftWindow.scrollTo(halfLink);
+            });
+          }
+        } else {
+          leftWindow.scrollTo(halfLink);
+        }
+      } else {
+        let newWindow = that.createWindow();
+        that.addWindowAfter(newWindow, windowObject.getInd());
+        ilex.tools.mime.loadDocument(newWindow, docId, ver,
+          function () {
+            if (!newWindow.isVisible()) {
+              if (that.visibleWindows.get() === 1) {
+                that.visibleWindows.inc();
+                ilex.applySize(true, false, '*', function () {
+                  rightWindow.scrollTo(halfLink);
+                });
+              } else {
+                that.slideLeft(function () {
+                  newWindow.scrollTo(halfLink);
+                });
+              }
+            } else {
+              $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
+             newWindow.scrollTo(halfLink);
+            }
+
+        });
+      }
+
+    });
+    
+//    var getWindowDocumentId = function(windowObject) {
+//      if (windowObject !== undefined &&
+//          windowObject.contentWidget !== undefined &&
+//          typeof windowObject.contentWidget.getFileInfo === 'function') {
+//        return windowObject.contentWidget.getFileInfo('id');
+//      }
+//      return null;
+//    };
+//    var loadAndScroll = function(win, documentId, version, callback) {
+//      if (getWindowDocumentId(win) === documentId) {
+//        win.contentWidget.loadVersion(version, callback);
+//      } else {
+//        win.closeDocument();
+//        ilex.tools.mime.loadDocument(win, documentId, version, callback);
+//      }
+//    };
+//    let newWindow = that.createWindow();
+//    that.addWindowAfter(newWindow, windowObject.getInd());
+//
+//    loadAndScroll(newWindow,
+//      haflLink.DocumentId,
+//      haflLink.versionNo);
+    
 //    var closeWindowsAfter = function (windowObj) {
 //      if (windowObj === undefined) {
 //        return;

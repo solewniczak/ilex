@@ -10,6 +10,9 @@ if (ilex.widgetsCollection.blockInput !== undefined)
 
 
 ilex.widgetsCollection.blockInput = function($container, defaultText) {
+  var border = '#ccc',
+      focusBorder = '#4d90fe';
+  
   if (defaultText === undefined) {
     defaultText = '';
   }
@@ -23,13 +26,12 @@ ilex.widgetsCollection.blockInput = function($container, defaultText) {
                   .css('white-space', 'nowrap')
                   .css('font-size', '12px')
                   .css('color', '#aaa')
-                  .css('border', '1px solid #ccc')
-                  .css('margin', '5px')
-                  .css('margin-top', '0')
+                  .css('border', '1px solid ' + border)
                   .css('padding', '2px');
   
   that.element.focus(function () {
     var $this = $(this);
+    $this.css('border-color', focusBorder);
     if ($this.data('ilex-empty') === 1) {
       $this.data('ilex-empty', 0);
       $this.css('color', '#000'); 
@@ -39,6 +41,7 @@ ilex.widgetsCollection.blockInput = function($container, defaultText) {
   
   that.element.blur(function () {
     var $this = $(this);
+    $this.css('border-color', border);
     if ($this.text() === '') {
       $this.text(defaultText);
       $this.css('color', '#aaa'); 

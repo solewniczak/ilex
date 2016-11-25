@@ -49,31 +49,42 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     return ilex.documents.get(documentObject.getId())[attr];
   };
   
-  var documentLinks = [];
-  that.getLinks = function () {
-    return documentLinks;
+  var documentHalfLinks = [];
+  that.getHalfLinks = function () {
+    return documentHalfLinks;
   };
   
   that.getVersion = function () {
     return version.get();
   };
   
-//  that.documentNameInput =
-//    ilex.widgetsCollection.blockInput(that.dock.toolbarTop.container, 'Untitled document');
-//  that.documentNameInput.element
-//    .width('200px')
-//    .css('display', 'inline-block')
-//    .css('vertical-align', 'middle');
-//  
-//  //set name
-//  that.documentNameInput.val(that.getFileInfo('name'));
-//  
-//  that.documentNameInput.element.on('blur', function () {
-//    var val = that.documentNameInput.val();
-//    if (val !==  that.getFileInfo('name')) {
-//      documentObject.changeName(val);
-//    }
-//  });
+  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf016;</span>', //<span class="ilex-awesome">&#xf00d;</span>
+    function(event) {
+      windowObject.closeDocument();
+      ilex.tools.mime.createDocument(windowObject, 'plain text');
+  });
+  
+  that.dock.toolbarTop.addSeparator();
+  
+  that.documentNameInput =
+    ilex.widgetsCollection.blockInput(that.dock.toolbarTop.container, 'Untitled document');
+  that.documentNameInput.element
+    .width('200px')
+    .css('display', 'inline-block')
+    .css('line-height', '26px')
+    .css('vertical-align', 'middle');
+  
+  //set name
+  that.documentNameInput.val(that.getFileInfo('name'));
+  
+  that.documentNameInput.element.on('blur', function () {
+    var val = that.documentNameInput.val();
+    if (val !==  that.getFileInfo('name')) {
+      documentObject.changeName(val, function () {
+        $(document).trigger('ilex-documentNameChanged', [windowObject]);
+      });
+    }
+  });
 //  
 //  
 //  that.dock.toolbarTop.addSeparator();
@@ -89,35 +100,38 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
       function (resp) {
         version.set(v);
         that.textEditor.setContent(resp.text);
-        documentLinks = resp.links;
-        if (resp.links !== null) {
-          for (let link of resp.links) {
-            that.setLink(link);
+        documentHalfLinks = resp.links;
+        if (documentHalfLinks !== null) {
+          for (let halfLink of documentHalfLinks) {
+            that.setHalfLink(halfLink);
           }
         }
         if (typeof callback === 'function') {
           callback();
         }
         $(document).trigger('canvasRedraw');
+      },
+      function (resp) {
+//        ilex.error.raise(resp.error);
       }
     );
   };
   
     
-  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf032;</span>', //bold
-    function(event) {
-      
-  });
-  
-  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf033;</span>', //italic
-    function(event) {
-      
-  });
-  
-  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf0cd;</span>', //underline
-    function(event) {
-      
-  });
+//  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf032;</span>', //bold
+//    function(event) {
+//      
+//  });
+//  
+//  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf033;</span>', //italic
+//    function(event) {
+//      
+//  });
+//  
+//  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf0cd;</span>', //underline
+//    function(event) {
+//      
+//  });
   
   that.dock.toolbarTop.addSeparator('15px');
   
@@ -127,7 +141,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     $spans.css('text-decoration', 'underline').css('color', 'blue');
   });
   
-  that.dock.toolbarTop.addSeparator('30px');
+  that.dock.toolbarTop.addSeparator('15px');
   
   that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf104;</span>', //<
     function(event) {
@@ -147,13 +161,13 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     that.container.find('.ilex-textLink').removeClass('ilex-textLinkNavigationMode');
   });
   
-  var linkTools = function() {
+  var halfLinkTools = function() {
     var prefix = 'ilex-linkId-';
     return {
-      'createLinkClassName': function(link) {
+      'getClassName': function(link) {
         return prefix + link.linkId;
       },
-      'getLinkIdsFromClassNames': function (classNames) {
+      'getIdsFromClassNames': function (classNames) {
         if (classNames === undefined) {
           return [];
         }
@@ -173,15 +187,15 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     };
   }();
   
-  var appendLinkToSpans = function($spans, link) {
+  var appendHalfLinkToSpans = function($spans, halfLink) {
     $spans.each(function () {
-      var links = $(this).data('ilex-links');
-      if (links === undefined) {
-        links = [link];
+      var halfLinks = $(this).data('ilex-links');
+      if (halfLinks === undefined) {
+        halfLinks = [halfLink];
       } else {
-        links.push(link);
+        halfLinks.push(halfLink);
       }
-      $(this).data('ilex-links', links);
+      $(this).data('ilex-links', halfLinks);
     });
   };
   
@@ -195,42 +209,50 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     }
     return true;
   }
-    
-  that.setLink = function (link) {
-    var linkRange = document.createRange(),
-        start = that.textEditor.textDocument.relPosition(link.range.position),
-        end = that.textEditor.textDocument.relPosition(link.range.position +
-                                                          link.range.length);
+
+  
+  that.setHalfLink = function (halfLink) {
+    var halfLinkRange = document.createRange(),
+      start = that.textEditor.textDocument.relPosition(halfLink.range.position),
+      end = that.textEditor.textDocument.relPosition(halfLink.range.position +
+                                                          halfLink.range.length);
     
     if (start === false || end === false) {
       return;
     }
     
-    linkRange.setStart(start.span.firstChild, start.position);
-    linkRange.setEnd(end.span.firstChild, end.position);
+    halfLinkRange.setStart(start.span.firstChild, start.position);
+    halfLinkRange.setEnd(end.span.firstChild, end.position);
     
-    let $spans = that.textEditor.getRangeSpans(linkRange);
+    let $spans = that.textEditor.getRangeSpans(halfLinkRange);
     
-    let linkClass = linkTools.createLinkClassName(link);
-    $spans.addClass('ilex-textLink').addClass(linkClass);
-    appendLinkToSpans($spans, link);
+    let halfLinkClass = halfLinkTools.getClassName(halfLink);
+    $spans.addClass('ilex-textLink').addClass(halfLinkClass);
+    appendHalfLinkToSpans($spans, halfLink);
     
     if (ilex.conf.get('browsing mode') === 1) {
       $spans.addClass('ilex-textLinkNavigationMode');
     }
     
-    that.textEditor.content.on('click', '.'+linkClass, function () {
+    $spans.off('click mouseover mouseleave');
+    $spans.on('click', function () {
       if (ilex.conf.get('browsing mode') === 1) {
-        $(document).trigger('ilex-linkClicked', [windowObject, link]);
+        $(document).trigger('ilex-linkClicked', [windowObject, halfLink]);
       }
     });
-    that.textEditor.content.on('mouseover', '.'+linkClass, function (event) {
+    $spans.on('mouseover', function (event) {
       if (ilex.conf.get('browsing mode') === 1) {
-        var file = ilex.documents.get(link.documentId);
-        ilex.view.popupNote.show(file.name + ' | <strong>'+link.versionNo+'</strong>');
+        ilex.server.linkGetLR(halfLink, function (msg) {
+          var file = ilex.documents.get(msg.documentId),
+              $span = $('<span>').text(file.name);
+          if (msg.versionNo < file.totalVersions) {
+            $span.css('font-family', 'IlexSansOblique');
+          }
+          ilex.view.popupNote.show(event.pageY, event.pageX, $span);
+	  });
       }
     });
-    that.textEditor.content.on('mouseleave', '.'+linkClass, function (event) {
+    $spans.on('mouseleave', function (event) {
       ilex.view.popupNote.hide();
     });
   };
@@ -316,7 +338,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     });
   
   that.textEditor.content.on('documentAddText', function(event, data) {
-    var links = linkTools.getLinkIdsFromClassNames(data.span.classList);
+    var links = halfLinkTools.getIdsFromClassNames(data.span.classList);
     documentObject.addText(data.absStart - 1, data.value, links);
   });
   
@@ -328,6 +350,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   if (startVersion === undefined) {
     startVersion = that.getFileInfo('totalVersions');
   }
+  
   that.loadVersion(startVersion, firstLoadCallback);  
   
   var textTools = [
@@ -364,26 +387,29 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   
   that.textEditor.content.on('contextmenu', '.ilex-textLink', function (event) {
     event.preventDefault();
-    var links = $(this).data('ilex-links'),
-        linkJumps = [];
-    if (links !== undefined) {
-      for (let link of links) {
-        var file = ilex.documents.get(link.to.documentId);
-//        ilex.view.popupNote.show(file.name + ' | <strong>'+link.to.versionNo+'</strong>');
-        
-        linkJumps.push([
-          'standardButton', function() {
-            alert('jump2');
-          }, {
-            'text': file.name,
-            'icon': '<span class="ilex-awesome">&#xf0c1;</span>'
-          }
-        ]);
-      }
-    }
-    
-    let menu = linkJumps.concat([['separator']], textTools);
-    ilex.popupMenu.show(event.pageY, event.pageX, menu, 220);
+    var haflLinks = $(this).data('ilex-links');
+    if (haflLinks !== undefined && haflLinks.length === 1) {
+        //
+      var halfLink = haflLinks[0];
+	  ilex.server.linkGetLR(halfLink, function (msg) {
+        var file = ilex.documents.get(msg.documentId),
+          linkJumps = [
+            ['standardButton', function() {
+               $(document).trigger('ilex-linkClicked', [windowObject, halfLink]);
+              }, {
+                'text': file.name,
+                'icon': '<span class="ilex-awesome">&#xf0c1;</span>'
+            }],
+		  ['separator']
+        ];
+		let menu = linkJumps.concat(textTools);
+    	ilex.popupMenu.show(event.pageY, event.pageX, menu, 220);
+	  });
+    } else {
+      let menu = textTools;
+      ilex.popupMenu.show(event.pageY, event.pageX, menu, 220);
+	}
+	  //        ilex.view.popupNote.show(file.name + ' | <strong>'+link.to.versionNo+'</strong>');
   });
 
   that.textEditor.content.on('contextmenu', 'span:not(.ilex-textLink)',

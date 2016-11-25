@@ -272,13 +272,12 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
     that.setActiveTabs(windowPointer, visibleWindows);
   });
   
-  $(document).on('ilex-documentLoaded', function (event, windowObject) {
+  $(document).on('ilex-documentLoaded ilex-documentNameChanged', function (event, windowObject) {
     var ind = windowObject.getInd(),
         name = windowObject.contentWidget.getFileInfo('name');
     that.setTabName(ind, name);
   });
-  
-  
+    
   that.container.on('windowResize', function(event) {
     var width = that.container.parent().data('ilex-width'),
       height = that.container.parent().data('ilex-height');

@@ -29,20 +29,43 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
           rightId = rightWidget.getFileInfo('id'),
           rightV = rightWidget.getVersion();
       
-      console.log(leftId);return;
+      //after linkCreated
+      var linkId = ilex.symHash(leftId + leftV, rightId + rightV),
+          lineage =  ilex.symHash(leftId, rightId);
       
-      leftWidget.createHalfLink(rightWindow);
-      rightWidget.createHalfLink(leftWindow);
-      ilex.server.addLink({
-        'id':  leftId,
-        'version': leftV,
-        'range': {
-          'position': leftWidget
-        }
+      var leftHalfLink = {
+        'documentId': leftId,
+        'versionNo': leftV,
+        'isLeft': true,
+        'lineage': lineage,
+        'linkId': linkId,
+        'range': leftWidget.textEditor.getSelectionAbsRange()
       },
-      {
-        
-      })
+      rightHalfLink = {
+        'documentId': rightId,
+        'versionNo': rightV,
+        'isLeft': false,
+        'lineage': lineage,
+        'linkId': linkId,
+        'range': rightWidget.textEditor.getSelectionAbsRange()  
+      };
+      
+      leftWidget.setHalfLink(leftHalfLink);
+      rightWidget.setHalfLink(rightHalfLink);
+      
+//      leftWidget.createHalfLink(rightWindow);
+//      rightWidget.createHalfLink(leftWindow);
+      
+//      ilex.server.addLink({
+//        'documentId':  leftId,
+//        'versionNo': leftV,
+//        'range': {
+//          'position': leftWidget
+//        }
+//      },
+//      {
+//        
+//      })
     });
     
     return $button;

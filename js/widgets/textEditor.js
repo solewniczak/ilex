@@ -699,16 +699,36 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     return getRangeSelectedSpans(that.selectionRange.get());
   };
   
+  that.getSelectionAbsRange = function () {
+    var range = that.selectionRange.get(),
+        startSpan = range.startContainer.parentElement,
+        startOffset = range.startOffset,
+        absStart = that.textDocument.absPosition($(startSpan), startOffset),
+        endSpan = range.endContainer.parentElement,
+        endOffset = range.endOffset,
+        absEnd = that.textDocument.absPosition($(endSpan), endOffset);
+    
+    return {
+      'position': absStart,
+      'length': absEnd - absStart
+    };
+  };
+  
   that.setContent = function (text) {
     //clear selection
     that.selectionRange.clear();
     //clean content
     that.content.html('');
-    
-    for (let line of text.match(/.*\n/g)) {
-      let $line = that.textDocument.createLineAfter();
-      //that.textEditor.textDocument.insertText($line.find("span"), 0, line + "\n");
-      $line.find("span").text(line);
+
+    let lines = text.match(/.*\n/g);
+    if (lines.length === 0) {
+      that.textDocument.createLineAfter();
+    } else {
+      for (let line of lines) {
+        let $line = that.textDocument.createLineAfter();
+        //that.textEditor.textDocument.insertText($line.find("span"), 0, line + "\n");
+        $line.find("span").text(line);
+      }
     }
   };
   
