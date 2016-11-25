@@ -699,6 +699,21 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     return getRangeSelectedSpans(that.selectionRange.get());
   };
   
+  that.getSelectionAbsRange = function () {
+    var range = that.selectionRange.get(),
+        startSpan = range.startContainer.parentElement,
+        startOffset = range.startOffset,
+        absStart = that.textDocument.absPosition($(startSpan), startOffset),
+        endSpan = range.endContainer.parentElement,
+        endOffset = range.endOffset,
+        absEnd = that.textDocument.absPosition($(endSpan), endOffset);
+    
+    return {
+      'position': absStart,
+      'length': absEnd - absStart
+    };
+  };
+  
   that.setContent = function (text) {
     //clear selection
     that.selectionRange.clear();

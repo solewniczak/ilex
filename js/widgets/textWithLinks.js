@@ -58,7 +58,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     return version.get();
   };
   
-    that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf016;</span>', //<span class="ilex-awesome">&#xf00d;</span>
+  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf016;</span>', //<span class="ilex-awesome">&#xf00d;</span>
     function(event) {
       windowObject.closeDocument();
       ilex.tools.mime.createDocument(windowObject, 'plain text');
@@ -141,7 +141,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     $spans.css('text-decoration', 'underline').css('color', 'blue');
   });
   
-  that.dock.toolbarTop.addSeparator('30px');
+  that.dock.toolbarTop.addSeparator('15px');
   
   that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf104;</span>', //<
     function(event) {
@@ -209,7 +209,8 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     }
     return true;
   }
-    
+
+  
   that.setHalfLink = function (halfLink) {
     var halfLinkRange = document.createRange(),
       start = that.textEditor.textDocument.relPosition(halfLink.range.position),
