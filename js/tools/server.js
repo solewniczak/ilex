@@ -170,7 +170,7 @@ ilex.tools.server.create = function (host) {
       });
     };
     
-    thatDocument.changeName = function(name) {
+    thatDocument.changeName = function(name, callback) {
       sendAction('documentChangeName', {
           'document': documentId,
           'tab': tabId,
@@ -181,6 +181,9 @@ ilex.tools.server.create = function (host) {
           file.name = name;
           //change files structure
           ilex.documents.set(documentId, file);
+          if (typeof callback === 'function') {
+            callback();
+          }
         }
       });
     };

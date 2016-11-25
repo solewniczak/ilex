@@ -704,11 +704,16 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     that.selectionRange.clear();
     //clean content
     that.content.html('');
-    
-    for (let line of text.match(/.*\n/g)) {
-      let $line = that.textDocument.createLineAfter();
-      //that.textEditor.textDocument.insertText($line.find("span"), 0, line + "\n");
-      $line.find("span").text(line);
+
+    let lines = text.match(/.*\n/g);
+    if (lines.length === 0) {
+      that.textDocument.createLineAfter();
+    } else {
+      for (let line of lines) {
+        let $line = that.textDocument.createLineAfter();
+        //that.textEditor.textDocument.insertText($line.find("span"), 0, line + "\n");
+        $line.find("span").text(line);
+      }
     }
   };
   
