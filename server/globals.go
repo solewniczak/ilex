@@ -66,5 +66,6 @@ func init() {
 		CREATE_DOCUMENT:            createDocument,
 		LINK_GET_LEFT:              linkGetF(true),
 		LINK_GET_RIGHT:             linkGetF(false),
+		ADD_LINK:                   linkAdd,
 	}
 }
