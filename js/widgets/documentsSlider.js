@@ -629,21 +629,36 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
           halfLinkInfo = createDocInfoObj(docId, ver),
           rightInfo = docInfo(rightWindow);
       
-      console.log(halfLinkInfo, rightInfo);
       //document to the right
       if (halfLinkInfo.equals(rightInfo)) {
         if (!rightWindow.isVisible()) {
-          that.slideLeft(function () {
-            rightWindow.scrollTo(halfLink);
-          });
+          if (that.visibleWindows.get() === 1) {
+            that.visibleWindows.inc();
+            ilex.applySize(true, false, '*', function () {
+              rightWindow.scrollTo(halfLink);
+            });
+          } else {
+            that.slideLeft(function () {
+              rightWindow.scrollTo(halfLink);
+            });
+          }
         } else {
           rightWindow.scrollTo(halfLink);
         }
       } else if (halfLinkInfo.equals(leftInfo)) {
         if (!leftWindow.isVisible()) {
-          that.slideRight(function () {
-            leftWindow.scrollTo(halfLink);
-          });
+          if (that.visibleWindows.get() === 1) {
+            that.visibleWindows.inc();
+            ilex.applySize(false, false, '*', function () {
+              that.slideRight(function () {
+                leftWindow.scrollTo(halfLink);
+              });
+            });
+          } else {
+            that.slideRight(function () {
+              leftWindow.scrollTo(halfLink);
+            });
+          }
         } else {
           leftWindow.scrollTo(halfLink);
         }
@@ -653,9 +668,16 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
         ilex.tools.mime.loadDocument(newWindow, docId, ver,
           function () {
             if (!newWindow.isVisible()) {
-              that.slideLeft(function () {
-                newWindow.scrollTo(halfLink);
-              });
+              if (that.visibleWindows.get() === 1) {
+                that.visibleWindows.inc();
+                ilex.applySize(true, false, '*', function () {
+                  rightWindow.scrollTo(halfLink);
+                });
+              } else {
+                that.slideLeft(function () {
+                  newWindow.scrollTo(halfLink);
+                });
+              }
             } else {
               $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
              newWindow.scrollTo(halfLink);
