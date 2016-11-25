@@ -227,8 +227,12 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     that.textEditor.content.on('mouseover', '.'+halfLinkClass, function (event) {
       if (ilex.conf.get('browsing mode') === 1) {
         ilex.server.linkGetLR(halfLink, function (msg) {
-          var file = ilex.documents.get(msg.anchor.DocumentId);
-          ilex.view.popupNote.show(file.name);
+          var file = ilex.documents.get(msg.documentId),
+              $span = $('<span>').text(file.name);
+          if (msg.versionNo < file.totalVersions) {
+            $span.css('font-family', 'IlexSansOblique');
+          }
+          ilex.view.popupNote.show(event.pageY, event.pageX, $span);
 	  });
 //        var file = ilex.documents.get(link.documentId);
 //        ilex.view.popupNote.show(file.name + ' | <strong>'+link.versionNo+'</strong>');
@@ -373,7 +377,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
         //
       var halfLink = haflLinks[0];
 	  ilex.server.linkGetLR(halfLink, function (msg) {
-        var file = ilex.documents.get(msg.anchor.DocumentId),
+        var file = ilex.documents.get(msg.documentId),
           linkJumps = [
             ['standardButton', function() {
                $(document).trigger('ilex-linkClicked', [windowObject, halfLink]);
