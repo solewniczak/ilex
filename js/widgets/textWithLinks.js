@@ -219,12 +219,13 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
       $spans.addClass('ilex-textLinkNavigationMode');
     }
     
-    that.textEditor.content.on('click', '.'+halfLinkClass, function () {
+    $spans.off('click mouseover mouseleave');
+    $spans.on('click', function () {
       if (ilex.conf.get('browsing mode') === 1) {
         $(document).trigger('ilex-linkClicked', [windowObject, halfLink]);
       }
     });
-    that.textEditor.content.on('mouseover', '.'+halfLinkClass, function (event) {
+    $spans.on('mouseover', function (event) {
       if (ilex.conf.get('browsing mode') === 1) {
         ilex.server.linkGetLR(halfLink, function (msg) {
           var file = ilex.documents.get(msg.documentId),
@@ -234,11 +235,9 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
           }
           ilex.view.popupNote.show(event.pageY, event.pageX, $span);
 	  });
-//        var file = ilex.documents.get(link.documentId);
-//        ilex.view.popupNote.show(file.name + ' | <strong>'+link.versionNo+'</strong>');
       }
     });
-    that.textEditor.content.on('mouseleave', '.'+halfLinkClass, function (event) {
+    $spans.on('mouseleave', function (event) {
       ilex.view.popupNote.hide();
     });
   };
