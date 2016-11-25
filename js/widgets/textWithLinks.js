@@ -58,22 +58,24 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     return version.get();
   };
   
-//  that.documentNameInput =
-//    ilex.widgetsCollection.blockInput(that.dock.toolbarTop.container, 'Untitled document');
-//  that.documentNameInput.element
-//    .width('200px')
-//    .css('display', 'inline-block')
-//    .css('vertical-align', 'middle');
-//  
-//  //set name
-//  that.documentNameInput.val(that.getFileInfo('name'));
-//  
-//  that.documentNameInput.element.on('blur', function () {
-//    var val = that.documentNameInput.val();
-//    if (val !==  that.getFileInfo('name')) {
-//      documentObject.changeName(val);
-//    }
-//  });
+  that.documentNameInput =
+    ilex.widgetsCollection.blockInput(that.dock.toolbarTop.container, 'Untitled document');
+  that.documentNameInput.element
+    .width('200px')
+    .css('display', 'inline-block')
+    .css('vertical-align', 'middle');
+  
+  //set name
+  that.documentNameInput.val(that.getFileInfo('name'));
+  
+  that.documentNameInput.element.on('blur', function () {
+    var val = that.documentNameInput.val();
+    if (val !==  that.getFileInfo('name')) {
+      documentObject.changeName(val, function () {
+        $(document).trigger('ilex-documentNameChanged', [windowObject]);
+      });
+    }
+  });
 //  
 //  
 //  that.dock.toolbarTop.addSeparator();
@@ -99,25 +101,28 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
           callback();
         }
         $(document).trigger('canvasRedraw');
+      },
+      function (resp) {
+//        ilex.error.raise(resp.error);
       }
     );
   };
   
     
-  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf032;</span>', //bold
-    function(event) {
-      
-  });
-  
-  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf033;</span>', //italic
-    function(event) {
-      
-  });
-  
-  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf0cd;</span>', //underline
-    function(event) {
-      
-  });
+//  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf032;</span>', //bold
+//    function(event) {
+//      
+//  });
+//  
+//  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf033;</span>', //italic
+//    function(event) {
+//      
+//  });
+//  
+//  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf0cd;</span>', //underline
+//    function(event) {
+//      
+//  });
   
   that.dock.toolbarTop.addSeparator('15px');
   
@@ -153,7 +158,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
       'getClassName': function(link) {
         return prefix + link.linkId;
       },
-      'getLinkIdsFromClassNames': function (classNames) {
+      'getIdsFromClassNames': function (classNames) {
         if (classNames === undefined) {
           return [];
         }
@@ -323,7 +328,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     });
   
   that.textEditor.content.on('documentAddText', function(event, data) {
-    var links = linkTools.getLinkIdsFromClassNames(data.span.classList);
+    var links = halfLinkTools.getIdsFromClassNames(data.span.classList);
     documentObject.addText(data.absStart - 1, data.value, links);
   });
   
@@ -335,6 +340,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   if (startVersion === undefined) {
     startVersion = that.getFileInfo('totalVersions');
   }
+  
   that.loadVersion(startVersion, firstLoadCallback);  
   
   var textTools = [
