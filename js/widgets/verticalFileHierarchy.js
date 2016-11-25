@@ -28,6 +28,7 @@ ilex.widgetsCollection.verticalFileHierarchy = function ($parentWidget) {
   
 
   that.filterInput = ilex.widgetsCollection.blockInput(that.container, 'Filter documents');
+  that.filterInput.element.css('margin', '0 7px');
   
   var filterFiles = function (query) {
     var query = that.filterInput.val();
