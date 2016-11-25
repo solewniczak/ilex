@@ -5,9 +5,14 @@
 
 {"action":"documentRemoveText","parameters":{"document":"5831d076cb6ab3549f0f7326","length":1,"position":355,"tab":0},"id":5},
 
-{"action":"tabClose","parameters":{"tab":0},"id":4}
+{"action":"tabClose","parameters":{"tab":0},"id":4},
 
 
-{"action":"linkGetLeft","parameters":{"linkId":"5837531c3e5399c77598e5fa"},"id":4}
+{"action":"linkGetLeft","parameters":{"linkId":"5837531c3e5399c77598e5fa"},"id":4},
+
+{"action":"addLink","parameters":{
+"left":{"documentId":"5838b3f6cb6ab3262e05adc8","versionNo":1,"range":{"length":3,"position":3},"type":"H"},
+"right":{"documentId":"5838b3f6cb6ab3262e05adc9","versionNo":1,"range":{"length":1,"position":0},"type":"F"}},
+"id":0}
 
 ]
