@@ -1,14 +1,16 @@
 BIN=server/server dbtool/dbtool
+GOSOURCES=$(shell find $(SOURCEDIR) -name '*.go')
+
 NW_PLATFORMS=linux64
 
-all: deps $(BIN) nw
+all: deps $(BIN)
 
 deps:
 	go get golang.org/x/net/websocket
 	go get gopkg.in/mgo.v2
 	go get github.com/fatih/structs
 
-$(BIN):
+$(BIN): $(GOSOURCES)
 	cd $(shell dirname "$@"); go build -o $(shell basename "$@")
   
 clean:
