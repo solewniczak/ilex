@@ -58,11 +58,20 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     return version.get();
   };
   
+    that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf016;</span>', //<span class="ilex-awesome">&#xf00d;</span>
+    function(event) {
+      windowObject.closeDocument();
+      ilex.tools.mime.createDocument(windowObject, 'plain text');
+  });
+  
+  that.dock.toolbarTop.addSeparator();
+  
   that.documentNameInput =
     ilex.widgetsCollection.blockInput(that.dock.toolbarTop.container, 'Untitled document');
   that.documentNameInput.element
     .width('200px')
     .css('display', 'inline-block')
+    .css('line-height', '26px')
     .css('vertical-align', 'middle');
   
   //set name
