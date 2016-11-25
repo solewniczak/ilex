@@ -78,8 +78,17 @@ func LowerFirst(s string) string {
 func ToMap(value interface{}) map[string]interface{} {
 	resp := make(map[string]interface{})
 	upper := structs.Map(value)
+	s := structs.New(value)
 	for _, name := range structs.Names(value) {
-		resp[LowerFirst(name)] = upper[name]
+		field := s.Field(name)
+		if field.IsEmbedded() {
+			packed := ToMap(field.Value())
+			for key, value := range packed {
+				resp[key] = value
+			}
+		} else {
+			resp[LowerFirst(name)] = upper[name]
+		}
 	}
 	return resp
 }
