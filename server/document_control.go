@@ -91,7 +91,7 @@ loop:
 			}
 			i := 0
 			for _, char := range message.String {
-				root.AddRune(char, message.Position+i+1)
+				root.AddRune(char, message.Position+i)
 				controllerData.Version.Size++
 				i++
 			}
