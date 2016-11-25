@@ -10,33 +10,34 @@ if (ilex.widgetsCollection.popupNote !== undefined)
 
 ilex.widgetsCollection.popupNote = function ($parentWidget, zIndex) {
   var that = {},
-    zIndex = zIndex || 3;
+    zIndex = zIndex || 3,
+    showTimeout = 500;
 
   that.container = $('<div class="ilex-popupNote">').appendTo($parentWidget)
               .css('position', 'absolute')
               .css('z-index', zIndex)
-              .css('border', '1px solid #000')
+              .css('box-shadow', '0 0 10px #aaa')
               .css('font-size', '80%')
-              .css('background', '#fff')
+              .css('background', '#fbeaa0')
               .css('padding', '5px');
   
   that.container.hide();
   
-  that.show = function(html) {
-    that.container.html(html);
-    that.container.show();
+  var timeoutId;
+  that.show = function(top, left, html) {
+    timeoutId = window.setTimeout(function () {
+      that.container.html(html);
+      that.container
+        .css('left', left)
+        .css('top', top + 10)
+        .show();
+     }, showTimeout);
   };
   
   that.hide = function () {
     that.container.hide();
+    window.clearTimeout(timeoutId);
   };
   
-  $(window).on('mousemove', function (event) {
-    that.container.offset({
-          'left': event.pageX,
-          'top': event.pageY - that.container.height() - 20
-    });         
-  });
-
   return that;
 };

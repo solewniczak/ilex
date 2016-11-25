@@ -92,6 +92,22 @@ ilex.tools.server.create = function (host) {
             'linkCreated': function() {}
           });
   };
+	
+  that.linkGetLR = function(halfLink, callback) {
+	  if (halfLink.isLeft) {
+		  var action = 'linkGetRight';
+	  } else {
+		  var action = 'linkGetLeft';
+	  }
+	  that.sendAndRecieve(action, {
+            'linkId': halfLink.linkId
+          },
+          {
+            'linkGetResponse': function(msg) {
+				callback(msg);
+			}
+	  	  });
+  }
   
   that.tabClose = function(tabId) {
     that.sendAndRecieve('tabClose', {
@@ -154,7 +170,7 @@ ilex.tools.server.create = function (host) {
       });
     };
     
-    thatDocument.changeName = function(name) {
+    thatDocument.changeName = function(name, callback) {
       sendAction('documentChangeName', {
           'document': documentId,
           'tab': tabId,
@@ -165,6 +181,9 @@ ilex.tools.server.create = function (host) {
           file.name = name;
           //change files structure
           ilex.documents.set(documentId, file);
+          if (typeof callback === 'function') {
+            callback();
+          }
         }
       });
     };
