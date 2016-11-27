@@ -869,7 +869,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     var hasSpanParent = function (node) {
       return node.parentNode && node.parentNode.nodeName === 'SPAN';
     };
-
+    console.log(range);
     //we have selected line <div>
     if (!hasSpanParent(range.startContainer)) {
         range.setStart(
