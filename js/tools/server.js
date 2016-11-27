@@ -82,31 +82,36 @@ ilex.tools.server.create = function (host) {
               });
   };
   
-  that.addLink = function(from, to) {
-    that.sendAndRecieve('tabClose', {
-            'from': from,
-            'to': to,
-            'type': 'HH'
+  that.addLink = function(left, right, callback) {
+    if (typeof callback !== 'function') {
+        callback = function () {};
+    }
+    
+    that.sendAndRecieve('addLink', {
+            'left': left,
+            'right': right,
           },
           {
-            'linkCreated': function() {}
+            'linkCreated': callback
           });
   };
 	
   that.linkGetLR = function(halfLink, callback) {
-	  if (halfLink.isLeft) {
-		  var action = 'linkGetRight';
-	  } else {
-		  var action = 'linkGetLeft';
-	  }
-	  that.sendAndRecieve(action, {
-            'linkId': halfLink.linkId
-          },
-          {
-            'linkGetResponse': function(msg) {
-				callback(msg);
-			}
-	  	  });
+    if (typeof callback !== 'function') {
+        callback = function () {};
+    }
+    
+    if (halfLink.isLeft) {
+        var action = 'linkGetRight';
+    } else {
+        var action = 'linkGetLeft';
+    }
+    that.sendAndRecieve(action, {
+          'linkId': halfLink.linkId
+        },
+        {
+          'linkGetResponse': callback
+        });
   }
   
   that.tabClose = function(tabId) {

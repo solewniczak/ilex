@@ -336,6 +336,14 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     }
   });
   
+  $(document).on('ilex-newLinkAdded', function (event, params) {
+    if (params.tab === windowObject.tabId &&
+        version.get() === that.getFileInfo('totalVersions')) {
+      console.log(params);
+      that.setHalfLink(params);
+    }
+  });
+  
   
   
   that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf105;</span>', //>

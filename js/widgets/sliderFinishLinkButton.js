@@ -29,43 +29,47 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
           rightId = rightWidget.getFileInfo('id'),
           rightV = rightWidget.getVersion();
       
-      //after linkCreated
-      var linkId = ilex.symHash(leftId + leftV, rightId + rightV),
-          lineage =  ilex.symHash(leftId, rightId);
-      
-      var leftHalfLink = {
-        'documentId': leftId,
+      ilex.server.addLink({
+        'documentId':  leftId,
         'versionNo': leftV,
-        'isLeft': true,
-        'lineage': lineage,
-        'linkId': linkId,
-        'range': leftWidget.textEditor.getSelectionAbsRange()
+        'range': leftWidget.textEditor.getSelectionAbsRange(),
+        'type': 'H'
       },
-      rightHalfLink = {
-        'documentId': rightId,
+      {
+        'documentId':  rightId,
         'versionNo': rightV,
-        'isLeft': false,
-        'lineage': lineage,
-        'linkId': linkId,
-        'range': rightWidget.textEditor.getSelectionAbsRange()  
-      };
+        'range': rightWidget.textEditor.getSelectionAbsRange(),
+        'type': 'H'
+      });
       
-      leftWidget.setHalfLink(leftHalfLink);
-      rightWidget.setHalfLink(rightHalfLink);
+      //after linkCreated
+//      var linkId = ilex.symHash(leftId + leftV, rightId + rightV),
+//          lineage =  ilex.symHash(leftId, rightId);
+      
+//      var leftHalfLink = {
+//        'documentId': leftId,
+//        'versionNo': leftV,
+//        'isLeft': true,
+//        'lineage': lineage,
+//        'linkId': linkId,
+//        'range': leftWidget.textEditor.getSelectionAbsRange()
+//      },
+//      rightHalfLink = {
+//        'documentId': rightId,
+//        'versionNo': rightV,
+//        'isLeft': false,
+//        'lineage': lineage,
+//        'linkId': linkId,
+//        'range': rightWidget.textEditor.getSelectionAbsRange()  
+//      };
+      
+//      leftWidget.setHalfLink(leftHalfLink);
+//      rightWidget.setHalfLink(rightHalfLink);
       
 //      leftWidget.createHalfLink(rightWindow);
 //      rightWidget.createHalfLink(leftWindow);
       
-//      ilex.server.addLink({
-//        'documentId':  leftId,
-//        'versionNo': leftV,
-//        'range': {
-//          'position': leftWidget
-//        }
-//      },
-//      {
-//        
-//      })
+
     });
     
     return $button;
