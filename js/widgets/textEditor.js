@@ -749,8 +749,8 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
   };
   
   that.removeText = function(absStart, length) {
-    var start = that.textDocument.relPosition(absStart - 1),
-        end = that.textDocument.relPosition(absStart + length - 1);
+    var start = that.textDocument.relPosition(absStart),
+        end = that.textDocument.relPosition(absStart + length);
     
     that.textDocument.removeText($(start.span), start.position,
                                  $(end.span), end.position, false);
