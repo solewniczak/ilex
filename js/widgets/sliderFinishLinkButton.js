@@ -29,46 +29,48 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
           rightId = rightWidget.getFileInfo('id'),
           rightV = rightWidget.getVersion();
       
+      var leftRange = leftWidget.textEditor.getSelectionAbsRange(),
+          rightRange = rightWidget.textEditor.getSelectionAbsRange();
       ilex.server.addLink({
         'documentId':  leftId,
         'versionNo': leftV,
-        'range': leftWidget.textEditor.getSelectionAbsRange(),
+        'range': leftRange,
         'type': 'H'
       },
       {
         'documentId':  rightId,
         'versionNo': rightV,
-        'range': rightWidget.textEditor.getSelectionAbsRange(),
+        'range': rightRange,
         'type': 'H'
+      }, function (msg) {
+        var leftMaxVer = leftWidget.getFileInfo('totalVersions'),
+            rightMaxVer = rightWidget.getFileInfo('totalVersions');
+        
+        if (leftMaxVer !== leftV) {
+           var leftHalfLink = {
+            'documentId': leftId,
+            'versionNo': leftV,
+            'isLeft': true,
+            'lineage': msg.lineage,
+            'linkId': msg.linkId,
+            'range': leftRange
+          };
+          leftWidget.setHalfLink(leftHalfLink);
+        }
+        
+        if (rightMaxVer !== rightV) {
+           var rightHalfLink = {
+            'documentId': rightId,
+            'versionNo': rightV,
+            'isLeft': false,
+            'lineage': msg.lineage,
+            'linkId': msg.linkId,
+            'range': rightRange
+          };
+          rightWidget.setHalfLink(rightHalfLink);
+        }
       });
-      
-      //after linkCreated
-//      var linkId = ilex.symHash(leftId + leftV, rightId + rightV),
-//          lineage =  ilex.symHash(leftId, rightId);
-      
-//      var leftHalfLink = {
-//        'documentId': leftId,
-//        'versionNo': leftV,
-//        'isLeft': true,
-//        'lineage': lineage,
-//        'linkId': linkId,
-//        'range': leftWidget.textEditor.getSelectionAbsRange()
-//      },
-//      rightHalfLink = {
-//        'documentId': rightId,
-//        'versionNo': rightV,
-//        'isLeft': false,
-//        'lineage': lineage,
-//        'linkId': linkId,
-//        'range': rightWidget.textEditor.getSelectionAbsRange()  
-//      };
-      
-//      leftWidget.setHalfLink(leftHalfLink);
-//      rightWidget.setHalfLink(rightHalfLink);
-      
-//      leftWidget.createHalfLink(rightWindow);
-//      rightWidget.createHalfLink(leftWindow);
-      
+
 
     });
     
