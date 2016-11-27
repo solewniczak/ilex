@@ -132,7 +132,7 @@ func (cd *ControllerData) TryUpdateVersion(database *mgo.Database, root *tree.Ro
 			Globals.DocumentUpdatedMessages <- &DocumentUpdate{cd.DocumentId, cd.Version.No, cd.Version.Name}
 		}
 		cd.NotifyClientsNewVersion(cd.LinksContainter.GetCurrent())
-		NotifyNeighbourDocuments(newNeighboursLinks)
+		NotifyNeighbourDocuments(cd.DocumentId, newNeighboursLinks)
 	}
 }
 
@@ -205,9 +205,10 @@ func (cd *ControllerData) NotifyClientsNewVersion(newLinks []ilex.HalfLink) {
 func (cd *ControllerData) NotifyClientsNewLink(link *ilex.HalfLink) {
 	for client, is_present := range cd.Clients {
 		if is_present {
-			n := NewTabNotification(client.TabId)
+			n := NewNotification()
 			n.Notification = NEW_LINK_ADDED
 			n.Parameters = ToMap(link)
+			n.Parameters[TAB] = client.TabId
 			n.SendTo(client.WS)
 		}
 	}

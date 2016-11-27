@@ -18,12 +18,14 @@ ilex.widgetsCollection.blockInput = function($container, defaultText) {
   }
   var that = {};
   //http://stackoverflow.com/questions/6831482/contenteditable-single-line-input
-  that.element = $('<div class="ilex-blockInput">').appendTo($container)
+  that.element = $('<input class="ilex-blockInput">').appendTo($container)
                   .attr('contenteditable', 'true')
                   .text(defaultText)
                   .data('ilex-empty', 1)
-                  .css('overflow', 'hidden')
-                  .css('white-space', 'nowrap')
+                  .css('box-sizing', 'border-box')
+//                  .css('overflow', 'hidden')
+//                  .css('white-space', 'nowrap')
+                  .css('font-family', 'IlexSans')
                   .css('font-size', '12px')
                   .css('color', '#aaa')
                   .css('border', '1px solid ' + border)
@@ -50,29 +52,29 @@ ilex.widgetsCollection.blockInput = function($container, defaultText) {
   });
   
   
-  that.element.on('keydown', function(event) {
-    //Disable Ctrl shortcouts
-    if (event.ctrlKey) {
-      return false;
-    }  
-    if (event.key === 'Enter') {
-      return false;
-    }
-  });
+//  that.element.on('keydown', function(event) {
+//    //Disable Ctrl shortcouts
+//    if (event.ctrlKey) {
+//      return false;
+//    }  
+//    if (event.key === 'Enter') {
+//      return false;
+//    }
+//  });
   
   that.val = function(val) {
     if (val === undefined) {
        if (that.element.data('ilex-empty') === 1) {
          return '';
        } else {
-         return that.element.text();
+         return that.element.val();
        }
     } else {
       if (that.element.data('ilex-empty') === 1) {
         that.element.data('ilex-empty', 0);
         that.element.css('color', '#000'); 
       }
-      that.element.text(val);
+      that.element.val(val);
     }
   };
   

@@ -96,7 +96,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
       if (notify) {
         let absStart = this.absPosition($span, relPos);
         that.content.trigger('documentAddText',[{
-                                'absStart': absStart + 1,
+                                'absStart': absStart,
                                 'value': text,
                                 'span': $span[0]
                               }]);
@@ -456,7 +456,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
       if (notify) {
         //send removal event  
         that.content.trigger('documentRemoveText',[{
-                      'absStart': absStart + 1,
+                      'absStart': absStart,
                       'length': length,
                       'removedSpanClasses': removedSpanClasses
                     }]);
@@ -869,7 +869,14 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     var hasSpanParent = function (node) {
       return node.parentNode && node.parentNode.nodeName === 'SPAN';
     };
-
+    
+    if (!hasSpanParent(range.startContainer) &&      
+        !range.startContainer.hasChildNodes()) {
+      console.log("textEditor.normalizeRange: document doesn't contains any lines.");
+      return document.createRange();
+    }
+    
+    
     //we have selected line <div>
     if (!hasSpanParent(range.startContainer)) {
         range.setStart(

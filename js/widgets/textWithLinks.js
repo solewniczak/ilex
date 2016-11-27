@@ -98,9 +98,41 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     }
     ilex.server.documentGetDump(windowObject.tabId, documentObject.getId(), v,
       function (resp) {
+        var lineage = {
+          'lineage': {},
+          'push': function (halfLink) {
+            if (this.lineage[halfLink.lineage] === undefined) {
+              this.lineage[halfLink.lineage] = [halfLink];
+            } else {
+              this.lineage[halfLink.lineage].push(halfLink);
+            }
+          },
+          'pushAll': function(halfLinks) {
+            if (halfLinks === null) {
+              return;
+            }
+            for (let halfLink of halfLinks) {
+              this.push(halfLink);
+            }
+          },
+          'getVisibleHalfLinks': function () {
+            var visibleHalfLinks = [];
+            for (let lineage in this.lineage) {
+              if (this.lineage.hasOwnProperty(lineage)) {
+                let halfLinks = this.lineage[lineage];
+                visibleHalfLinks.push(halfLinks[0]);
+              }
+            }
+            return visibleHalfLinks;
+          }
+        };
+      
         version.set(v);
         that.textEditor.setContent(resp.text);
-        documentHalfLinks = resp.links;
+      
+        lineage.pushAll(resp.links);
+        let documentHalfLinks = lineage.getVisibleHalfLinks();
+              console.log(documentHalfLinks);
         if (documentHalfLinks !== null) {
           for (let halfLink of documentHalfLinks) {
             that.setHalfLink(halfLink);
@@ -339,7 +371,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   
   that.textEditor.content.on('documentAddText', function(event, data) {
     var links = halfLinkTools.getIdsFromClassNames(data.span.classList);
-    documentObject.addText(data.absStart - 1, data.value, links);
+    documentObject.addText(data.absStart, data.value, links);
   });
   
   that.textEditor.content.on('documentRemoveText', function(event, data) {  
