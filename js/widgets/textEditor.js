@@ -35,6 +35,8 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
 //                .css('overflow-x', 'hidden')
 //                .data('ilex-width', width)
 //                .data('ilex-height', height);
+  
+  that.allowChanges = true;
 
   that.content = $('<div class="ilex-content">').appendTo(that.container)
                 //proper new line handling
@@ -830,6 +832,11 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
         that.selectionRange.clear();
       }
     };
+        
+    if (that.allowChanges === false) {
+      event.preventDefault();
+      return;
+    }
     
     //Delete selection
     if (that.selectionRange.get().collapsed === false &&
