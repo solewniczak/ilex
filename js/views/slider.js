@@ -48,7 +48,8 @@ ilex.views.slider = function(canvas) {
         return;
       }
       
-      let leftHalfLinks = leftWindow.contentWidget.getHalfLinks();
+      let leftHalfLinks =
+                    leftWindow.contentWidget.documentHalfLinks.getVisible();
       for (let halfLink of leftHalfLinks) {
         if (drawnLinks.indexOf(halfLink.linkId) === -1) {
           var $leftSpans = leftWindow.contentWidget.container

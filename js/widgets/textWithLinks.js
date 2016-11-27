@@ -49,10 +49,63 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     return ilex.documents.get(documentObject.getId())[attr];
   };
   
-  var documentHalfLinks = [];
-  that.getHalfLinks = function () {
-    return documentHalfLinks;
-  };
+  that.documentHalfLinks = function () {
+    var lineages = {};
+    var addToLineage = function(halfLink) {
+      if (lineages[halfLink.lineage] === undefined) {
+        lineages[halfLink.lineage] = [halfLink];
+      } else {
+        lineages[halfLink.lineage].push(halfLink);
+      }
+    };
+    
+    return {
+      'getVisibleFromLinage': function(lineage) {
+        var curVerLineage = $.grep(lineages[lineage], function (v) {
+          return v.versionNo === that.getVersion();
+        });
+        
+        if (curVerLineage.length > 0) {
+          return curVerLineage[0];
+        }
+        return undefined;
+      },
+      'isVisible': function (halfLink) {
+        if (this.getVisibleFromLinage(halfLink.lineage).linkId === 
+            halfLink.linkId) {
+          return true;
+        }
+        return false;
+      },
+      'create': function (halfLink) {
+        addToLineage(halfLink);
+        if (this.isVisible(halfLink)) {
+          that.setHalfLink(halfLink);
+        }
+      },
+      'load': function(halfLinks) {
+        if (halfLinks === null) {
+          return;
+        }
+        for (let halfLink of halfLinks) {
+          addToLineage(halfLink);
+        }
+      },
+      'getVisible': function () {
+        var visibleHalfLinks = [];
+        for (let lineage in lineages) {
+          if (lineages.hasOwnProperty(lineage)) {
+            let visibleHalfLink = this.getVisibleFromLinage(lineage);
+            if (visibleHalfLink !== undefined) {
+              visibleHalfLinks.push(visibleHalfLink);
+            }
+          }
+        }
+        return visibleHalfLinks;
+      }
+    };
+  }();
+  
   
   that.getVersion = function () {
     return version.get();
@@ -98,46 +151,16 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     }
     ilex.server.documentGetDump(windowObject.tabId, documentObject.getId(), v,
       function (resp) {
-        var lineage = {
-          'lineage': {},
-          'push': function (halfLink) {
-            if (this.lineage[halfLink.lineage] === undefined) {
-              this.lineage[halfLink.lineage] = [halfLink];
-            } else {
-              this.lineage[halfLink.lineage].push(halfLink);
-            }
-          },
-          'pushAll': function(halfLinks) {
-            if (halfLinks === null) {
-              return;
-            }
-            for (let halfLink of halfLinks) {
-              this.push(halfLink);
-            }
-          },
-          'getVisibleHalfLinks': function () {
-            var visibleHalfLinks = [];
-            for (let lineage in this.lineage) {
-              if (this.lineage.hasOwnProperty(lineage)) {
-                let halfLinks = this.lineage[lineage];
-                visibleHalfLinks.push(halfLinks[0]);
-              }
-            }
-            return visibleHalfLinks;
-          }
-        };
-      
+
         version.set(v);
         that.textEditor.setContent(resp.text);
-      
-        lineage.pushAll(resp.links);
-        let documentHalfLinks = lineage.getVisibleHalfLinks();
-              console.log(documentHalfLinks);
-        if (documentHalfLinks !== null) {
-          for (let halfLink of documentHalfLinks) {
-            that.setHalfLink(halfLink);
-          }
+
+        that.documentHalfLinks.load(resp.links);
+        let visibleHalfLinks = that.documentHalfLinks.getVisible();
+        for (let visibleHalfLink of visibleHalfLinks) {
+          that.setHalfLink(visibleHalfLink);
         }
+
         if (typeof callback === 'function') {
           callback();
         }
@@ -341,7 +364,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
         version.get() === that.getFileInfo('totalVersions')) {
       params.range.length = params.range.Length;
       params.range.position = params.range.Position;
-      that.setHalfLink(params);
+      that.documentHalfLinks.create(params);
     }
   });
   

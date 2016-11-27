@@ -55,7 +55,7 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
             'linkId': msg.linkId,
             'range': leftRange
           };
-          leftWidget.setHalfLink(leftHalfLink);
+          leftWidget.documentHalfLinks.create(leftHalfLink);
         }
         
         if (rightMaxVer !== rightV) {
@@ -67,7 +67,7 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
             'linkId': msg.linkId,
             'range': rightRange
           };
-          rightWidget.setHalfLink(rightHalfLink);
+          rightWidget.documentHalfLinks.create(rightHalfLink);
         }
       });
 
