@@ -22,6 +22,10 @@ func linkGet(request *IlexMessage, ws *websocket.Conn, isLeft bool) error {
 		respond_with_nak(ws, response, "No link id supplied!")
 	}
 
+	if !bson.IsObjectIdHex(requestedLinkId) {
+		respond_with_nak(ws, response, "Requested link id is not a valid ID!")
+	}
+
 	db_session, err := mgo.Dial(ilex.DEFAULT_HOST)
 	if err != nil {
 		fmt.Println("Did not find database!")

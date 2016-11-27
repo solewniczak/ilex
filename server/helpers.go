@@ -87,7 +87,12 @@ func ToMap(value interface{}) map[string]interface{} {
 				resp[key] = value
 			}
 		} else {
-			resp[LowerFirst(name)] = upper[name]
+			value := field.Value()
+			if structs.IsStruct(value) {
+				resp[LowerFirst(name)] = ToMap(value)
+			} else {
+				resp[LowerFirst(name)] = upper[name]
+			}
 		}
 	}
 	return resp

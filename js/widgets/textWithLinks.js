@@ -339,8 +339,8 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   $(document).on('ilex-newLinkAdded', function (event, params) {
     if (params.tab === windowObject.tabId &&
         version.get() === that.getFileInfo('totalVersions')) {
-      params.range.length = params.range.Length;
-      params.range.position = params.range.Position;
+      params.range.length = params.range.length;
+      params.range.position = params.range.position;
       that.setHalfLink(params);
     }
   });
