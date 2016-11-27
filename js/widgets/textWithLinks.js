@@ -297,10 +297,10 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   version.set = function (v) {
     if (v === that.getFileInfo('totalVersions')) {
       version.element.html(v + ' (cur.)');
-      that.textEditor.content.attr('contenteditable', 'true');
+      that.textEditor.allowChanges = true;
     } else {
       version.element.text(v);
-      that.textEditor.content.attr('contenteditable', 'false');
+      that.textEditor.allowChanges = false;
     }
   };
   
@@ -333,6 +333,15 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     if (params.tab === windowObject.tabId &&
         version.get() === that.getFileInfo('totalVersions')) {
       that.textEditor.removeText(params.position, params.length);
+    }
+  });
+  
+  $(document).on('ilex-newLinkAdded', function (event, params) {
+    if (params.tab === windowObject.tabId &&
+        version.get() === that.getFileInfo('totalVersions')) {
+      params.range.length = params.range.Length;
+      params.range.position = params.range.Position;
+      that.setHalfLink(params);
     }
   });
   

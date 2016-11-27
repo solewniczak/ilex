@@ -35,6 +35,8 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
 //                .css('overflow-x', 'hidden')
 //                .data('ilex-width', width)
 //                .data('ilex-height', height);
+  
+  that.allowChanges = true;
 
   that.content = $('<div class="ilex-content">').appendTo(that.container)
                 //proper new line handling
@@ -747,8 +749,8 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
   };
   
   that.removeText = function(absStart, length) {
-    var start = that.textDocument.relPosition(absStart - 1),
-        end = that.textDocument.relPosition(absStart + length - 1);
+    var start = that.textDocument.relPosition(absStart),
+        end = that.textDocument.relPosition(absStart + length);
     
     that.textDocument.removeText($(start.span), start.position,
                                  $(end.span), end.position, false);
@@ -830,6 +832,11 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
         that.selectionRange.clear();
       }
     };
+        
+    if (that.allowChanges === false) {
+      event.preventDefault();
+      return;
+    }
     
     //Delete selection
     if (that.selectionRange.get().collapsed === false &&
