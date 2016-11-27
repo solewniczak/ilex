@@ -371,7 +371,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   
   that.textEditor.content.on('documentAddText', function(event, data) {
     var links = halfLinkTools.getIdsFromClassNames(data.span.classList);
-    documentObject.addText(data.absStart - 1, data.value, links);
+    documentObject.addText(data.absStart, data.value, links);
   });
   
   that.textEditor.content.on('documentRemoveText', function(event, data) {  
