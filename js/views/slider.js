@@ -30,7 +30,7 @@ ilex.views.slider = function(canvas) {
     ilex.widgetsCollection.sliderFinishLinkButton($('body'), view.slider);
   
   
-  $(document).on('canvasRedraw', function () {
+  $(document).on('canvasRedraw', function (event) {
     if (!ilex.conf.get('nelson mode')) {
       return;
     }

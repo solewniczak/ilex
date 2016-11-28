@@ -17,9 +17,24 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
                     .css('position', 'absolute')
                     .css('z-index', 100);
     
-//    $button.on('mouseenter mouseleave', function(event) {
-//      $(document).trigger('canvasRedraw');
-//    });
+    $button.on('mouseenter', function(event) {
+      //http://stackoverflow.com/questions/13338484/jquery-trigger-custom-event-synchronously 
+      $.when($(document).trigger('canvasRedraw')).then(function () {
+        var leftRange = leftWindow.contentWidget.textEditor.selectionRange.get(),
+          rightRange = rightWindow.contentWidget.textEditor.selectionRange.get();
+        
+        //connect evetry part of link with its origins
+        ilex.canvas.drawConnection(leftRange.getClientRects(),
+                                   rightRange.getClientRects(),
+                                  ilex.colorCycle.current(0.6), true);
+        ilex.colorCycle.next();
+        
+      });
+    });
+    
+    $button.on('mouseleave', function(event) {
+      $(document).trigger('canvasRedraw');
+    });
     
     $button.on('click', function(event) {
       var leftWidget = leftWindow.contentWidget,
@@ -70,7 +85,8 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
           rightWidget.documentHalfLinks.create(rightHalfLink);
         }
       });
-
+      leftWidget.textEditor.selectionRange.clear();
+      rightWidget.textEditor.selectionRange.clear();
       $button.hide();
     });
     
@@ -88,6 +104,7 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
             $handler = leftWindow.rightSideHandler;
         
         //every window must have contentWidget
+        //we don't need to check this
 //        if (leftWindow.contentWidget === undefined ||
 //            rightWindow.contentWidget === undefined) {
 //          continue;
@@ -113,35 +130,6 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
   $(document).on('canvasRedraw', function (event) {
     
   });
-  
-//    var buttonOffset = that.button.offset(),
-//      selection = window.getSelection(),
-//      linksLength = 0;
-//
-//    if (ilex.view !== undefined && ilex.view.links !== undefined) {
-//      linksLength = ilex.view.links.length
-//    }
-//
-//    if (that.button.filter(':hover').length > 0) {
-//      //connect evetry part of link with its origins
-//      for (let elm of
-//        ilex.tools.range.cartesianOfNotCollapsedRanges(doc1.selectionRanges,
-//                                                        doc2.selectionRanges)) {
-//          canvas.drawConnection(elm[0].getClientRects(),
-//                                elm[1].getClientRects(),
-//                                //select next avalible color for next connection
-//                                ilex.linksColors[linksLength %
-//                                                      ilex.linksColors.length]);
-//      }
-//    }
-
-
-//  that.button.on('mouseup', function(event) {
-//    ilex.tools.connections.createLinkFromRanges(doc1, doc1.selectionRanges, doc2, doc2.selectionRanges);
-//    that.button.hide();
-//  });
-
-
 
   return that;
 }
