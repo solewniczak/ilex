@@ -34,8 +34,10 @@ ilex.views.slider = function(canvas) {
     if (!ilex.conf.get('nelson mode')) {
       return;
     }
-    var colorId = 0,
-        drawnLinks = [];
+    
+    ilex.colorCycle.reset();
+    
+    var drawnLinks = [];
     for (let i = view.slider.windowPointer;
          i < view.slider.windowPointer + view.slider.visibleWindows.get() - 1;
          i += 1) {
@@ -61,11 +63,13 @@ ilex.views.slider = function(canvas) {
               continue;
             }
           
-            ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans, ilex.tools.colors.htmlToRgba(ilex.linksColors[colorId], 0.6), true);
+            ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans,
+                                            ilex.colorCycle.current(0.6), true);
+            ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans,
+                                            ilex.colorCycle.current(0.1), false);
             
-            ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans, ilex.tools.colors.htmlToRgba(ilex.linksColors[colorId], 0.1), false);
-            
-            colorId = (colorId + 1) % ilex.linksColors.length;
+            ilex.colorCycle.next();
+          
             drawnLinks.push(halfLink.linkId);
         }
       }
@@ -131,10 +135,6 @@ ilex.views.slider = function(canvas) {
     //.contentWidget.loadText(params)
     ilex.applySize();
   };
-
-  /*Array of view links*/
-  view.links = [];
-  view.connections = ilex.widgetsCollection.connections($(window), canvas);
 
   //apply size
   ilex.applySize();

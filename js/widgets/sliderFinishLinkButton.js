@@ -71,7 +71,7 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
         }
       });
 
-
+      $button.hide();
     });
     
     return $button;
@@ -111,6 +111,9 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
 
 
   $(document).on('canvasRedraw', function (event) {
+    
+  });
+  
 //    var buttonOffset = that.button.offset(),
 //      selection = window.getSelection(),
 //      linksLength = 0;
@@ -131,7 +134,7 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
 //                                                      ilex.linksColors.length]);
 //      }
 //    }
-  });
+
 
 //  that.button.on('mouseup', function(event) {
 //    ilex.tools.connections.createLinkFromRanges(doc1, doc1.selectionRanges, doc2, doc2.selectionRanges);

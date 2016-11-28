@@ -81,6 +81,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
         addToLineage(halfLink);
         if (this.isVisible(halfLink)) {
           that.setHalfLink(halfLink);
+          $(document).trigger('canvasRedraw');
         }
       },
       'load': function(halfLinks) {
@@ -160,11 +161,11 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
         for (let visibleHalfLink of visibleHalfLinks) {
           that.setHalfLink(visibleHalfLink);
         }
+        $(document).trigger('canvasRedraw');
 
         if (typeof callback === 'function') {
           callback();
         }
-        $(document).trigger('canvasRedraw');
       },
       function (resp) {
 //        ilex.error.raise(resp.error);
@@ -362,7 +363,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   $(document).on('ilex-newLinkAdded', function (event, params) {
     if (params.tab === windowObject.tabId &&
         version.get() === that.getFileInfo('totalVersions')) {
-      that.setHalfLink(params);
+      that.documentHalfLinks.create(params);
     }
   });
   

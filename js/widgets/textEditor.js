@@ -870,29 +870,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     
     event.preventDefault();
   });
-  
-  //start and end container are always span texts.
-  var normalizeRange = function (range) {
-    var hasSpanParent = function (node) {
-      return node.parentNode && node.parentNode.nodeName === 'SPAN';
-    };
     
-    if (!hasSpanParent(range.startContainer) &&      
-        !range.startContainer.hasChildNodes()) {
-      console.log("textEditor.normalizeRange: document doesn't contains any lines.");
-      return document.createRange();
-    }
-    
-    
-    //we have selected line <div>
-    if (!hasSpanParent(range.startContainer)) {
-        range.setStart(
-          range.startContainer.childNodes[range.startOffset].childNodes[0], 0);
-    }
-    
-    return range;
-  };
-  
   //draw selection
   $(document).on('selectionchange.ilex.text', function(event) {
     var selection = window.getSelection(),
@@ -900,7 +878,8 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     if (active.length > 0 && selection.rangeCount >= 1) {
       $('.ilex-content').each(function () {
         if ($(this).is(that.content) && $(this).is(active)) {
-          that.selectionRange.update(normalizeRange(selection.getRangeAt(0)));
+          that.selectionRange.update(
+            ilex.tools.range.normalize(selection.getRangeAt(0)));
         }
       });
     }

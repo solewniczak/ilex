@@ -195,6 +195,12 @@ ilex.tools.range.normalize = function (range) {
     return node.parentNode && node.parentNode.nodeName === 'SPAN';
   };
   
+  if (!hasSpanParent(range.startContainer) &&      
+        !range.startContainer.hasChildNodes()) {
+    console.log("textEditor.normalizeRange: document doesn't contains any lines.");
+    return document.createRange();
+  }
+  
   //we have selected <div>
   if (!hasSpanParent(range.startContainer)) {
     range.setStart(range.startContainer.childNodes[range.startOffset].childNodes[0], 0);
