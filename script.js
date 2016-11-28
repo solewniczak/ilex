@@ -2,6 +2,11 @@
 
 //http://stackoverflow.com/questions/5680013/how-to-be-notified-once-a-web-font-has-loaded
 
+//This function also checks if we have modern browser:
+//Chrome >= 35
+//Firefox >= 41
+//More info:
+//https://developer.mozilla.org/en-US/docs/Web/API/CSS_Font_Loading_API
 document.fonts.ready.then(function() {
   
   $('.ilex-noJavaScriptNotice').remove();

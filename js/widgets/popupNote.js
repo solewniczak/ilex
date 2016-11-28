@@ -16,8 +16,8 @@ ilex.widgetsCollection.popupNote = function ($parentWidget, zIndex) {
   that.container = $('<div class="ilex-popupNote">').appendTo($parentWidget)
               .css('position', 'absolute')
               .css('z-index', zIndex)
+              .css('font', '12px IlexSans')
               .css('box-shadow', '0 0 10px #aaa')
-              .css('font-size', '80%')
               .css('background', '#fbeaa0')
               .css('padding', '5px');
   

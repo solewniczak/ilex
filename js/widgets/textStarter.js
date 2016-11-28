@@ -36,6 +36,10 @@ ilex.widgetsCollection.textStarter = function (windowObject) {
     return -1;
   };
   
+  that.getDocumentObject = function () {
+    return undefined;
+  };
+  
   //create new document
   that.newDocButton.on('click', function () {
     ilex.tools.mime.createDocument(windowObject, 'plain text');

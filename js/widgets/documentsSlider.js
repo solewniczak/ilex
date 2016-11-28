@@ -289,8 +289,11 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       newWindow.element.remove();
       newWindow.rightSideHandler.remove();
 
-      ilex.server.tabClose(winInd);
-      
+      let docObj = newWindow.contentWidget.getDocumentObject();
+      if (docObj !== undefined) {
+        ilex.server.tabClose(docObj.getTabId());
+      }
+
       $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
     };
     

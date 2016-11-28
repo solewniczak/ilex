@@ -49,6 +49,10 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     return ilex.documents.get(documentObject.getId())[attr];
   };
   
+  that.getDocumentObject = function () {
+    return documentObject;
+  };
+  
   that.documentHalfLinks = function () {
     var lineages = {};
     var addToLineage = function(halfLink) {
@@ -418,21 +422,21 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   
   var textTools = [
     ['standardButton', function() {
-        alert('cut');
+        alert('Cut');
       }, {
           'text': 'Cut',
           'icon': '<span class="ilex-awesome">&#xf0c4;</span>',
           'shortcutLabel': 'Ctrl+X'
       }],
     ['standardButton', function() {
-        alert('jump2');
+        alert('Copy');
       }, {
           'text': 'Copy',
           'icon': '<span class="ilex-awesome">&#xf0c5;</span>',
           'shortcutLabel': 'Ctrl+C'
       }],
     ['standardButton', function() {
-        alert('jump2');
+        alert('Paste');
       }, {
           'text': 'Paste',
           'icon': '<span class="ilex-awesome">&#xf0ea;</span>',
@@ -440,7 +444,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
       }],
     ['separator'],
     ['standardButton', function() {
-        alert('jump2');
+        alert('Comment');
       }, {
           'text': 'Comment',
           'icon': '<span class="ilex-awesome">&#xf27b;</span>',

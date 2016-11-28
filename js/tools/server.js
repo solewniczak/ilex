@@ -154,6 +154,10 @@ ilex.tools.server.create = function (host) {
     thatDocument.getId = function () {
       return documentId;
     };
+    
+    thatDocument.getTabId = function () {
+      return tabId;
+    };
       
     thatDocument.addText = function(position, str, links) {
       sendAction('documentAddText', {

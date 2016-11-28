@@ -54,6 +54,9 @@ ilex.views.slider = function(canvas) {
                     leftWindow.contentWidget.documentHalfLinks.getVisible();
       for (let halfLink of leftHalfLinks) {
         if (drawnLinks.indexOf(halfLink.linkId) === -1) {
+          //Musimy to zimenić tak aby uwzględnić czy link jest lewy czy prawy.
+          //W przeciwnym wypadku będziemy wyświetlać linki do samego siebie, co
+          //nie jest prawdą.
           var $leftSpans = leftWindow.contentWidget.container
                             .find('span.ilex-linkId-'+halfLink.linkId),
               $rightSpans = rightWindow.contentWidget.container
