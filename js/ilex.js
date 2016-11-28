@@ -134,24 +134,6 @@ ilex.conf = function () {
   };
 }();
 
-
-ilex.symHash = function (a,b) {
-  var len = a.length < b.length ? a.length : b.length,
-      hash = '';
-  for (let i = 0; i < len; i++) {
-    let x = a.charCodeAt(i),
-        y = b.charCodeAt(i);
-    hash += (x+y).toString();
-  }
-  return hash;
-};
-
-ilex.linkHash = function (link) {
-  var x = link.firstDocumentId + link.firstPosition,
-      y = link.secondDocumentId + link.secondPosition;
-  return ilex.symHash(x, y);
-};
-
 //$(document).on('mousedown', function (event) {
 //  //prevent Linux clippboard
 //  if (event.button === 1) {
