@@ -59,18 +59,18 @@ ilex.views.slider = function(canvas) {
               $rightSpans = rightWindow.contentWidget.container
                             .find('span.ilex-linkId-'+halfLink.linkId);
           
-            if ($leftSpans.length === 0 || $rightSpans.length === 0) {
-              continue;
-            }
+          if ($leftSpans.length === 0 || $rightSpans.length === 0) {
+            continue;
+          }
           
-            ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans,
-                                            ilex.colorCycle.current(0.6), true);
-            ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans,
-                                            ilex.colorCycle.current(0.1), false);
-            
-            ilex.colorCycle.next();
-          
-            drawnLinks.push(halfLink.linkId);
+          ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans,
+                                          ilex.colorCycle.current(0.6), true);
+          ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans,
+                                          ilex.colorCycle.current(0.1), false);
+
+          ilex.colorCycle.next();
+
+          drawnLinks.push(halfLink.linkId);
         }
       }
       

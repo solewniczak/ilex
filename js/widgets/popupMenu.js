@@ -58,6 +58,7 @@ ilex.widgetsCollection.popupMenu = function ($parentWidget, zIndex) {
     }
     var $elm = $('<div class="ilex-popupMenuElement">')
                   .height(elementHeight)
+                  .css('font', '12px IlexSans')
                   .css('line-height', elementHeight+'px')
                   .css('display', 'flex')
                   .width(menuWidth);

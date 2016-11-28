@@ -17,7 +17,6 @@ ilex.widgetsCollection.textStarter = function (windowObject) {
   windowObject.widget.html(that.container);
   
   let $ico = $('<span class="ilex-awesome">&#xf016;</span>')
-                .css('display', 'block')
                 .css('font-size', '100px');
   
   that.newDocButton = $('<div class="ilex-noBorderButton">').appendTo(that.container)

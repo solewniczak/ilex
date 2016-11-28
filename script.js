@@ -1,7 +1,14 @@
 'use strict';
 
-$(document).ready(function(){
+//http://stackoverflow.com/questions/5680013/how-to-be-notified-once-a-web-font-has-loaded
+
+document.fonts.ready.then(function() {
+  
+  $('.ilex-noJavaScriptNotice').remove();
+  
   $("body").css("overflow", "hidden");
+  
+  console.log(document.fonts);
 
   ilex.window = $('<div>').appendTo('body')
                       .css('position', 'relative')

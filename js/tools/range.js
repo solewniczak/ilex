@@ -195,8 +195,11 @@ ilex.tools.range.normalize = function (range) {
     return node.parentNode && node.parentNode.nodeName === 'SPAN';
   };
   
-  if (!hasSpanParent(range.startContainer) &&      
-        !range.startContainer.hasChildNodes()) {
+  if (
+      (!hasSpanParent(range.startContainer) &&      
+        !range.startContainer.hasChildNodes()) ||
+     (!hasSpanParent(range.endContainer) &&      
+        !range.endContainer.hasChildNodes()) ) {
     console.log("textEditor.normalizeRange: document doesn't contains any lines.");
     return document.createRange();
   }

@@ -55,7 +55,7 @@ ilex.widgetsCollection.verticalFileHierarchy = function ($parentWidget) {
       let $superDiv = $('<div class="ilex-fileListElement">').appendTo(that.fileContainer)
                 .css('padding', '5px 0')
                 .css('padding-left', '10px')
-                .css('font-size', '12px')
+                .css('font', '12px IlexSans')
                 .css('white-space', 'nowrap')
                 .css('overflow', 'hidden')
                 .css('text-overflow', 'ellipsis')
@@ -89,7 +89,7 @@ ilex.widgetsCollection.verticalFileHierarchy = function ($parentWidget) {
                         .css('padding-top', '5px');
         var $titleText = $('<span>').appendTo($title)
                 .text(file.name)
-                .css('font-size', '12px')
+                .css('font', '12px IlexSans')
                 .css('color', '#fff')
                 .css('background-color', '#000');
 

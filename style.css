@@ -2,8 +2,6 @@
 @import url("css/font.css");
 
 body {
-  font-family: IlexSans;
-  font-size: 12pt;
   user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;
@@ -12,10 +10,6 @@ body {
 
 div:focus {
   outline: 0;
-}
-
-strong {
-  font-family: IlexSansBold;
 }
 
 /*CSS is based on Metro UI design*/
@@ -43,8 +37,7 @@ strong {
   color: #262626;
   cursor: default;
   display: inline-block;
-  font-size: 12px;
-  font-family: IlexSans;
+  font: 12px IlexSans;
 }
 
 .ilex-button.ilex-rect-button {
@@ -58,12 +51,9 @@ strong {
 }
 
 .ilex-awesome {
-  font-family: Awesome;
+  font: 12px Awesome;
 }
 
-.ilex-awesome span {
-  font-family: IlexSans;
-}
 
 .ilex-button:hover {
   border-color: #787878;
@@ -107,8 +97,7 @@ strong {
   color: #262626;
   cursor: pointer;
   display: inline-block;
-  font-size: 12px;
-  font-family: IlexSans;
+  font: 12px IlexSans;
 }
 
 .ilex-noBorderButton:hover {
@@ -174,8 +163,7 @@ strong {
   background-color: #ffffff;
   color: #262626;
   cursor: default;
-  font-size: 12px;
-  font-family: IlexSans;
+  font: 12px IlexSans;
 }
 
 .ilex-popupMenuElement:hover {

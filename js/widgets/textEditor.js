@@ -40,6 +40,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
 
   that.content = $('<div class="ilex-content">').appendTo(that.container)
                 //proper new line handling
+                .css('font', '14px IlexSans')
                 .css('white-space', 'pre-wrap')
                 .css('overflow-y', 'auto')
                 .css('overflow-x', 'hidden')

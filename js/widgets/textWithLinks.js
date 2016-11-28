@@ -315,7 +315,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   
   var version = {};
   version.element = $('<span>0</span>').appendTo(that.dock.toolbarTop.container)
-                                    .css('font-size', '14px')
+                                    .css('font', '12px IlexSans')
                                     .css('display', 'inline-block')
                                     .css('margin', '0 4px');
   version.set = function (v) {

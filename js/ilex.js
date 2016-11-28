@@ -154,7 +154,6 @@ $(document).on('ilex-newVersionAvailable', function (event, data) {
   $(document).trigger('ilex-fileInfoUpdated', file.id);
 });
 
-
 //apply sizes to elements
 ilex.applySize = function(animateWidth, animateHeight, selector, widthCallback) {
   animateWidth = animateWidth || false;

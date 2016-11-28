@@ -671,7 +671,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
               if (that.visibleWindows.get() === 1) {
                 that.visibleWindows.inc();
                 ilex.applySize(true, false, '*', function () {
-                  rightWindow.scrollTo(halfLink);
+                  newWindow.scrollTo(halfLink);
                 });
               } else {
                 that.slideLeft(function () {
