@@ -122,6 +122,7 @@ loop:
 
 			controllerData.Version.Name = message.NewName
 			Globals.DocumentUpdatedMessages <- &DocumentUpdate{documentId, controllerData.Version.No, controllerData.Version.Name}
+			controllerData.HasUnsavedChanges = true
 			controllerData.NotifyClientsNameChange(message)
 
 		case message := <-subscriptions.TabControlMessages:
