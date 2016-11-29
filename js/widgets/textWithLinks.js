@@ -132,12 +132,15 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
 
       },
       'load': function(halfLinks, callback) {
-        if (halfLinks === null) {
-          return;
-        }
         if (callback === undefined) {
           callback = function () {};
         }
+        
+        if (halfLinks === null) {
+          callback();
+          return;
+        }
+        
         var secondLinksToLoad = halfLinks.length;
         for (let halfLink of halfLinks) {
           ilex.server.linkGetLR(halfLink, function(msg) {

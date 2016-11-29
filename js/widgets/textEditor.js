@@ -724,6 +724,7 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     that.content.html('');
 
     let lines = text.match(/.*\n/g);
+    //we have to hava at least one line for correct textEditor behaviour
     if (lines.length === 0) {
       that.textDocument.createLineAfter();
     } else {
