@@ -70,9 +70,8 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
             'linkId': msg.linkId,
             'range': leftRange
           };
-          leftWidget.documentHalfLinks.create(leftHalfLink);
+          
         }
-        
         if (rightMaxVer !== rightV) {
            var rightHalfLink = {
             'documentId': rightId,
@@ -82,7 +81,10 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
             'linkId': msg.linkId,
             'range': rightRange
           };
-          rightWidget.documentHalfLinks.create(rightHalfLink);
+        }
+        if (leftMaxVer !== leftV && rightMaxVer !== rightV) {
+          leftWidget.documentHalfLinks.create(leftHalfLink, rightHalfLink);
+          rightWidget.documentHalfLinks.create(rightHalfLink, leftHalfLink);
         }
       });
       leftWidget.textEditor.selectionRange.clear();

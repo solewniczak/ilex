@@ -50,17 +50,23 @@ ilex.views.slider = function(canvas) {
         return;
       }
       
-      let leftHalfLinks =
+      let leftVisibleLinksObjects =
                     leftWindow.contentWidget.documentHalfLinks.getVisible();
-      for (let halfLink of leftHalfLinks) {
-        if (drawnLinks.indexOf(halfLink.linkId) === -1) {
+      for (let visibleObject of leftVisibleLinksObjects) {
+        if (drawnLinks.indexOf(visibleObject.top.linkId) === -1) {
           //Musimy to zimenić tak aby uwzględnić czy link jest lewy czy prawy.
           //W przeciwnym wypadku będziemy wyświetlać linki do samego siebie, co
           //nie jest prawdą.
+          let classes = [];
+          for (let hl of visibleObject.all) {
+            classes.push('span.ilex-linkId-'+hl.linkId);
+          }
+          let selector = classes.join(',');
+          
           var $leftSpans = leftWindow.contentWidget.container
-                            .find('span.ilex-linkId-'+halfLink.linkId),
+                            .find(selector),
               $rightSpans = rightWindow.contentWidget.container
-                            .find('span.ilex-linkId-'+halfLink.linkId);
+                            .find(selector);
           
           if ($leftSpans.length === 0 || $rightSpans.length === 0) {
             continue;
@@ -73,7 +79,7 @@ ilex.views.slider = function(canvas) {
 
           ilex.colorCycle.next();
 
-          drawnLinks.push(halfLink.linkId);
+          drawnLinks.push(visibleObject.top.linkId);
         }
       }
       

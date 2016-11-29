@@ -63,52 +63,99 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
       }
     };
     
-    return {
+    var documentHalfLinksReturn = {
       'getVisibleFromLinage': function(lineage) {
         var curVerLineage = $.grep(lineages[lineage], function (v) {
           return v.versionNo === that.getVersion();
         });
         
-        if (curVerLineage.length > 0) {
-          return curVerLineage[0];
+        if (curVerLineage.length === 0) {
+          return undefined;
+        } else if (curVerLineage.length === 1) {
+          return {'top': curVerLineage[0], 'all': curVerLineage};
+        } else {
+          let maxSecondHalf = curVerLineage[0];
+          for (let i = 1; i < curVerLineage.length; i++) {
+            let hl = curVerLineage[i];
+            if (hl.secongHalf.versionNo > maxSecondHalf.secongHalf.versionNo) {
+              maxSecondHalf = hl;
+            }
+          }
+          return {'top': maxSecondHalf, 'all': curVerLineage};
+          //console.log(that.getFileInfo('name'), curVerLineage);
+//          let secondsHalfs = {};
+//          for (let h of curVerLineage) {
+//            ilex.server.linkGetLR(h, function(msg) {
+//              var info = ilex.documents.get(msg.documentId);
+//              console.log(h, that.getFileInfo('name'), msg, info['name']);
+//            });
+//          }
+          
         }
-        return undefined;
       },
-      'isVisible': function (halfLink) {
-        if (this.getVisibleFromLinage(halfLink.lineage).linkId === 
+      'isTop': function (halfLink) {
+        if (this.getVisibleFromLinage(halfLink.lineage).top.linkId === 
             halfLink.linkId) {
           return true;
         }
         return false;
       },
-      'create': function (halfLink) {
-        addToLineage(halfLink);
-        if (this.isVisible(halfLink)) {
-          that.setHalfLink(halfLink);
-          $(document).trigger('canvasRedraw');
+      'create': function (halfLink, secondHalf, callback) {
+        if (callback === undefined) {
+          callback = function () {};
         }
+        var addToDocument = function (halfLink) {
+          addToLineage(halfLink);
+          if (documentHalfLinksReturn.isTop(halfLink)) {
+            that.setHalfLink(halfLink, [halfLink]);
+            $(document).trigger('canvasRedraw');
+          }
+          callback(halfLink);
+        };
+        if (secondHalf !== undefined) {
+          halfLink.secongHalf = secondHalf;
+          addToDocument(halfLink);
+        } else {
+          ilex.server.linkGetLR(halfLink, function(msg) {
+            halfLink.secongHalf = msg;
+            addToDocument(halfLink)
+          });
+        } 
+
       },
-      'load': function(halfLinks) {
+      'load': function(halfLinks, callback) {
         if (halfLinks === null) {
           return;
         }
+        if (callback === undefined) {
+          callback = function () {};
+        }
+        var secondLinksToLoad = halfLinks.length;
         for (let halfLink of halfLinks) {
-          addToLineage(halfLink);
+          ilex.server.linkGetLR(halfLink, function(msg) {
+            halfLink.secongHalf = msg;
+            addToLineage(halfLink);
+            secondLinksToLoad -= 1;
+            if (secondLinksToLoad === 0) {
+              callback();
+            }
+          });
         }
       },
       'getVisible': function () {
         var visibleHalfLinks = [];
         for (let lineage in lineages) {
           if (lineages.hasOwnProperty(lineage)) {
-            let visibleHalfLink = this.getVisibleFromLinage(lineage);
-            if (visibleHalfLink !== undefined) {
-              visibleHalfLinks.push(visibleHalfLink);
+            let visibleObject = this.getVisibleFromLinage(lineage);
+            if (visibleObject !== undefined) {
+              visibleHalfLinks.push(visibleObject);
             }
           }
         }
         return visibleHalfLinks;
       }
     };
+    return documentHalfLinksReturn;
   }();
   
   
@@ -156,20 +203,22 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     }
     ilex.server.documentGetDump(windowObject.tabId, documentObject.getId(), v,
       function (resp) {
+        that.documentHalfLinks.load(resp.links, function() {
+          //load text
+          version.set(v);
+          that.textEditor.setContent(resp.text);
+          
+          //load links
+          let visibleHalfLinks = that.documentHalfLinks.getVisible();
+          for (let visibleHalfLink of visibleHalfLinks) {
+            that.setHalfLink(visibleHalfLink.top, visibleHalfLink.all);
+          }
+          $(document).trigger('canvasRedraw');
 
-        version.set(v);
-        that.textEditor.setContent(resp.text);
-
-        that.documentHalfLinks.load(resp.links);
-        let visibleHalfLinks = that.documentHalfLinks.getVisible();
-        for (let visibleHalfLink of visibleHalfLinks) {
-          that.setHalfLink(visibleHalfLink);
-        }
-        $(document).trigger('canvasRedraw');
-
-        if (typeof callback === 'function') {
-          callback();
-        }
+          if (typeof callback === 'function') {
+            callback();
+          }
+        });
       },
       function (resp) {
 //        ilex.error.raise(resp.error);
@@ -193,14 +242,14 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
 //      
 //  });
   
-  that.dock.toolbarTop.addSeparator('15px');
-  
-  
-  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf127;</span>', function () {
-    let $spans = that.textEditor.getSelectionSpans();
-    $spans.css('text-decoration', 'underline').css('color', 'blue');
-  });
-  
+//  that.dock.toolbarTop.addSeparator('15px');
+//  
+//  
+//  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf127;</span>', function () {
+//    let $spans = that.textEditor.getSelectionSpans();
+//    $spans.css('text-decoration', 'underline').css('color', 'blue');
+//  });
+//  
   that.dock.toolbarTop.addSeparator('15px');
   
   that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf104;</span>', //<
@@ -271,7 +320,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   }
 
   
-  that.setHalfLink = function (halfLink) {
+  that.setHalfLink = function (halfLink, all) {
     var halfLinkRange = document.createRange(),
       start = that.textEditor.textDocument.relPosition(halfLink.range.position),
       end = that.textEditor.textDocument.relPosition(halfLink.range.position +
@@ -286,9 +335,12 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     
     let $spans = that.textEditor.getRangeSpans(halfLinkRange);
     
-    let halfLinkClass = halfLinkTools.getClassName(halfLink);
-    $spans.addClass('ilex-textLink').addClass(halfLinkClass);
-    appendHalfLinkToSpans($spans, halfLink);
+    for (let hl of all) {
+      let halfLinkClass = halfLinkTools.getClassName(hl);
+      $spans.addClass('ilex-textLink').addClass(halfLinkClass);
+      appendHalfLinkToSpans($spans, halfLink);
+    }
+
     
     if (ilex.conf.get('browsing mode') === 1) {
       $spans.addClass('ilex-textLinkNavigationMode');
@@ -302,15 +354,21 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     });
     $spans.on('mouseover', function (event) {
       if (ilex.conf.get('browsing mode') === 1) {
-        ilex.server.linkGetLR(halfLink, function (msg) {
-          var file = ilex.documents.get(msg.documentId),
-              $span = $('<span>').text(file.name);
-          if (msg.versionNo < file.totalVersions) {
-            $span.css('font-family', 'IlexSansOblique');
-          }
+        let file = ilex.documents.get(halfLink.secongHalf.documentId),
+                    $span = $('<span>').text(file.name);
+        
+        if (halfLink.secongHalf.versionNo < file.totalVersions) {
+          $span.css('font-family', 'IlexSansOblique');
+        }
+        
+//        ilex.server.linkGetLR(halfLink, function (msg) {
+//          var file = ilex.documents.get(msg.documentId),
+//              $span = $('<span>').text(file.name);
+//          if (msg.versionNo < file.totalVersions) {
+//            $span.css('font-family', 'IlexSansOblique');
+//          }
           ilex.view.popupNote.show(event.pageY, event.pageX, $span);
-	  });
-      }
+	  }
     });
     $spans.on('mouseleave', function (event) {
       ilex.view.popupNote.hide();
@@ -392,17 +450,17 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
       }
   });
   
-  that.dock.toolbarTop.addSeparator('15px');
-  
-  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf070;</span>', //slash eye
-    function(event) {
-      $(this).find('span').html('&#xf06e;');//slash eye
-      $(this).addClass('ilex-active');
-    },
-    function (event) {
-      $(this).find('span').html('&#xf070;');//eye
-      $(this).removeClass('ilex-active');
-    });
+//  that.dock.toolbarTop.addSeparator('15px');
+//  
+//  that.dock.toolbarTop.addButton('<span class="ilex-awesome">&#xf070;</span>', //slash eye
+//    function(event) {
+//      $(this).find('span').html('&#xf06e;');//slash eye
+//      $(this).addClass('ilex-active');
+//    },
+//    function (event) {
+//      $(this).find('span').html('&#xf070;');//eye
+//      $(this).removeClass('ilex-active');
+//    });
   
   that.textEditor.content.on('documentAddText', function(event, data) {
     var links = halfLinkTools.getIdsFromClassNames(data.span.classList);
