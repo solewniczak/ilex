@@ -10,8 +10,10 @@ import (
 )
 
 type HalfLinkContainer struct {
-	Links    []ilex.HalfLink
-	ToDelete []ilex.HalfLink
+	Links          []ilex.HalfLink
+	ToDelete       []ilex.HalfLink
+	IsInTransition bool
+	TransitionMap  map[bson.ObjectId]string // current to former
 }
 
 func (c HalfLinkContainer) Len() int      { return len(c.Links) }
@@ -38,11 +40,20 @@ func (lc *HalfLinkContainer) AddHalfLink(new *ilex.HalfLink) {
 	sort.Sort(*lc)
 }
 
-func isAmongLinks(link *ilex.HalfLink, linkIds []string) bool {
-	idAsString := link.LinkId.Hex()
-	for _, linkId := range linkIds {
-		if idAsString == linkId {
-			return true
+func (lc *HalfLinkContainer) isAmongLinks(link *ilex.HalfLink, linkIds []string) bool {
+	if lc.IsInTransition {
+		idAsString := lc.TransitionMap[link.LinkId]
+		for _, linkId := range linkIds {
+			if idAsString == linkId {
+				return true
+			}
+		}
+	} else {
+		idAsString := link.LinkId.Hex()
+		for _, linkId := range linkIds {
+			if idAsString == linkId {
+				return true
+			}
 		}
 	}
 	return false
@@ -56,14 +67,21 @@ func (lc *HalfLinkContainer) print() {
 	fmt.Printf("+ %d links to delete.\n", len(lc.ToDelete))
 }
 
-func (lc *HalfLinkContainer) AddRunes(position, length int, linkIds []string) error {
+func (lc *HalfLinkContainer) validateAddRequest(position, length int, linkIds []string) error {
 	for _, link := range lc.Links {
-		if link.Anchor.Range.Position < position && link.Anchor.Range.Position+link.Anchor.Range.Length > position && !isAmongLinks(&link, linkIds) {
+		if link.Anchor.Range.Position < position && link.Anchor.Range.Position+link.Anchor.Range.Length > position && !lc.isAmongLinks(&link, linkIds) {
 			return errors.New("Splitting links with not linked text is not supported.")
 		}
 	}
+	return nil
+}
+
+func (lc *HalfLinkContainer) AddRunes(position, length int, linkIds []string) error {
+	if err := lc.validateAddRequest(position, length, linkIds); err != nil {
+		return err
+	}
 	for i, link := range lc.Links {
-		if link.Anchor.Range.Position <= position && link.Anchor.Range.Position+link.Anchor.Range.Length >= position && isAmongLinks(&link, linkIds) {
+		if link.Anchor.Range.Position <= position && link.Anchor.Range.Position+link.Anchor.Range.Length >= position && lc.isAmongLinks(&link, linkIds) {
 			lc.Links[i].Anchor.Range.Length += length
 		} else if link.Anchor.Range.Position >= position {
 			// link is shifted right
@@ -71,6 +89,7 @@ func (lc *HalfLinkContainer) AddRunes(position, length int, linkIds []string) er
 		}
 	}
 	lc.print()
+	lc.IsInTransition = false
 	return nil
 }
 
@@ -116,6 +135,7 @@ func (lc *HalfLinkContainer) RemoveRunes(position, length int) {
 	}
 	lc.Links = lc.Links[:writeIndex]
 	lc.print()
+	lc.IsInTransition = false
 }
 
 func (lc *HalfLinkContainer) Persist(db *mgo.Database) error {
@@ -190,6 +210,7 @@ func (lc *HalfLinkContainer) Propagate(db *mgo.Database) ([]ilex.HalfLink, error
 	newFullLinks := make([]interface{}, 0)
 	newHalfLinks := make([]ilex.HalfLink, 0)
 	otherHalfLinks := make([]ilex.HalfLink, 0)
+	transitionMap := make(map[bson.ObjectId]string)
 
 	for _, halfLink := range lc.Links {
 		var link ilex.TwoWayLink
@@ -204,6 +225,7 @@ func (lc *HalfLinkContainer) Propagate(db *mgo.Database) ([]ilex.HalfLink, error
 		newFullLinks = append(newFullLinks, link)
 		newHalfLinks = append(newHalfLinks, newHalf)
 		otherHalfLinks = append(otherHalfLinks, newOtherHalf)
+		transitionMap[newHalf.LinkId] = halfLink.LinkId.Hex()
 	}
 
 	bulk := links.Bulk()
@@ -212,5 +234,7 @@ func (lc *HalfLinkContainer) Propagate(db *mgo.Database) ([]ilex.HalfLink, error
 		return nil, err
 	}
 	lc.Links = newHalfLinks
+	lc.IsInTransition = true
+	lc.TransitionMap = transitionMap
 	return otherHalfLinks, nil
 }
