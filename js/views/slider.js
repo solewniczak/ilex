@@ -50,37 +50,33 @@ ilex.views.slider = function(canvas) {
         return;
       }
       
-      let leftVisibleLinksObjects =
-                    leftWindow.contentWidget.documentHalfLinks.getVisible();
-      for (let visibleObject of leftVisibleLinksObjects) {
-        if (drawnLinks.indexOf(visibleObject.top.linkId) === -1) {
-          //Musimy to zimenić tak aby uwzględnić czy link jest lewy czy prawy.
-          //W przeciwnym wypadku będziemy wyświetlać linki do samego siebie, co
-          //nie jest prawdą.
-          let classes = [];
-          for (let hl of visibleObject.all) {
-            classes.push('span.ilex-linkId-'+hl.linkId);
-          }
-          let selector = classes.join(',');
-          
-          var $leftSpans = leftWindow.contentWidget.container
-                            .find(selector),
-              $rightSpans = rightWindow.contentWidget.container
-                            .find(selector);
-          
-          if ($leftSpans.length === 0 || $rightSpans.length === 0) {
-            continue;
-          }
-          
-          ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans,
-                                          ilex.colorCycle.current(0.6), true);
-          ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans,
-                                          ilex.colorCycle.current(0.1), false);
-
-          ilex.colorCycle.next();
-
-          drawnLinks.push(visibleObject.top.linkId);
+      let resolved = leftWindow.contentWidget.documentLinks.getResolved();
+      for (let resolvedLink of resolved) {
+        //Musimy to zimenić tak aby uwzględnić czy link jest lewy czy prawy.
+        //W przeciwnym wypadku będziemy wyświetlać linki do samego siebie, co
+        //nie jest prawdą.
+        let classes = [];
+        for (let hl of resolvedLink.all) {
+          classes.push('span.ilex-linkId-'+hl.linkId);
         }
+        let selector = classes.join(',');
+
+        var $leftSpans = leftWindow.contentWidget.container
+                          .find(selector),
+            $rightSpans = rightWindow.contentWidget.container
+                          .find(selector);
+
+        if ($leftSpans.length === 0 || $rightSpans.length === 0) {
+          continue;
+        }
+
+        ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans,
+                                        ilex.colorCycle.current(0.6), true);
+        ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans,
+                                        ilex.colorCycle.current(0.1), false);
+
+        ilex.colorCycle.next();
+
       }
       
 

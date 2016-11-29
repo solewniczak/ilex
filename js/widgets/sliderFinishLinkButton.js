@@ -83,8 +83,12 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
           };
         }
         if (leftMaxVer !== leftV && rightMaxVer !== rightV) {
-          leftWidget.documentHalfLinks.create(leftHalfLink, rightHalfLink);
-          rightWidget.documentHalfLinks.create(rightHalfLink, leftHalfLink);
+          leftWidget.documentLinks.create(leftHalfLink, rightHalfLink);
+          rightWidget.documentLinks.create(rightHalfLink, leftHalfLink);
+        } else if (leftMaxVer !== leftV) {
+          leftWidget.documentLinks.create(leftHalfLink);
+        } else if (rightMaxVer !== rightV) {
+          rightWidget.documentLinks.create(rightHalfLink);
         }
       });
       leftWidget.textEditor.selectionRange.clear();
