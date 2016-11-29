@@ -308,13 +308,13 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   
   var appendResolvedLinkToSpans = function($spans, resolvedLink) {
     $spans.each(function () {
-      var resolvedLinks = $(this).data('ilex-links');
+      var resolvedLinks = $(this).data('ilex-resolvedLinks');
       if (resolvedLinks === undefined) {
         resolvedLinks = [resolvedLink];
       } else {
         resolvedLinks.push(resolvedLink);
       }
-      $(this).data('ilex-links', resolvedLinks);
+      $(this).data('ilex-resolvedLinks', resolvedLinks);
     });
   };
   
@@ -476,7 +476,12 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
 //    });
   
   that.textEditor.content.on('documentAddText', function(event, data) {
-    var links = halfLinkTools.getIdsFromClassNames(data.span.classList);
+//    var links = halfLinkTools.getIdsFromClassNames(data.span.classList);
+    var links = [],
+        resolvedLinks = $(data.span).data('ilex-resolvedLinks');
+    if (resolvedLinks !== undefined) {
+      links.push(resolvedLinks[0].top.linkId);
+    }
     documentObject.addText(data.absStart, data.value, links);
   });
   
@@ -525,28 +530,45 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   
   that.textEditor.content.on('contextmenu', '.ilex-textLink', function (event) {
     event.preventDefault();
-    var haflLinks = $(this).data('ilex-links');
-    if (haflLinks !== undefined && haflLinks.length === 1) {
-        //
-      var halfLink = haflLinks[0];
-	  ilex.server.linkGetLR(halfLink, function (msg) {
-        var file = ilex.documents.get(msg.documentId),
-          linkJumps = [
-            ['standardButton', function() {
-               $(document).trigger('ilex-linkClicked', [windowObject, halfLink]);
-              }, {
-                'text': file.name,
-                'icon': '<span class="ilex-awesome">&#xf0c1;</span>'
-            }],
-		  ['separator']
-        ];
-		let menu = linkJumps.concat(textTools);
-    	ilex.popupMenu.show(event.pageY, event.pageX, menu, 220);
-	  });
-    } else {
-      let menu = textTools;
-      ilex.popupMenu.show(event.pageY, event.pageX, menu, 220);
-	}
+//    var haflLinks = $(this).data('ilex-links');
+//    if (haflLinks !== undefined && haflLinks.length === 1) {
+//        //
+//      var halfLink = haflLinks[0];
+//	  ilex.server.linkGetLR(halfLink, function (msg) {
+//        var file = ilex.documents.get(msg.documentId),
+//          linkJumps = [
+//            ['standardButton', function() {
+//               $(document).trigger('ilex-linkClicked', [windowObject, halfLink]);
+//              }, {
+//                'text': file.name,
+//                'icon': '<span class="ilex-awesome">&#xf0c1;</span>'
+//            }],
+//		  ['separator']
+//        ];
+//		let menu = linkJumps.concat(textTools);
+//    	ilex.popupMenu.show(event.pageY, event.pageX, menu, 220);
+//	  });
+//        } else {
+//      let menu = textTools;
+//      ilex.popupMenu.show(event.pageY, event.pageX, menu, 220);
+//	}
+    var resolvedLinks = $(this).data('ilex-resolvedLinks'),
+        resolvedLink = resolvedLinks[0],
+        top = resolvedLink.top,
+        file = ilex.documents.get(top.secondHalf.documentId),
+        linkJumps = [
+          ['standardButton', function() {
+             $(document).trigger('ilex-linkClicked', [windowObject, resolvedLink]);
+            }, {
+              'text': file.name,
+              'icon': '<span class="ilex-awesome">&#xf0c1;</span>'
+          }],
+        ['separator']
+      ];
+    let menu = linkJumps.concat(textTools);
+    ilex.popupMenu.show(event.pageY, event.pageX, menu, 220);
+
+
 	  //        ilex.view.popupNote.show(file.name + ' | <strong>'+link.to.versionNo+'</strong>');
   });
 

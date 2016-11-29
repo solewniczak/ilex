@@ -13,8 +13,6 @@ document.fonts.ready.then(function() {
   
   $("body").css("overflow", "hidden");
   
-  console.log(document.fonts);
-
   ilex.window = $('<div>').appendTo('body')
                       .css('position', 'relative')
                       .css('z-index', 2)
