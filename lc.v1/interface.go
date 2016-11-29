@@ -24,7 +24,7 @@ func NewLinkContainer(documentId *bson.ObjectId, version int, db *mgo.Database) 
 		fmt.Println("DB error creating links container:", err.Error())
 		return nil
 	}
-	result := HalfLinkContainer{Links: docLinks, ToDelete: make([]ilex.HalfLink, 0)}
+	result := HalfLinkContainer{Links: docLinks, ToDelete: make([]ilex.HalfLink, 0), IsInTransition: false, TransitionMap: nil}
 	sort.Sort(result)
 	result.print()
 	return &result
