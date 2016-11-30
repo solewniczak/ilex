@@ -600,6 +600,29 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     }
   };
   
+//  that.updateAllLinks = function () {
+//    for (var i = 0; i <= that.windows.length; i++) {
+//      var curWin = that.windows.get(i),
+//          curWidget = curWin.contentWidget;
+//      if (curWidget.isLinkable()) {
+//        //block edition while updating
+//        curWidget.textEditor.allowChanges = false;
+//        that.documentLinks.load(params.newLinks, function () {
+//          that.clearLinks();
+//          //load links
+//          let resolved = that.documentLinks.getResolved();
+//          for (let resolvedLink of resolved) {
+//            that.setLink(resolvedLink);
+//          }
+//          
+//          $(document).trigger('canvasRedraw');
+//          
+//          that.textEditor.allowChanges = true;
+//        });
+//      }
+//    }
+//  };
+  
   $(document).on('ilex-linkClicked', function(event, windowObject, resolvedLink) {
     var createDocInfoObj = function(docId, ver) {
       return {

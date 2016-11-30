@@ -53,6 +53,10 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     return documentObject;
   };
   
+  that.isLinkable = function () {
+    return true;
+  };
+  
   //Użyte abstrakcje
   //halfLink
   //link halflink posiadający parametr halfLink.secondHalf
@@ -60,17 +64,49 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   
   that.documentLinks = function () {
     var lineages = {};
-    var addToLineage = function(halfLink) {
-      if (lineages[halfLink.lineage] === undefined) {
-        lineages[halfLink.lineage] = [halfLink];
-      } else {
-        lineages[halfLink.lineage].push(halfLink);
-      }
-    };
-    
+
     var documentLinksReturn = {
+      'addToLineage': function(link) {
+        if (lineages[link.lineage] === undefined) {
+          lineages[link.lineage] = [link];
+        } else {
+          lineages[link.lineage].push(link);
+        }
+      },
+      'clear': function () {
+        lineages = {};
+      },
+      'hasLineage': function(lineage) {
+        if (lineages[lineage] !== undefined) {
+          return true;
+        } else {
+          return false;
+        }
+      },
       //@return resolvedLink
       'resolveLinage': function(lineage) {
+        var resolveFollowing = function(curVerLineage) {
+          let maxSecondHalf = curVerLineage[0];
+          for (let i = 1; i < curVerLineage.length; i++) {
+            let hl = curVerLineage[i];
+            if (hl.secondHalf.versionNo > maxSecondHalf.secondHalf.versionNo) {
+              maxSecondHalf = hl;
+            }
+          }
+          return {'top': maxSecondHalf, 'all': curVerLineage};
+        };
+        
+        var resolveHistoric = function (curVerLineage) {
+          let minSecondHalf = curVerLineage[0];
+          for (let i = 1; i < curVerLineage.length; i++) {
+            let hl = curVerLineage[i];
+            if (hl.secondHalf.versionNo < minSecondHalf.secondHalf.versionNo) {
+              minSecondHalf = hl;
+            }
+          }
+          return {'top': minSecondHalf, 'all': curVerLineage};
+        };
+        
         var curVerLineage = $.grep(lineages[lineage], function (v) {
           return v.versionNo === that.getVersion();
         });
@@ -80,14 +116,15 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
         } else if (curVerLineage.length === 1) {
           return {'top': curVerLineage[0], 'all': curVerLineage};
         } else {
-          let maxSecondHalf = curVerLineage[0];
-          for (let i = 1; i < curVerLineage.length; i++) {
-            let hl = curVerLineage[i];
-            if (hl.secondHalf.versionNo > maxSecondHalf.secondHalf.versionNo) {
-              maxSecondHalf = hl;
-            }
+          var type = curVerLineage[0].type;
+          if (type === 'F') {
+            return resolveFollowing(curVerLineage);
+          } else if (type === 'H') {
+            return resolveHistoric(curVerLineage);
+          } else {
+            console.log('documentLinks: unknown link type: '+type);
           }
-          return {'top': maxSecondHalf, 'all': curVerLineage};
+          
           //console.log(that.getFileInfo('name'), curVerLineage);
 //          let secondsHalfs = {};
 //          for (let h of curVerLineage) {
@@ -111,7 +148,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
           callback = function () {};
         }
         var addToDocument = function (link) {
-          addToLineage(link);
+          documentLinksReturn.addToLineage(link);
           if (documentLinksReturn.isTop(link)) {
             that.setLink({'top': link, 'all': [link]});
             $(document).trigger('canvasRedraw');
@@ -147,7 +184,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
             var link = halfLink;
             link.secondHalf = msg;
             
-            addToLineage(link);
+            documentLinksReturn.addToLineage(link);
             secondLinksToLoad -= 1;
             if (secondLinksToLoad === 0) {
               callback();
@@ -218,7 +255,9 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
       function (resp) {
         that.documentLinks.load(resp.links, function() {
           //load text
+          version.updateLastest(v);
           version.set(v);
+          
           that.textEditor.setContent(resp.text);
           
           //load links
@@ -309,17 +348,17 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     };
   }();
   
-  var appendResolvedLinkToSpans = function($spans, resolvedLink) {
-    $spans.each(function () {
-      var resolvedLinks = $(this).data('ilex-resolvedLinks');
-      if (resolvedLinks === undefined) {
-        resolvedLinks = [resolvedLink];
-      } else {
-        resolvedLinks.push(resolvedLink);
-      }
-      $(this).data('ilex-resolvedLinks', resolvedLinks);
-    });
-  };
+//  var appendResolvedLinkToSpans = function($spans, resolvedLink) {
+//    $spans.each(function () {
+//      var resolvedLinks = $(this).data('ilex-resolvedLinks');
+//      if (resolvedLinks === undefined) {
+//        resolvedLinks = [resolvedLink];
+//      } else {
+//        resolvedLinks.push(resolvedLink);
+//      }
+//      $(this).data('ilex-resolvedLinks', resolvedLinks);
+//    });
+//  };
   
   that.textEditor = ilex.widgetsCollection.textEdiotr(that.container);
   
@@ -331,7 +370,37 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     }
     return true;
   }
-
+  
+//  that.updateLink = function (prevLinkId, newResolvedLink) {
+//    let halfLinkClass = 'ilex-linkId-'+prevLinkId;
+//      $spans = that.textEditor.content.find('span.'+halfLinkClass);
+//    
+//    //remove previous classes
+//    for (let spanClass of $spans.get(0).classList) {
+//      if (spanClass.indexOf('ilex-linkId-') === 0) {
+//        $spans.removeClass(spanClass);
+//      }
+//    }
+//    
+//    $spans.data('ilex-resolvedLinks', [newResolvedLink]);
+//    
+//    for (let hl of newResolvedLink.all) {
+//      let halfLinkClass = halfLinkTools.getClassName(hl);
+//      $spans.addClass(halfLinkClass);
+//    }
+//  };
+  
+  that.clearLinks = function() {  
+    let $spans = that.textEditor.content.find('span');
+    
+    $spans.removeClass('ilex-textLink');
+    $spans.removeClass(function (index, css) {
+      return (css.match (/(^|\s)ilex-linkId-\S+/g) || []).join(' ');
+    });
+    $spans.data('ilex-resolvedLinks', []);
+    $spans.off('click mouseover mouseleave');
+    
+  };
   
   that.setLink = function (resolved) {
     var top = resolved.top,
@@ -353,8 +422,9 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     for (let hl of all) {
       let halfLinkClass = halfLinkTools.getClassName(hl);
       $spans.addClass('ilex-textLink').addClass(halfLinkClass);
-      appendResolvedLinkToSpans($spans, resolved);
     }
+    //      setResolvedLinkToSpans($spans, resolved);
+    $spans.data('ilex-resolvedLinks', [resolved]);
 
     
     if (ilex.conf.get('browsing mode') === 1) {
@@ -395,8 +465,17 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
                                     .css('font', '12px IlexSans')
                                     .css('display', 'inline-block')
                                     .css('margin', '0 4px');
+  version.lastest = 0;
+  version.updateLastest = function (v) {
+    if (v >= version.lastest) {
+      version.lastest = v;
+    } else {
+      console.log('version.setLast: version: '+v+' is lower than lastest: '+version.lastest);
+    }
+  };
+  
   version.set = function (v) {
-    if (v === that.getFileInfo('totalVersions')) {
+    if (v === version.lastest) {
       version.element.html(v + ' (cur.)');
       that.textEditor.allowChanges = true;
     } else {
@@ -410,9 +489,68 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
   };
   
   //wait for version and names changes
-  $(document).on('ilex-fileInfoUpdated', function (event, fileId) {
-    if (documentObject.getId() === fileId) {
-      version.set(that.getFileInfo('totalVersions'));
+//  $(document).on('ilex-fileInfoUpdated', function (event, fileId) {
+//    if (documentObject.getId() === fileId) {
+//      version.set(that.getFileInfo('totalVersions'));
+//    }
+//  });
+
+  $(document).on('ilex-updateLineage', function (e, lineage) {
+    if (that.documentLinks.hasLineage(lineage)) {
+      that.textEditor.allowChanges = false;
+    
+      //remove documents links from array
+      that.documentLinks.clear();
+      
+      //get new links
+      ilex.server.documentGetDump(windowObject.tabId,
+                                  documentObject.getId(),
+                                  that.getVersion(),
+        function (resp) {
+          that.documentLinks.load(resp.links, function() {
+            //remove links spans
+            that.clearLinks();
+
+            //load links
+            let resolved = that.documentLinks.getResolved();
+            for (let resolvedLink of resolved) {
+              that.setLink(resolvedLink);
+            }
+            $.when($(document).trigger('canvasRedraw')).done(function () {
+              that.textEditor.allowChanges = true;
+            });
+          });
+      });
+    } 
+  });
+  
+  $(document).on('ilex-versionNumberIncremented', function (event, params) {
+    if (params.tab === windowObject.tabId) {
+      version.updateLastest(params.version);
+      //we are viewing previous version
+      if (that.getVersion() === params.version - 1) {
+        version.set(params.version);
+        //block edition while updating
+        that.textEditor.allowChanges = false;
+        for (let newLink of params.newLinks) {
+          $(document).trigger('ilex-updateLineage', [newLink.lineage]);  
+        }
+//        that.documentLinks.load(params.newLinks, function () {
+//          
+//          
+//          that.clearLinks();
+//          //load links
+//          let resolved = that.documentLinks.getResolved();
+//          for (let resolvedLink of resolved) {
+////            that.setLink(resolvedLink);
+//            $(document).trigger('ilex-updateLineage', [resolvedLink.lineage]);   
+//          }
+//          
+//         
+//          
+//          that.textEditor.allowChanges = true;
+//        });
+      }
     }
   });
   
@@ -482,7 +620,8 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
 //    var links = halfLinkTools.getIdsFromClassNames(data.span.classList);
     var links = [],
         resolvedLinks = $(data.span).data('ilex-resolvedLinks');
-    if (resolvedLinks !== undefined) {
+
+    if (resolvedLinks !== undefined && resolvedLinks.length > 0) {
       links.push(resolvedLinks[0].top.linkId);
     }
     documentObject.addText(data.absStart, data.value, links);

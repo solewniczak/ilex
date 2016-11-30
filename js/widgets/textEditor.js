@@ -625,6 +625,19 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     }
   };
   
+  var getPreviousSpan = function(span) {
+    var line = span.parentElement;
+    if (span.previousElementSibling !== null) {
+      return span.previousElementSibling;
+    } else if (line.previousElementSibling !== null) {
+      var prevLine = line.previousElementSibling;
+      return prevLine.lastElementChild;
+    } else {
+      console.log('textEditor: getPresiousSpan: you selected first span of the document');
+      return null;
+    }
+  };
+  
   //public API
   
   that.getRangeSpans = function(range) {
@@ -635,8 +648,16 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
         startLine = startSpan.parentElement,
         relStart = range.startOffset,
         endSpan = range.endContainer.parentElement,
-        endLine = endSpan.parentElement,
         relEnd = range.endOffset;
+    
+    //if rel end === 0 skip to previous span to prevent creation of empty span
+    //<span></span>
+    if (relEnd === 0) {
+      endSpan = getPreviousSpan(endSpan);
+      relEnd = endSpan.textContent.length;
+    }
+    
+    var endLine = endSpan.parentElement;
     if (startLine === endLine) {
       return getSingleLineSpans(startSpan, relStart, endSpan, relEnd); 
     } else {
