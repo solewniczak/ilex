@@ -251,11 +251,12 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
       }
       return;
     }
-    ilex.server.documentGetDump(windowObject.tabId, documentObject.getId(), v,
+    var docId = documentObject.getId();
+    ilex.server.documentGetDump(windowObject.tabId, docId, v,
       function (resp) {
         that.documentLinks.load(resp.links, function() {
           //load text
-          version.updateLastest(v);
+          version.updateLastest(ilex.documents.get(docId).totalVersions);
           version.set(v);
           
           that.textEditor.setContent(resp.text);
@@ -530,11 +531,10 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
       //we are viewing previous version
       if (that.getVersion() === params.version - 1) {
         version.set(params.version);
-        //block edition while updating
-        that.textEditor.allowChanges = false;
-        for (let newLink of params.newLinks) {
-          $(document).trigger('ilex-updateLineage', [newLink.lineage]);  
-        }
+      }
+      for (let newLink of params.newLinks) {
+        $(document).trigger('ilex-updateLineage', [newLink.lineage]);  
+      }
 //        that.documentLinks.load(params.newLinks, function () {
 //          
 //          
@@ -550,7 +550,6 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
 //          
 //          that.textEditor.allowChanges = true;
 //        });
-      }
     }
   });
   
