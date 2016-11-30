@@ -49,10 +49,10 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
           rightType = 'F';
       
       if (leftMaxVer !== leftV) {
-        rightType = 'H';
+        leftType = 'H';
       }
       if (rightMaxVer !== rightV) {
-        leftType = 'H';
+        rightType = 'H';
       }
       
       var leftRange = leftWidget.textEditor.getSelectionAbsRange(),

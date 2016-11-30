@@ -137,7 +137,8 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
         }
       },
       'isTop': function (link) {
-        if (this.resolveLinage(link.lineage).top.linkId === 
+        var resolvedLink = this.resolveLinage(link.lineage);
+        if (resolvedLink !== undefined && resolvedLink.top.linkId === 
             link.linkId) {
           return true;
         }
