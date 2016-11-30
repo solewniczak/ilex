@@ -104,7 +104,6 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
   };
   
   that.addTabAfter = function(afterInd, windowObject) {
-    
     //http://stackoverflow.com/questions/5322895/is-there-a-way-to-create-a-chrome-like-tab-using-css
     
     var $tab = $('<div class="ilex-tab">')
@@ -147,6 +146,7 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
       //middle mouse button - close tab
       if (event.button === 1) {
         closeTabAndDocument();
+        return false;
       } else if (event.button === 2) {
         //contextmenu
         return false; 

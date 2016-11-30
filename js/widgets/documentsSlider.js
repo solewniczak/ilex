@@ -585,7 +585,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
   
   that.slideTo = function (windowPointer, callback) {
     if (windowPointer < 0 || windowPointer >= that.windows.length) {
-      console.log('on ilex-slider-setWindowPointer: windowPointer ' + windowPointer + ' out of bound');
+      console.log('that.slideTo: windowPointer ' + windowPointer + ' out of bound');
       return;
     }
     //last windows
