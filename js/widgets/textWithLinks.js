@@ -116,7 +116,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
         } else if (curVerLineage.length === 1) {
           return {'top': curVerLineage[0], 'all': curVerLineage};
         } else {
-          var type = curVerLineage[0].type;
+          var type = curVerLineage[0].secondHalf.type;
           if (type === 'F') {
             return resolveFollowing(curVerLineage);
           } else if (type === 'H') {
@@ -398,7 +398,11 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     $spans.removeClass(function (index, css) {
       return (css.match (/(^|\s)ilex-linkId-\S+/g) || []).join(' ');
     });
-    $spans.data('ilex-resolvedLinks', []);
+    
+    $spans.removeClass('ilex-linkType-H');
+    $spans.removeClass('ilex-linkType-F');
+
+    $spans.data('ilex-resolvedLinks', undefined);
     $spans.off('click mouseover mouseleave');
     
   };
@@ -422,10 +426,17 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     
     for (let hl of all) {
       let halfLinkClass = halfLinkTools.getClassName(hl);
-      $spans.addClass('ilex-textLink').addClass(halfLinkClass);
+      $spans.addClass(halfLinkClass);
     }
     //      setResolvedLinkToSpans($spans, resolved);
     $spans.data('ilex-resolvedLinks', [resolved]);
+    
+    $spans.addClass('ilex-textLink');
+    if (top.type === 'H') {
+      $spans.addClass('ilex-linkType-H');
+    } else if (top.type === 'F') {
+      $spans.addClass('ilex-linkType-F');
+    }
 
     
     if (ilex.conf.get('browsing mode') === 1) {
@@ -441,10 +452,12 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     $spans.on('mouseover', function (event) {
       if (ilex.conf.get('browsing mode') === 1) {
         let file = ilex.documents.get(top.secondHalf.documentId),
-                    $span = $('<span>').text(file.name);
+                    $span = $('<span>').text('"'+file.name+'"');
         
-        if (top.secondHalf.versionNo < file.totalVersions) {
+        
+        if (top.secondHalf.type === 'H') {
           $span.css('font-family', 'IlexSansOblique');
+          $span.append(' v. '+top.secondHalf.versionNo);
         }
         
 //        ilex.server.linkGetLR(halfLink, function (msg) {

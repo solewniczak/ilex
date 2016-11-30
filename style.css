@@ -120,6 +120,9 @@ div:focus {
   cursor: pointer;
 }
 
+.ilex-linkType-H {
+  font-family: IlexSansOblique;
+}
 
 .ilex-closeTabButton {
   text-align: center;

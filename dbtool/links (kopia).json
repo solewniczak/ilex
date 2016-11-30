@@ -1,0 +1,212 @@
+[
+{
+"Left": {
+"Type": "H",
+"VersionNo": 1,
+"Range" : { "Position": 348,
+"Length": 15}
+}, "Right": {
+"Type": "H",
+"VersionNo": 1,
+"Range" : { "Position": 637,
+"Length": 10}
+}
+},
+
+{
+"Left": {
+"Type": "F",
+"VersionNo": 1,
+"Range" : { "Position": 81,
+"Length": 28}
+}, "Right": {
+"Type": "F",
+"VersionNo": 2,
+"Range" : { "Position": 389,
+"Length": 34}
+}
+},
+
+{
+"Left": {
+"Type": "F",
+"VersionNo": 1,
+"Range" : { "Position": 81,
+"Length": 28}
+}, "Right": {
+"Type": "F",
+"VersionNo": 3,
+"Range" : { "Position": 389,
+"Length": 34}
+}
+},
+
+{
+"Left": {
+"Type": "F",
+"VersionNo": 1,
+"Range" : { "Position": 200,
+"Length": 14}
+}, "Right": {
+"Type": "F",
+"VersionNo": 2,
+"Range" : { "Position": 502,
+"Length": 35}
+}
+},
+
+{
+"Left": {
+"Type": "F",
+"VersionNo": 2,
+"Range" : { "Position": 200,
+"Length": 14}
+}, "Right": {
+"Type": "F",
+"VersionNo": 2,
+"Range" : { "Position": 502,
+"Length": 35}
+}
+},
+
+{
+"Left": {
+"Type": "F",
+"VersionNo": 3,
+"Range" : { "Position": 200,
+"Length": 14}
+}, "Right": {
+"Type": "F",
+"VersionNo": 2,
+"Range" : { "Position": 502,
+"Length": 35}
+}
+},
+
+{
+"Left": {
+"Type": "F",
+"VersionNo": 3,
+"Range" : { "Position": 200,
+"Length": 14}
+}, "Right": {
+"Type": "F",
+"VersionNo": 1,
+"Range" : { "Position": 697,
+"Length": 35}
+}
+},
+
+{
+"Left": {
+"Type": "H",
+"VersionNo": 1,
+"Range" : { "Position": 110,
+"Length": 13}
+}, "Right": {
+"Type": "H",
+"VersionNo": 1,
+"Range" : { "Position": 600,
+"Length": 9}
+}
+},
+
+{
+"Left": {
+"Type": "H",
+"VersionNo": 2,
+"Range" : { "Position": 110,
+"Length": 13}
+}, "Right": {
+"Type": "H",
+"VersionNo": 1,
+"Range" : { "Position": 600,
+"Length": 9}
+}
+},
+
+{
+"Left": {
+"Type": "H",
+"VersionNo": 3,
+"Range" : { "Position": 110,
+"Length": 13}
+}, "Right": {
+"Type": "H",
+"VersionNo": 1,
+"Range" : { "Position": 600,
+"Length": 9}
+}
+},
+
+{
+"Left": {
+"Type": "H",
+"VersionNo": 1,
+"Range" : { "Position": 110,
+"Length": 13}
+}, "Right": {
+"Type": "H",
+"VersionNo": 2,
+"Range" : { "Position": 605,
+"Length": 9}
+}
+},
+
+{
+"Left": {
+"Type": "H",
+"VersionNo": 1,
+"Range" : { "Position": 285,
+"Length": 18}
+}, "Right": {
+"Type": "H",
+"VersionNo": 1,
+"Range" : { "Position": 334,
+"Length": 25}
+}
+},
+
+{
+"Left": {
+"Type": "H",
+"VersionNo": 2,
+"Range" : { "Position": 290,
+"Length": 18}
+}, "Right": {
+"Type": "H",
+"VersionNo": 1,
+"Range" : { "Position": 334,
+"Length": 25}
+}
+},
+
+{
+"Left": {
+"Type": "F",
+"VersionNo": 2,
+"Range" : { "Position": 454,
+"Length": 34}
+}, "Right": {
+"Type": "H",
+"VersionNo": 1,
+"Range" : { "Position": 204,
+"Length": 22}
+}
+},
+
+{
+"Left": {
+"Type": "H",
+"VersionNo": 1,
+"Range" : { "Position": 195,
+"Length": 13}
+}, "Right": {
+"Type": "F",
+"VersionNo": 1,
+"Range" : { "Position": 403,
+"Length": 21}
+}
+}
+
+]
