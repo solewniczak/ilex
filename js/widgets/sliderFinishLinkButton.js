@@ -42,7 +42,18 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
           leftV = leftWidget.getVersion(),
           rightWidget = rightWindow.contentWidget,
           rightId = rightWidget.getFileInfo('id'),
-          rightV = rightWidget.getVersion();
+          rightV = rightWidget.getVersion(),
+          leftMaxVer = leftWidget.getFileInfo('totalVersions'),
+          rightMaxVer = rightWidget.getFileInfo('totalVersions'),
+          leftType = 'F',
+          rightType = 'F';
+      
+      if (leftMaxVer !== leftV) {
+        rightType = 'H';
+      }
+      if (rightMaxVer !== rightV) {
+        leftType = 'H';
+      }
       
       var leftRange = leftWidget.textEditor.getSelectionAbsRange(),
           rightRange = rightWidget.textEditor.getSelectionAbsRange();
@@ -50,16 +61,15 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
         'documentId':  leftId,
         'versionNo': leftV,
         'range': leftRange,
-        'type': 'H'
+        'type': leftType
       },
       {
         'documentId':  rightId,
         'versionNo': rightV,
         'range': rightRange,
-        'type': 'H'
+        'type': rightType
       }, function (msg) {
-        var leftMaxVer = leftWidget.getFileInfo('totalVersions'),
-            rightMaxVer = rightWidget.getFileInfo('totalVersions');
+
         
         if (leftMaxVer !== leftV) {
            var leftHalfLink = {
@@ -68,7 +78,8 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
             'isLeft': true,
             'lineage': msg.lineage,
             'linkId': msg.linkId,
-            'range': leftRange
+            'range': leftRange,
+            'type': leftType
           };
           
         }
@@ -79,7 +90,8 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
             'isLeft': false,
             'lineage': msg.lineage,
             'linkId': msg.linkId,
-            'range': rightRange
+            'range': rightRange,
+            'type': rightType
           };
         }
         if (leftMaxVer !== leftV && rightMaxVer !== rightV) {
