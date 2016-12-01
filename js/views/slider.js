@@ -61,7 +61,7 @@ ilex.views.slider = function(canvas) {
 //        }
 //        let selector = classes.join(',');
         
-        let selector = 'span.ilex-lineage-'+resolvedLink.top.lineage;
+        let selector = 'span.ilex-lineage-'+resolvedLink.lineage;
         var $leftSpans = leftWindow.contentWidget.container
                           .find(selector),
             $rightSpans = rightWindow.contentWidget.container

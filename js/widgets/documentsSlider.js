@@ -648,8 +648,8 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     };
     //When jumping on link resol it one more time to get the lastest
     //possible version!
-    var halfLink = resolvedLink.top;
-    ilex.server.linkGetLR(resolvedLink.top, function (msg) {
+    var halfLink = resolvedLink;
+    ilex.server.linkGetLR(resolvedLink, function (msg) {
       var docId = msg.documentId,
           ver = msg.versionNo,
           leftWindow = that.windows.get(windowObject.getInd() - 1),
