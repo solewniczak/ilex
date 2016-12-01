@@ -623,7 +623,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
 //    }
 //  };
   
-  $(document).on('ilex-linkClicked', function(event, windowObject, resolvedLink) {
+  $(document).on('ilex-linkClicked', function(event, windowObject, lineage) {
     var createDocInfoObj = function(docId, ver) {
       return {
         'docId': docId,
@@ -648,74 +648,80 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     };
     //When jumping on link resol it one more time to get the lastest
     //possible version!
-    var halfLink = resolvedLink;
-    ilex.server.linkGetLR(resolvedLink, function (msg) {
-      var docId = msg.documentId,
-          ver = msg.versionNo,
-          leftWindow = that.windows.get(windowObject.getInd() - 1),
-          rightWindow = that.windows.get(windowObject.getInd() + 1),
-          leftInfo = docInfo(leftWindow),
-          halfLinkInfo = createDocInfoObj(docId, ver),
-          rightInfo = docInfo(rightWindow);
-      
-      //document to the right
-      if (halfLinkInfo.equals(rightInfo)) {
-        if (!rightWindow.isVisible()) {
-          if (that.visibleWindows.get() === 1) {
-            that.visibleWindows.inc();
-            ilex.applySize(true, false, '*', function () {
-              rightWindow.scrollTo(halfLink);
-            });
-          } else {
-            that.slideLeft(function () {
-              rightWindow.scrollTo(halfLink);
-            });
-          }
+    var contentWidget = windowObject.contentWidget;
+    if (!contentWidget.isLinkable()) {
+      return;
+    }
+    
+    var link = contentWidget.documentLinks.resolveLinage(lineage),
+        halfLink = link;
+//    ilex.server.linkGetLR(resolvedLink, function (msg) {
+    var docId = link.secondHalf.documentId,
+        ver = link.secondHalf.versionNo,
+        leftWindow = that.windows.get(windowObject.getInd() - 1),
+        rightWindow = that.windows.get(windowObject.getInd() + 1),
+        leftInfo = docInfo(leftWindow),
+        halfLinkInfo = createDocInfoObj(docId, ver),
+        rightInfo = docInfo(rightWindow);
+
+    //document to the right
+    if (halfLinkInfo.equals(rightInfo)) {
+      if (!rightWindow.isVisible()) {
+        if (that.visibleWindows.get() === 1) {
+          that.visibleWindows.inc();
+          ilex.applySize(true, false, '*', function () {
+            rightWindow.scrollTo(halfLink);
+          });
         } else {
-          rightWindow.scrollTo(halfLink);
+          that.slideLeft(function () {
+            rightWindow.scrollTo(halfLink);
+          });
         }
-      } else if (halfLinkInfo.equals(leftInfo)) {
-        if (!leftWindow.isVisible()) {
-          if (that.visibleWindows.get() === 1) {
-            that.visibleWindows.inc();
-            ilex.applySize(false, false, '*', function () {
-              that.slideRight(function () {
-                leftWindow.scrollTo(halfLink);
-              });
-            });
-          } else {
+      } else {
+        rightWindow.scrollTo(halfLink);
+      }
+    } else if (halfLinkInfo.equals(leftInfo)) {
+      if (!leftWindow.isVisible()) {
+        if (that.visibleWindows.get() === 1) {
+          that.visibleWindows.inc();
+          ilex.applySize(false, false, '*', function () {
             that.slideRight(function () {
               leftWindow.scrollTo(halfLink);
             });
-          }
+          });
         } else {
-          leftWindow.scrollTo(halfLink);
+          that.slideRight(function () {
+            leftWindow.scrollTo(halfLink);
+          });
         }
       } else {
-        let newWindow = that.createWindow();
-        that.addWindowAfter(newWindow, windowObject.getInd());
-        ilex.tools.mime.loadDocument(newWindow, docId, ver,
-          function () {
-            if (!newWindow.isVisible()) {
-              if (that.visibleWindows.get() === 1) {
-                that.visibleWindows.inc();
-                ilex.applySize(true, false, '*', function () {
-                  newWindow.scrollTo(halfLink);
-                });
-              } else {
-                that.slideLeft(function () {
-                  newWindow.scrollTo(halfLink);
-                });
-              }
-            } else {
-              $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
-             newWindow.scrollTo(halfLink);
-            }
-
-        });
+        leftWindow.scrollTo(halfLink);
       }
+    } else {
+      let newWindow = that.createWindow();
+      that.addWindowAfter(newWindow, windowObject.getInd());
+      ilex.tools.mime.loadDocument(newWindow, docId, ver,
+        function () {
+          if (!newWindow.isVisible()) {
+            if (that.visibleWindows.get() === 1) {
+              that.visibleWindows.inc();
+              ilex.applySize(true, false, '*', function () {
+                newWindow.scrollTo(halfLink);
+              });
+            } else {
+              that.slideLeft(function () {
+                newWindow.scrollTo(halfLink);
+              });
+            }
+          } else {
+            $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
+           newWindow.scrollTo(halfLink);
+          }
 
-    });
+      });
+    }
+
+//    });
     
 //    var getWindowDocumentId = function(windowObject) {
 //      if (windowObject !== undefined &&

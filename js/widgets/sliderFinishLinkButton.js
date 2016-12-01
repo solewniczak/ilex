@@ -49,10 +49,10 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
           rightType = 'F';
       
       if (leftMaxVer !== leftV) {
-        leftType = 'H';
+        rightType = 'H';
       }
       if (rightMaxVer !== rightV) {
-        rightType = 'H';
+        leftType = 'H';
       }
       
       var leftRange = leftWidget.textEditor.getSelectionAbsRange(),
@@ -94,14 +94,20 @@ ilex.widgetsCollection.sliderFinishLinkButton = function ($parentWidget, documen
             'type': rightType
           };
         }
-        if (leftMaxVer !== leftV && rightMaxVer !== rightV) {
-          leftWidget.documentLinks.create(leftHalfLink, rightHalfLink);
-          rightWidget.documentLinks.create(rightHalfLink, leftHalfLink);
-        } else if (leftMaxVer !== leftV) {
-          leftWidget.documentLinks.create(leftHalfLink);
-        } else if (rightMaxVer !== rightV) {
-          rightWidget.documentLinks.create(rightHalfLink);
-        }
+//        if (leftMaxVer !== leftV && rightMaxVer !== rightV) {
+//          leftWidget.documentLinks.create(leftHalfLink, rightHalfLink);
+//          rightWidget.documentLinks.create(rightHalfLink, leftHalfLink);
+//        } else if (leftMaxVer !== leftV) {
+//          leftWidget.documentLinks.create(leftHalfLink);
+//        } else if (rightMaxVer !== rightV) {
+//          rightWidget.documentLinks.create(rightHalfLink);
+//        }
+      if (leftMaxVer !== leftV) {
+        leftWidget.documentLinks.load([leftHalfLink]);
+      }
+      if (rightMaxVer !== rightV) {
+        rightWidget.documentLinks.load([rightHalfLink]);
+      }
       });
       leftWidget.textEditor.selectionRange.clear();
       rightWidget.textEditor.selectionRange.clear();
