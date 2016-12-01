@@ -55,12 +55,13 @@ ilex.views.slider = function(canvas) {
         //Musimy to zimenić tak aby uwzględnić czy link jest lewy czy prawy.
         //W przeciwnym wypadku będziemy wyświetlać linki do samego siebie, co
         //nie jest prawdą.
-        let classes = [];
-        for (let hl of resolvedLink.all) {
-          classes.push('span.ilex-linkId-'+hl.linkId);
-        }
-        let selector = classes.join(',');
-
+//        let classes = [];
+//        for (let hl of resolvedLink.all) {
+//          classes.push('span.ilex-linkId-'+hl.linkId);
+//        }
+//        let selector = classes.join(',');
+        
+        let selector = 'span.ilex-lineage-'+resolvedLink.top.lineage;
         var $leftSpans = leftWindow.contentWidget.container
                           .find(selector),
             $rightSpans = rightWindow.contentWidget.container

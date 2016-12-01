@@ -324,31 +324,31 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     that.container.find('.ilex-textLink').removeClass('ilex-textLinkNavigationMode');
   });
   
-  var halfLinkTools = function() {
-    var prefix = 'ilex-linkId-';
-    return {
-      'getClassName': function(link) {
-        return prefix + link.linkId;
-      },
-      'getIdsFromClassNames': function (classNames) {
-        if (classNames === undefined) {
-          return [];
-        }
-        if (typeof classNames === 'string' || classNames instanceof String) {
-          var classList = classNames.split(' ');
-        } else {
-          var classList = classNames;
-        }
-        var linksList = [];
-        for (let class_name of classList) {
-          if (class_name.indexOf(prefix) !== -1) {
-            linksList.push(class_name.slice(prefix.length));
-          }
-        }
-        return linksList;
-      }
-    };
-  }();
+//  var halfLinkTools = function() {
+//    var prefix = 'ilex-linkId-';
+//    return {
+//      'getClassName': function(link) {
+//        return prefix + link.linkId;
+//      },
+//      'getIdsFromClassNames': function (classNames) {
+//        if (classNames === undefined) {
+//          return [];
+//        }
+//        if (typeof classNames === 'string' || classNames instanceof String) {
+//          var classList = classNames.split(' ');
+//        } else {
+//          var classList = classNames;
+//        }
+//        var linksList = [];
+//        for (let class_name of classList) {
+//          if (class_name.indexOf(prefix) !== -1) {
+//            linksList.push(class_name.slice(prefix.length));
+//          }
+//        }
+//        return linksList;
+//      }
+//    };
+//  }();
   
 //  var appendResolvedLinkToSpans = function($spans, resolvedLink) {
 //    $spans.each(function () {
@@ -397,7 +397,7 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     
     $spans.removeClass('ilex-textLink');
     $spans.removeClass(function (index, css) {
-      return (css.match (/(^|\s)ilex-linkId-\S+/g) || []).join(' ');
+      return (css.match (/(^|\s)ilex-lineage-\S+/g) || []).join(' ');
     });
     
     $spans.removeClass('ilex-linkType-H');
@@ -425,10 +425,12 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     
     let $spans = that.textEditor.getRangeSpans(halfLinkRange);
     
-    for (let hl of all) {
-      let halfLinkClass = halfLinkTools.getClassName(hl);
-      $spans.addClass(halfLinkClass);
-    }
+    $spans.addClass('ilex-lineage-'+top.lineage);
+    
+//    for (let hl of all) {
+//      let halfLinkClass = halfLinkTools.getClassName(hl);
+//      $spans.addClass(halfLinkClass);
+//    }
     //      setResolvedLinkToSpans($spans, resolved);
     $spans.data('ilex-resolvedLinks', [resolved]);
     
