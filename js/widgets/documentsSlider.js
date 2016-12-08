@@ -334,8 +334,8 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
       return false;
     };
     
-    newWindow.scrollTo = function (halfLink) {
-      console.log(halfLink);
+    newWindow.scrollTo = function (halfLink, clickPos) {
+      newWindow.contentWidget.scrollTo(halfLink, clickPos);
     };
     
     //Close tab behaviour when closing visible windows:
@@ -623,7 +623,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
 //    }
 //  };
   
-  $(document).on('ilex-linkClicked', function(event, windowObject, lineage) {
+  $(document).on('ilex-linkClicked', function(event, clickPos, windowObject, lineage) {
     var createDocInfoObj = function(docId, ver) {
       return {
         'docId': docId,
@@ -670,15 +670,15 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
         if (that.visibleWindows.get() === 1) {
           that.visibleWindows.inc();
           ilex.applySize(true, false, '*', function () {
-            rightWindow.scrollTo(halfLink);
+            rightWindow.scrollTo(halfLink, clickPos);
           });
         } else {
           that.slideLeft(function () {
-            rightWindow.scrollTo(halfLink);
+            rightWindow.scrollTo(halfLink, clickPos);
           });
         }
       } else {
-        rightWindow.scrollTo(halfLink);
+        rightWindow.scrollTo(halfLink, clickPos);
       }
     } else if (halfLinkInfo.equals(leftInfo)) {
       if (!leftWindow.isVisible()) {
@@ -686,16 +686,16 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
           that.visibleWindows.inc();
           ilex.applySize(false, false, '*', function () {
             that.slideRight(function () {
-              leftWindow.scrollTo(halfLink);
+              leftWindow.scrollTo(halfLink, clickPos);
             });
           });
         } else {
           that.slideRight(function () {
-            leftWindow.scrollTo(halfLink);
+            leftWindow.scrollTo(halfLink, clickPos);
           });
         }
       } else {
-        leftWindow.scrollTo(halfLink);
+        leftWindow.scrollTo(halfLink, clickPos);
       }
     } else {
       let newWindow = that.createWindow();
@@ -706,16 +706,16 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
             if (that.visibleWindows.get() === 1) {
               that.visibleWindows.inc();
               ilex.applySize(true, false, '*', function () {
-                newWindow.scrollTo(halfLink);
+                newWindow.scrollTo(halfLink, clickPos);
               });
             } else {
               that.slideLeft(function () {
-                newWindow.scrollTo(halfLink);
+                newWindow.scrollTo(halfLink, clickPos);
               });
             }
           } else {
             $(document).trigger('ilex-slider-viewChanged', [that.windowPointer, that.visibleWindows.get()]);
-           newWindow.scrollTo(halfLink);
+           newWindow.scrollTo(halfLink, clickPos);
           }
 
       });

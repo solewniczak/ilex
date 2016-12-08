@@ -778,6 +778,21 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     that.textDocument.removeText($(start.span), start.position,
                                  $(end.span), end.position, false);
   };
+  
+  //scroll to first span with class given in parameter
+  that.scrollTo = function (spanClass, clickPos) {
+    var $span = that.content.find('span.'+spanClass);
+    if ($span.length > 0) {
+      var spanTop = $span.offset().top,
+          contentTop = that.content.offset().top,
+          contentScrollTop = that.content.scrollTop();
+      
+      console.log(spanTop);
+      that.content.animate({
+            'scrollTop': spanTop - contentTop  + contentScrollTop - (clickPos.top - contentTop)
+          }, 200);
+    }
+  };
 
   
    //There cannot be empty spans in ilex document

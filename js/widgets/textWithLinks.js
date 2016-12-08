@@ -387,7 +387,11 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
       return false;
     }
     return true;
-  }
+  };
+  
+  that.scrollTo = function(halfLink, clickPos) {
+    that.textEditor.scrollTo('ilex-lineage-'+halfLink.lineage, clickPos);
+  };
   
 //  that.updateLink = function (prevLinkId, newResolvedLink) {
 //    let halfLinkClass = 'ilex-linkId-'+prevLinkId;
@@ -470,9 +474,10 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     }
     
     $spans.off('click mouseover mouseleave');
-    $spans.on('click', function () {
+    $spans.on('click', function (event) {
+      var clickPos = {'top': event.pageY, 'left': event.pageX};
       if (ilex.conf.get('browsing mode') === 1) {
-        $(document).trigger('ilex-linkClicked', [windowObject, resolved.lineage]);
+        $(document).trigger('ilex-linkClicked', [clickPos, windowObject, resolved.lineage]);
       }
     });
     $spans.on('mouseover', function (event) {
@@ -751,10 +756,11 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
       var lineage = getLinageFromClassList(this.classList),
         resolved = that.documentLinks.resolveLinage(lineage),
         file = ilex.documents.get(resolved.secondHalf.documentId),
+        clickPos = $(this).offset(),
         linkJumps = [
           ['standardButton', function() {
              $(document).trigger('ilex-linkClicked',
-                                 [windowObject, lineage]);
+                                 [clickPos, windowObject, lineage]);
             }, {
               'text': file.name,
               'icon': '<span class="ilex-awesome">&#xf0c1;</span>'
