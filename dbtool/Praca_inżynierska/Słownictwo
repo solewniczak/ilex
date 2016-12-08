@@ -1,0 +1,7 @@
+dokument - pisząc o dokumencie mamy na myśli sekwencyjną paczkę danych. Dokument jest u nas konceptem analogicznym do “pliku” w systemach plików, staramy się jednak unikać tego drugiego terminu, ponieważ został on utworzony wtórnie wraz z pojawieniem się komputerów i sugeruje pewien schemat myślowy zakładający autonomiczność poszczególnych paczek danych, czego w naszym systemie staramy się uniknąć. Twórcy innych systemów hipermedialnych dla oznaczenia tego konceptu używają też terminów takich jak: węzeł (ang. node) i karta (ang. card).
+
+link - logiczne połączenie między dwoma dokumentami. Szczegółowo o linkach pisaliśmy już w poprzednim rozdziale. Chcielibyśmy tu tylko podkreślić, że w naszej pracy używamy pojęcia link w jego najszerszym możliwym znaczeniu. W przypadku gdy chodzi nam o jakiś konkretny mechanizm (np. weblink) będziemy to zaznaczać.
+
+transkluzja - termin stworzony przez Teda Nelsona oznaczający link między dwoma fragmentami treści, które są takie same. O transkluzji najlepiej myśleć jak o cytacie, który w łatwy sposób może być sprawdzony w oryginalnym kontekście.
+
+dokument hipertekstowy/hipermedialny - zbiór wielu dokumentów połączonych za pomocą linków, stanowiących jakąś logiczną całość. Czasami dla wyrażenia tego pojęcia będziemy też używać terminu hiperdokument.

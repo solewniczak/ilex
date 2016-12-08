@@ -47,8 +47,8 @@ document.fonts.ready.then(function() {
             ilex.view.slider.addWindowAfter(win1);
             
             
-            let win2 = ilex.view.slider.createWindow();
-            ilex.view.slider.addWindowAfter(win2);
+//            let win2 = ilex.view.slider.createWindow();
+//            ilex.view.slider.addWindowAfter(win2);
             
             ilex.view.slider.visibleWindows.inc();
 
@@ -83,8 +83,7 @@ document.fonts.ready.then(function() {
 //              });
             };
             loadToWindow(0, texts[0].id, texts[0].totalVersions);
-            loadToWindow(1, texts[3].id, texts[3].totalVersions);
-            loadToWindow(2, texts[4].id, texts[4].totalVersions);
+            loadToWindow(1, texts[1].id, texts[1].totalVersions);
           },
     'retrievalFailed':
           function (params) {

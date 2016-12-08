@@ -1,0 +1,79 @@
+Memex (1945)
+To właśnie Memeksa przyjęło się uważać za historycznie pierwszy projekt systemu hipertekstowego. Memex został zaproponowany przez Vannevara Busha w artykule “As we may think” z 1945 roku. W swojej wizjonerskim jak na owe czasy wizji autor przewidział, że z roku na rok będziemy mieli coraz większy problem ze skutecznym przetwarzaniem wiedzy i zaproponował swój pomysł na jego rozwiązanie. Memex miał być urządzeniem mechanicznym z wbudowanym repozytorium książek i innych materiałów znajdujących się na mikrofilmach. Użytkownik miał mieć możliwość przeglądania dokumentów na dwóch równoległych ekranach. Interesującą cechą systemu z naszego punktu widzenia, była możliwość tworzenia linków (zwanych przez autora “szlakami (ang. trials)”), między dwoma dokumentami.
+
+
+Koncepcja “szlaków” różniła się zasadniczo od znanych z dzisiejszego World Wide Web weblinków. Szlaki miały być dwustronne oraz łączyć fragmenty dokumentu. Dodatkowo połączenia miały być tworzone przez wszystkich użytkowników systemu (a nie tylko przez samych twórców treści) i  umożliwić udostępniania własnych połączeń innym. System miał umożliwiać też tworzenie prywatnych notatek, które mogliśmy dołączać do szlaku głównego lub tworzyć z nich szlaki poboczne.
+
+
+O szlakach najlepiej jest myśleć jako o zupełnie nowych sekwencjach, tworzonych z poprzednich sekwencji. W swoim artykule autor podaje przykład szlaku dotyczącego tureckiego łuku. Użytkownik Memeksa otwiera najpierw fragment encyklopedii poświęcony temu zagadnieniu, następnie dołącza do niego fragment książki dotyczącą kultury tureckiej i tak dalej.
+
+
+W założeniach Vannevara Busha, każdy szlak miał być w zasadzie nową całością, utworzoną z fragmentów wielu kolejnych materiałów. W artykule przewidywał także, że w przyszłości może powstać zupełnie nowa profesja, zajmująca się tylko i wyłącznie komponowaniem nowych dokumentów z fragmentów już istniejących całości.
+
+NLS (1968)
+Memex Vannevara Busha, chociaż nigdy nie skonstruowany, zainspirował następne pokolenia twórców systemów hipermedialnych. Jedną z takich osób był młody amerykański inżynier Douglas Engelbart, którego system hipertekstowy, zaprezentowany w 1968 roku na konferencji “Fall Joint Computer Conference” w San Francisco całkowicie zmienił ówczesny punkt widzenia na temat możliwości komputerów. Poza takimi przełomowymi mechanizmami jak okna (umożliwiające otwieranie wielu dokumentów równolegle), pełnoekranową edycję, prosty wizualny edytor grafiki, wideokonferencje, czy mysz komputerowa, system posiadał też ciekawy mechanizm tworzenia linków, który pokrótce opiszę.
+
+
+Zacznijmy od tego, że wszystkie dokumenty w NLS posiadały stabilny adres. Każdy znak w każdej z wersji dokumentu posiadał swój indywidualny identyfikator, który nie ulegał zmianie. Dzięki temu raz utworzony link zawsze wskazywał na właściwy zasób. Wszystkie linki w NLS były dynamiczne i bazowały na specjalnym języku zapytań, który pozwalał na tworzenie bardziej rozbudowanych akcji niż tylko prosty przeskok. Dla lepszej ilustracji tego pomysłu przeanalizujmy poniższy przykład:
+<Calendar, Events, “Bastille Day”: t>
+Link należy odczytać następująco: otwórz plik “Events” z katalogu “Calendar” i następnie przeskocz do pierwszej znalezionej frazy: “Bastille Day”. Po dwukropku następuje określenie widoku w jakim należy otworzyć plik. W naszym wypadku jest to “t”, które nakazuje wyświetlić tylko pierwszą linię z każdego zdania w pliku.
+
+KMS (1983)
+Knowledge Management System  został stworzony przez Dona McCrackena i Roba Akscyna jako następca ich wcześniejszego systemu ZOG. Od samego początku był projektowany jako narzędzie do zarządzania dokumentacją w wieloosobowej organizacji. Architektura umożliwiała na uruchomienie systemu na wielu rozproszonych serwerach i zakładała że dostęp do danych będzie się odbywał przy użyciu bezdyskowych stacji roboczych. Podstawową jednostką danych w systemie była ramka, posiadająca stały rozmiar 1132x805px. W ramach ranki użytkownik mógł umieszczać tekst, zdjęcia lub grafikę wektorową. Poszczególne ramki tworzyły w KMS hierarchiczną strukturę, jednak system umożliwiał też tworzenie jednostronnych linków fragment-całość między dowolnymi ramkami. System służył też jednocześnie jako przeglądarka i edytor dokumentów, a wszystkie zmiany wprowadzone przez użytkowników zapisywał na bieżąco. 
+
+
+Twórcy KMS dostrzegli też potrzebę prezentowania wielu dokumentów równolegle i w domyślnym widoku system dzielił ekran na dwie części wyświetlając dwie ramki na raz. Dzięki temu po przejściu po linku użytkownik nie tracił kontekstu ramki z której skoczył. Jest to funkcjonalność której bardzo brakuje dzisiejszym systemom hipermedialnym.
+
+NoteCards (1984)
+NoteCards jest systemem hipermedialnym wywodzącym się ze słynnego laboratorium Xerox PARC. System został zaimplementowany przez Randalla Trigga, Franka Halasza i Thomasa Morana w 1984r. Podobnie jak w KMS, sieć w NoteCards składa się z kart i linków, jednak w tym przypadku kary mogły być dowolnej wielkości. Dużą zaletą systemu była możliwość tworzenia własnych typów kart do konkretnych zastosowań przy użyciu interfejsu programistycznego. Inną ciekawą własnością systemu były etykiety przypisywane linkom, dzięki czemu połączenie mogło posiadać znaczenie, jak np. “opinia zgodna”, “opinia przeciwna”, itd. Bardzo pomysłową funkcją systemu był też widok sieci linków jako grafu, który umożliwiał nam zorientować się w którym miejscu hiperdokumentu się znajdujemy.
+
+
+Poza klasycznymi linkami system umożliwiał też na tworzenie struktur hierarchicznych przy użyciu specjalnego typu karty: “FileBox”. NoteCards był też pierwszym systemem hipermedialnym, który do prezentacji poszczególnych dokumentów wykorzystywał pływające okna.
+
+Intermedia (1985)
+System Intermedia powstał w 1985 roku na Brown University, posiadającym długą historię badań nad zagadnieniami hipermedialnymi i myślimy, że może zostać uznany za najbardziej zaawansowany tego typu system, jaki do tej pory został zaimplementowany.
+
+
+Od samego początku system był projektowany z myślą o połączeniu ze sobą wielu różnych typów dokumentów. W tym celu opracowany został specjalny protokół, który miał umożliwić bezproblemowe dodawanie do systemu nowych mediów. W momencie zakończenia prac nad  systemem, istniało w nim pięć narzędzi do pracy nad dokumentami różnego typu:
+Video - umożliwiający na tworzenie połączeń do fragmentów filmów,
+Play - edytor animacji, z możliwością linkowania do konkretnych klatek,
+Val - narzędzie pozwalające na tworzenie osi czasu,
+Draw - edytor grafiki wektorowej,
+Word - edytor tekstu.
+Wszystkie linki w systemie były dwustronne i łączyły się z dowolnymi fragmentami dokumentów dowolnego typu. System umożliwiał też na tworzenie linków wielokrotnych (wielu linków z/do danego fragmentu) oraz linków do fragmentów nachodzących na siebie. W przypadku kliknięcia na link wielokrotny, w system otwierał okno, w którym można było zobaczyć listę dokumentów, do których można przejść.
+
+
+Wszystkie linki trzymane były w osobnych strukturach zwanych sieciami, co umożliwiało łączenie ze sobą linków publicznych i prywatnych. Intermedia posiadały też prosty system kontroli uprawnień bazujący na modelu Discretionary Access Control z użytkownikami i grupami użytkowników, znanym z Uniksa.
+
+Neptune (1986)
+Neptune, zaimplementowany przez Normana Delisie i Mayera Schwartza w Tektronix Labolatories jest kolejnym interesującym systemem hipermedialnym, któremu chcielibyśmy się przyjrzeć. Cały system został oparty na pomyśle generalizacji struktur hipermedialnych, który doprowadził do stworzenia koncepcji Hypertext Abstract Machine (HAM). HAM z założenia miał być zupełnie niezależny od informacji w nim przechowywanych (znaczenie danym miała nadawać aplikacja kliencka). Sieć dokumentów miała się składać z węzłów i linków. Każdy węzeł jak i link mógł  posiadać dowolną ilość atrybutów, będących parami klucz-wartość. Atrybuty były wykorzystywane do nadania znaczenia węzłom (np. “typ treści”), jak i linkom (np. “jest częścią”, “odnosi się do”, “komentuje”). Cały system posiadał też wsparcie dla wersjonowania oraz linki dwustronne do fragmentów treści.
+
+
+Interfejs graficzny Neptune został zaimplementowany w środowisku Smalltalk-80 i umożliwiał przeglądanie dokumentów w trzech perspektywach. Graph Browser wyświetlał sieć hiperdokumentów w postaci mapy i umożliwiał na szybkie zorientowanie się w strukturze sieci, Document Browser wyświetlał pojedyncze węzły wraz hierarchią linków wskazujących na dokument, Node Browser umożliwiał natomiast przejrzenie pojedynczego węzła. Poza widokami podstawowymi istniała jeszcze specjalna przeglądarka Node Diffierence Browser, która umożliwiała na wyświetlenie dwóch wersji węzła obok siebie, z możliwością porównania zmian. 
+
+World Wide Web (1990)
+Nie chcemy tutaj dokładnie opisywać wszystkich aspektów hipertekstowego systemu Tima Bernersa-Lee, który przez lata rozrósł się do gigantycznych rozmiarów, a jedynie skupić się na kilku aspektach, istotnych z perspektywy naszej pracy.
+
+
+Po pierwsze dużym błędem jest utożsamianie pojęcia hipertekst z WWW, co wiele osób obecnie czyni. Myślę, że udało się nam już pokazać, że nie jest to jedyny istniejący system hipertekstowy, choć zdecydowanie najlepiej znany. WWW, jak każdy system, opiera się na pewnych założeniach, które można sformułować tak:
+system służy jedynie wyświetlaniu treści i nie pozwala na jej edycję,
+w systemie istnieją tylko niesemantyczne linki jednostronne,
+linki są wbudowane w dokumenty, pociąga to za sobą brak możliwości tworzenia własnych prywatnych połączeń,
+linki nie mogą się nakładać,
+adresy dokumentów mogą się dowolnie zmieniać tzn. nie mamy gwarancji że ten sam URI będzie zawsze wskazywał na ten sam zasób,
+system nie przewiduje żadnej kontroli wersji, co powoduje że nie można się odwołać się w nim do historycznych wersji zasobów.
+
+
+WWW jest w swej istocie bardzo prosty, co umożliwiło szybki rozrost opartej na nim infrastruktury udostępniającej treści i znacząco przyczyniło się popularności Internetu jako takiego. Niestety jednak założenia przyjęte przez jego twórcę, wprowadziły sporo ograniczeń i w żadnym razie nie uczyniły tematu hipermediów niewartym dalszego zgłębiania.
+
+Xanadu (1960 - ?)
+Xanadu ciężko nazwać po prostu projektem. Należałoby raczej mówić o wizji czegoś, co jej autor Theodor Holm Nelson nazwał: “oryginalnym i prawdopodobnie ostatecznym systemem hipertekstowym”. Autor sam w sobie jest bardzo ciekawą osobowością, posiadającą własne, bardzo oryginalne spojrzenie na świat komputerów. Pierwszą szkice swojego projektu zaczął tworzyć już od roku 1960. Na samym początku Xanadu miało być edytorem tekstu umożliwiającym na przechowywanie wszystkich historycznych wersji dokumentu, szybko jednak wizja rozrosła się do rozmiarów globalnego, ogólnoświatowego systemu hipermedialnego (warto zauważyć, że wizja ta powstała jeszcze na długo przed siecią Internet). O Xanadu można by opowiadać bardzo długo, tutaj jednak chciałbym się skupić na kilku najciekawszych założeniach:
+w Xanadu poza jump-linkami mają występować linki dwustronne, umożliwiające na łączenie ze sobą dowolnych dwóch fragmentów dokumentów,
+linki mają być stabilne, tzn. raz utworzone wskazywać cały czas na tą samą treść,
+linki mają być przechowywane poza dokumentem, dzięki czemu możliwe jest łączenie w ramach dokumentu linków publicznych i prywatnych,
+każdy fragment dokumentu może posiadać dowolną ilość linków, linki mogą się na siebie wzajemnie nakładać,
+linki mają być prezentowane w sposób widoczny, dokumenty połączone muszą być prezentowane jeden obok drugiego,
+dokument ma być zapisany wraz ze wszystkimi swoimi wersjami,
+poza linkami w systemie występują też transkluzje (Xanadu jest według naszej wiedzy jedynym systemem, który zwraca uwagę na potrzebę ich występowania),
+system ma posiadać wbudowany system kontroli uprawnień i praw autorskich do treści, nazwany przez Nelsona transcopyright. W systemie tym twórca dokumentu może udostępnić go za stosowną opłatą, a osoby przeglądające dokument będą płacić jedynie za dostęp do tej części treści, którą przejrzeli, a nie “z góry” za cały dokument.
+

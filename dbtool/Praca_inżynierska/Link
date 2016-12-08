@@ -1,0 +1,33 @@
+Ważnym zagadnieniem jaką należałoby tu poruszyć jest samo pojęcie linku. Ponieważ postulat "tworzenia połączeń" między dokumentami jest dość ogólny, doczekał się wielu interpretacji. Po pierwsze możemy mówić o linkach "jednostronnych" i "dwustronnych". Ideę linków jednostronnych można przyrównać do grafu ze skierowanymi krawędziami. Wyobraźmy sobie dwa dokumenty A i B posiadającymi jeden link A -> B. W tej sytuacji przeglądając dokument A jesteśmy w stanie podążyć za linkiem i znaleźć się w dokumencie B, jednak przeglądając dokument B, nie mamy pojęcia że wskazuje na nas A. Linki "dwustronne" natomiast umożliwiają nam na śledzenie połączenie niezależnie od której strony linku się znajdujemy.
+
+
+Poza "stroną" linków można też mówić o połączeniach między całymi dokumentami lub jego fragmentami. Można to podsumować poniżej:
+
+jednostronny
+
+całość - całość
+np. "Zobacz też" na Wikipedii (w sensie technicznym jest to zwykły weblink, ale założenie jest takie aby połączyć cały artykułu, z innym całym artykułem)
+
+całość - fragment
+zwany też jump-linkiem
+np. weblink
+
+fragment - fragment
+np. weblink z kotwicą
+
+dwustronny
+
+całość - całość
+rozwiązanie to nie jest wykorzystywane w żadnym znanym nam systemie hipermedialnym
+
+całość - fragment
+zwany też jump-linkiem
+
+np. mechanizm "Stron linkujących" w MediaWiki
+
+fragment - fragment
+np. xanalink (Xanadu), link w Intermedia, link w Ileksie
+
+
+Poza tym podziałem można jeszcze dodatkowo rozróżniać linki na proste i semantyczne (posiadające znaczenie) oraz statyczne (zasób wskazywany przez link podaje się w momencie tworzenia) i dynamiczne (zasób wskazywany przez link jest generowany w momencie podążenia za linkiem).
+
