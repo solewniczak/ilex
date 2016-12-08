@@ -260,7 +260,6 @@ ilex.widgetsCollection.tabBar = function ($parentWidget) {
   };
   
   $(document).on('ilex-slider-windowAddedAfter', function (event, afterInd, win) {
-    console.log(afterInd, win);
     that.addTabAfter(afterInd, win);
   });
   
