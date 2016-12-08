@@ -915,7 +915,6 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
     that.container.data('ilex-width', width);
     that.content.data('ilex-width', width);
     
-    
     that.content.find('.ilex-line').data('ilex-width', countLineWidth());
     
     //that.content doesn't have fix width to react on scrollbar

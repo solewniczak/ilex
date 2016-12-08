@@ -335,7 +335,7 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
     };
     
     newWindow.scrollTo = function (halfLink) {
-      
+      console.log(halfLink);
     };
     
     //Close tab behaviour when closing visible windows:

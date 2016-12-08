@@ -271,7 +271,11 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
       
         that.documentLinks.clear();
       
-      that.documentLinks.load(resp.links, callback);
+      that.documentLinks.load(resp.links, function () {
+        //count correct lines widths in textEditor
+        ilex.applySize();
+        callback();
+      });
 
 //        that.documentLinks.load(resp.links, function() {
 //          //load links
