@@ -19,20 +19,32 @@ ilex.tools.mime.loadDocument = function (win, documentId, version, callback) {
 };
 
 //type from mime.formats
-ilex.tools.mime.createDocument = function (win, type) {
+ilex.tools.mime.createDocument = function (win, type, name, content, callback) {
   if (ilex.tools.mime.formats[type] === undefined) {
     throw 'ilex.tools.mime.createDocument: undefined file format';
   }
-  ilex.tools.mime.formats[type].create(win);
+  ilex.tools.mime.formats[type].create(win, name, content, callback);
 };
 
 ilex.tools.mime.formats = {};
 ilex.tools.mime.formats['plain text'] = {
   'icon': '<span class="ilex-awesome">&#xf0f6;</span>', //fa-file-text-o
-  'create': function (win) {
+  'create': function (win, name, content, callback) {
+    if (callback === undefined) {
+      callback = function () {};
+    }
+    
     var params = {};
-    params.name = 'Unititled document';
-    params.text = '\n';
+    if (name === undefined) {
+      params.name = 'Unititled document';
+    } else {
+      params.name = name;
+    }
+    if (content === undefined) {
+      params.text = '\n';
+    } else {
+      params.text = content;
+    }
     params.class = 'utf-8 encoded text file';
     params.format = 'plain text';
     
@@ -40,6 +52,7 @@ ilex.tools.mime.formats['plain text'] = {
       var widget = ilex.widgetsCollection.textWithLinks(win, documentObject, 1,
         function () {
           $(document).trigger('ilex-documentLoaded', [win]);
+          callback();
         });
       win.setContentWidget(widget);
       ilex.applySize();

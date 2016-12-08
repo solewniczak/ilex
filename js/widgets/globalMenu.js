@@ -38,7 +38,7 @@ ilex.widgetsCollection.globalMenu = function($parent) {
     );
   }
   
-  ilex.popupMenu.buttonBind(that.button, mainMenu);
+  ilex.popupMenu.buttonBind(that.button, mainMenu, 180);
     
   return that;
 }

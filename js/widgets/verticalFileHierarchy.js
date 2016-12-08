@@ -14,13 +14,48 @@ ilex.widgetsCollection.verticalFileHierarchy = function ($parentWidget) {
     width = $parentWidget.data('ilex-width'),
     height = $parentWidget.data('ilex-height'),
     filterMargin = 7;
-
+  
   that.container = $('<div class="ilex-resize ilex-fileSelector">')
                   .css('background-color', '#fff')
                   .data('ilex-width', width)
                   .data('ilex-height', height);
   $parentWidget.html(that.container);
   
+  //file upload
+  var $fileSelector = $('<input type="file" multiple>')
+                                            .appendTo($parentWidget).show();
+  //http://stackoverflow.com/questions/14155310/upload-file-as-string-to-javascript-variable
+  $fileSelector.on('change', function (changeEvent) {
+    for (var i = 0; i < changeEvent.target.files.length; ++i) {
+      (function (file) {               // Wrap current file in a closure.
+        var loader = new FileReader();
+        loader.onload = function (loadEvent) {
+          if (loadEvent.target.readyState != 2)
+            return;
+          if (loadEvent.target.error) {
+            console.log("Error while reading file " + file.name + ": " + loadEvent.target.error);
+            return;
+          }
+          var name = file.name.replace(/\.\w*$/, '');
+          $(document).trigger('ilex-createAndOpenDocument', ['plain text', name, loadEvent.target.result]);
+        };
+        loader.readAsText(file);
+      })(changeEvent.target.files[i]);
+    }
+  });
+  
+  that.container.on('contextmenu', function (event) {
+    event.preventDefault();
+      var menu = [
+          ['standardButton', function() {
+             $fileSelector.trigger('click');
+            }, {
+              'text': 'Import',
+              'shortcutLabel': 'Ctrl+O'
+          }]
+      ];
+    ilex.popupMenu.show(event.pageY, event.pageX, menu, 180);
+  });
     
   var globalTools = ilex.widgetsCollection.globalTools(that.container);
   
@@ -73,7 +108,7 @@ ilex.widgetsCollection.verticalFileHierarchy = function ($parentWidget) {
       });
       
       $superDiv.on('dblclick', function () {
-       $(document).trigger('ilex-openDocument', [file, '']);
+       $(document).trigger('ilex-openDocument', [file]);
       });
       
       $superDiv.on('dragstart', function(event) {

@@ -862,6 +862,15 @@ ilex.widgetsCollection.documentsSlider = function ($parentWidget, createStarterW
   that.addWindowAfter(win);
   that.visibleWindows.inc();
   
+  
+  $(document).on('ilex-createAndOpenDocument', function (event, type, name, content) {
+    var win = that.createWindow();
+    that.addWindowBefore(win, that.windowPointer + that.visibleWindows.get());
+    
+    ilex.tools.mime.createDocument(win, type, name, content);
+    that.slideLeft();
+  });
+  
   $(document).on('ilex-openDocument', function (event, file, afterInd) {
       //by default newest version
       //get new document
