@@ -274,7 +274,9 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
       that.documentLinks.load(resp.links, function () {
         //count correct lines widths in textEditor
         ilex.applySize();
-        callback();
+        if (typeof callback === 'function') {
+          callback();
+        }
       });
 
 //        that.documentLinks.load(resp.links, function() {
@@ -475,8 +477,9 @@ ilex.widgetsCollection.textWithLinks = function(windowObject, documentObject, st
     
     $spans.off('click mouseover mouseleave');
     $spans.on('click', function (event) {
-      var clickPos = {'top': event.pageY, 'left': event.pageX};
       if (ilex.conf.get('browsing mode') === 1) {
+        var clickPos = $spans.offset();
+        
         $(document).trigger('ilex-linkClicked', [clickPos, windowObject, resolved.lineage]);
       }
     });

@@ -208,11 +208,32 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
   };
   //draw two rects and a line that connects them
   //a, b are ClientRectLists
-  that.drawConnection = function (left, right, color, stroke) {
+  that.drawConnection = function (left, right, color, stroke, clipRect) {
+    if (left.length === 0) {
+      console.log('canvas.drawConnection: empty list of left rects');
+      return;
+    }
+    if (right.length === 0) {
+      console.log('canvas.drawConnection: empty list of right rects');
+      return;
+    }
+    
+    
     var color = color || 'rgba(0, 108, 255, 0.3)',
       stroke = stroke || false,
       leftThreeRectSel = that.threeRectsSelection(left),
       rightTreeRectSel = that.threeRectsSelection(right);
+    
+    if (clipRect !== undefined) {
+      leftThreeRectSel = that.clipClientRectList(clipRect, leftThreeRectSel);
+      rightTreeRectSel = that.clipClientRectList(clipRect, rightTreeRectSel);
+    }
+    
+    //no rects left after clipping
+    if (leftThreeRectSel.length === 0 || rightTreeRectSel.length === 0) {
+      return;
+    }
+    
     //check selections order
     if (leftThreeRectSel[0].left > rightTreeRectSel[0].left) {
       let t = leftThreeRectSel;
@@ -363,7 +384,7 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
 
   };
   
-  that.drawConnectionSpans = function($leftSpans, $rightSpans, color, stroke) {
+  that.drawConnectionSpans = function($leftSpans, $rightSpans, color, stroke, clipRect) {
     var concatClientRectsList = function(array, clientRectsList) {
       for (let i = 0; i < clientRectsList.length; i++) {
         array.push(clientRectsList[i]);
@@ -378,7 +399,8 @@ ilex.widgetsCollection.canvas = function ($parentWidget, zIndex) {
     for (let span of $rightSpans) {
       concatClientRectsList(rightRects, span.getClientRects());
     }
-    that.drawConnection(leftRects, rightRects, color, stroke);
+
+    that.drawConnection(leftRects, rightRects, color, stroke, clipRect);
   };
 
   //basic canvasRedraw behaviour

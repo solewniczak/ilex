@@ -787,7 +787,6 @@ ilex.widgetsCollection.textEdiotr = function($parent) {
           contentTop = that.content.offset().top,
           contentScrollTop = that.content.scrollTop();
       
-      console.log(spanTop);
       that.content.animate({
             'scrollTop': spanTop - contentTop  + contentScrollTop - (clickPos.top - contentTop)
           }, 200);

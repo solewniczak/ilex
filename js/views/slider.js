@@ -30,6 +30,18 @@ ilex.views.slider = function(canvas) {
     ilex.widgetsCollection.sliderFinishLinkButton($('body'), view.slider);
   
   
+  //return true when spans are visible in current user scroll
+  var spansAreVisible = function($spans, clipRect) {
+    var offset = $spans.offset();
+    //console.log(offset);
+    
+    return true;
+    if (offset.top < 0) {
+      return false;
+    }
+    return true;
+  };
+  
   $(document).on('canvasRedraw', function (event) {
     if (!ilex.conf.get('nelson mode')) {
       return;
@@ -49,7 +61,7 @@ ilex.views.slider = function(canvas) {
         //windows not ready yet
         return;
       }
-      
+            
       let resolved = leftWindow.contentWidget.documentLinks.getResolved();
       for (let resolvedLink of resolved) {
         //Musimy to zimenić tak aby uwzględnić czy link jest lewy czy prawy.
@@ -70,11 +82,32 @@ ilex.views.slider = function(canvas) {
         if ($leftSpans.length === 0 || $rightSpans.length === 0) {
           continue;
         }
-
-        ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans,
-                                        ilex.colorCycle.current(0.6), true);
-        ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans,
-                                        ilex.colorCycle.current(0.1), false);
+        
+        let leftClipRect = 
+            leftWindow.contentWidget.textEditor.content[0].getBoundingClientRect(),
+            rightClipRect = 
+            rightWindow.contentWidget.textEditor.content[0].getBoundingClientRect(),
+            leftVisible = spansAreVisible($leftSpans, leftClipRect),
+            rightVisible = spansAreVisible($rightSpans, rightClipRect);
+        
+      
+        let x = leftClipRect.left,
+            y = leftClipRect.top,
+            w = rightClipRect.left + rightClipRect.width - x,
+            h = leftClipRect.height,
+            clipRect = ilex.tools.geometry.createClientRect(x, y, w, h);
+        if (leftVisible && rightVisible) {
+          ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans,
+                                          ilex.colorCycle.current(0.6), true,
+                                          clipRect);
+          ilex.canvas.drawConnectionSpans($leftSpans, $rightSpans,
+                                          ilex.colorCycle.current(0.1), false,
+                                          clipRect);
+        } else if (leftVisible) {
+          
+        } else if (rightVisible) {
+          
+        }
 
         ilex.colorCycle.next();
 
